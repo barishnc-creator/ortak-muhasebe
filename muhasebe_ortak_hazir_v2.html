@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tidex Technology · Atölye Defteri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef4f5;--card:#ffffff;--tx:#14282d;--mu:#5f7479;--ln:#d7e3e6;--ac:#0b7f95;--act:#fff;--ac2:#e0f6fa;--ok:#2b8a3e;--bad:#c92a2a;--hd:#05222b;--sh:0 1px 2px rgba(5,34,43,.05),0 8px 24px rgba(5,34,43,.08);--in:#f5fafb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1417;--card:#112126;--tx:#e6f3f5;--mu:#8fa9af;--ln:#23393f;--ac:#2dd4e8;--act:#04222b;--ac2:#0f2b32;--ok:#5fd37a;--bad:#ff7b7b;--hd:#03151b;--sh:0 1px 2px rgba(0,0,0,.4);--in:#0d1b1f;}}
+:root[data-theme="dark"]{--bg:#0a1417;--card:#112126;--tx:#e6f3f5;--mu:#8fa9af;--ln:#23393f;--ac:#2dd4e8;--act:#04222b;--ac2:#0f2b32;--ok:#5fd37a;--bad:#ff7b7b;--hd:#03151b;--sh:0 1px 2px rgba(0,0,0,.4);--in:#0d1b1f;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
+.hd{background:linear-gradient(135deg,var(--hd),#0a5666);color:#fff;padding:22px 16px 40px;border-radius:0 0 24px 24px}
+.hd>div{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.logo{width:54px;height:54px;border-radius:16px;object-fit:cover;border:2px solid rgba(255,255,255,.28);box-shadow:0 6px 18px rgba(13,184,204,.45)}
+h1{font-size:21px;margin:0;font-weight:800;letter-spacing:-.3px}
+.hd small{opacity:.7;font-size:13px}
+main{max-width:900px;margin:-24px auto 0;padding:0 14px 28px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--sh)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.grid .card{margin:0}
+.kpi{border-left:5px solid var(--k,var(--ac))}
+.kpi:nth-child(1){--k:var(--ok)}.kpi:nth-child(2){--k:var(--bad)}.kpi:nth-child(3){--k:#3b82f6}.kpi:nth-child(4){--k:#f59e0b}.kpi:nth-child(5){--k:#8b5cf6}
+.kpi small{color:var(--mu);display:block;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px}.kpi b{font-size:22px;font-weight:800}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.mu{color:var(--mu)}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end}
+label{font-size:12px;font-weight:600;color:var(--mu);display:block;margin-bottom:3px}
+input,select{width:100%;padding:10px;border:1px solid var(--ln);border-radius:10px;background:var(--in);color:var(--tx);font:inherit;transition:.15s}
+input:focus,select:focus{outline:0;border-color:var(--ac);box-shadow:0 0 0 3px var(--ac2)}
+.b{background:var(--ac);color:var(--act);border:0;padding:10px 16px;border-radius:10px;cursor:pointer;font:inherit;font-weight:700;box-shadow:0 4px 12px rgba(13,184,204,.3);transition:.15s}
+.b:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.g{background:var(--card);border:1px solid var(--ln);color:var(--tx);padding:7px 11px;border-radius:9px;cursor:pointer;font:inherit;font-weight:600;font-size:13px;transition:.15s}
+.g:hover{border-color:var(--ac);color:var(--ac)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid var(--ln);padding:12px 6px;border-radius:8px}
+.row:first-of-type{border-top:0}.row:hover{background:var(--ac2)}
+.sm{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.sm input{width:90px}.sm select{width:auto}
+select.st{font-weight:700;border-radius:20px;padding:6px 10px;font-size:13px}
+.s0{background:#e9ecef;color:#495057}.s1{background:#fff3bf;color:#8a6100}.s2{background:#d0ebff;color:#175c91}.s3{background:#d3f9d8;color:#1e6b2e}
+h2{font-size:14px;margin:0 0 12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mu)}
+.bk{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--mu);margin-top:6px}
+.bk{flex-wrap:wrap}.t{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--hd);color:#fff;padding:11px 16px;border-radius:12px;gap:12px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:20;max-width:92%}
+textarea{width:100%;padding:10px;border:1px solid var(--ln);border-radius:10px;background:var(--in);color:var(--tx);font:inherit;resize:vertical}
+
+.hd{padding:18px 16px 22px}
+main{margin:16px auto 0;padding:0 14px calc(100px + env(safe-area-inset-bottom,0px))}
+input,select,textarea{font-size:16px;padding:11px}
+.pt{display:flex;gap:12px;align-items:center;margin:2px 2px 14px}
+.pt i{font-style:normal;font-size:22px;width:46px;height:46px;border-radius:14px;background:var(--ac2);display:grid;place-items:center}
+.pt b{font-size:19px;display:block;font-weight:800;letter-spacing:-.2px}.pt small{color:var(--mu)}
+.qa{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.qa button{flex:1;min-width:120px;padding:12px}
+.bn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(560px,calc(100% - 20px));display:flex;gap:2px;padding:6px;background:var(--card);border:1px solid var(--ln);border-radius:22px;box-shadow:0 10px 30px rgba(5,34,43,.25);z-index:10}
+.ni{flex:1;border:0;background:none;color:var(--mu);padding:7px 2px;border-radius:16px;cursor:pointer;font:inherit;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11px;font-weight:700;transition:.15s;min-width:0}
+.ni i{font-style:normal;font-size:20px;line-height:1.2}.ni span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ni.on{background:var(--ac);color:var(--act);box-shadow:0 4px 12px rgba(13,184,204,.35)}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;align-items:flex-end;justify-content:center}
+.sh{background:var(--card);width:min(560px,100%);border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mc{border:1px solid var(--ln);background:var(--in);color:var(--tx);border-radius:16px;padding:14px;text-align:left;cursor:pointer;font:inherit}
+.mc i{font-style:normal;font-size:24px;display:block;margin-bottom:4px}.mc b{display:block}.mc small{color:var(--mu)}
+.mc.on{border-color:var(--ac);background:var(--ac2)}
+.t{bottom:calc(88px + env(safe-area-inset-bottom,0px));width:max-content;max-width:92vw}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.auth{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px}.authbox{width:min(440px,100%);background:var(--card);border:1px solid var(--ln);border-radius:22px;padding:24px;box-shadow:var(--sh)}.authbox h2{margin:0 0 6px}.authbox p{color:var(--mu);margin:0 0 18px}.authbox input{width:100%;margin:6px 0 10px}.authrow{display:flex;gap:8px;flex-wrap:wrap}.authmsg{min-height:22px;margin-top:10px;font-size:13px}.workspace{position:fixed;right:14px;top:14px;z-index:20;display:flex;gap:6px;align-items:center}.workspace .g{background:var(--card)}.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="auth" class="auth"><div class="authbox">
+<h2>🔐 Ortak Atölye Defteri</h2><p>Önce hesabınızla giriş yapın. İlk girişte çalışma alanınız oluşturulur; arkadaşınız davet koduyla aynı deftere katılır.</p>
+<label>E-posta</label><input id="ae" type="email" autocomplete="email" placeholder="ornek@mail.com">
+<label>Şifre</label><input id="ap" type="password" autocomplete="current-password" placeholder="En az 6 karakter">
+<div class="authrow"><button class="b" onclick="login()">Giriş yap</button><button class="g" onclick="signup()">Yeni hesap oluştur</button></div>
+<div id="authmsg" class="authmsg"></div>
+</div></div>
+<div id="ws" class="workspace hidden"></div>
+<header class="hd"><div><img class="logo" alt="Tidex Technology logosu" src="data:image/jpeg;base64,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"><span><h1>Tidex Technology</h1><small>Atölye Defteri · 3D baskı muhasebesi</small></span></div></header>
+<main>
+
+<div id="v"></div>
+<div class="card"><h2>Yedek ve dışa aktarma</h2><div class="sm"><button class="g" onclick="bak()">⬇ Yedek indir</button><button class="g" onclick="$('#rf').click()">⬆ Yedekten geri yükle</button><button class="g" onclick="csv('ord')">Siparişler (CSV)</button><button class="g" onclick="csv('tx')">Gelir-Gider (CSV)</button></div><input type="file" id="rf" accept=".json,application/json" style="display:none" onchange="geri(event)"><div class="bk"><span id="bi"></span></div><div class="bk"><span id="info"></span></div><div class="sm" style="margin-top:10px"><button class="g" onclick="abList()">🗂 Otomatik yedekler</button></div><p class="mu" style="font-size:12px;margin:8px 0 0">Defter her gün ilk açılışta, o günün başlangıç hâlini otomatik yedekler ve son 14 günü saklar. Hesabınız dışında bir kopya için "Yedek indir"i yine kullanın.</p><div id="ab"></div></div>
+<div id="bn" class="bn"></div>
+<div id="mo" class="mo" onclick="sheet(false)"><div class="sh" onclick="event.stopPropagation()"><h2>Diğer bölümler</h2><div class="g2" id="mg2"></div></div></div>
+<div class="t" id="t" style="display:none"></div>
+</main>
+<script>
+const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TL=n=>new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:2}).format(n||0);
+const uid=()=>Math.random().toString(36).slice(2,9),td=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')},N=v=>parseFloat(v)||0,V=i=>$('#'+i).value;
+const ST=['Sipariş alındı','Baskıda','Hazır','Teslim edildi'];
+const TABS=[['ozet','Özet','🏠','Genel durum ve hızlı işlemler'],['ord','Siparişler','📋','Müşteri siparişleri ve tahsilat'],['job','Üretim','🖨️','Baskıdaki işler'],['tx','Kasa','💰','Gelir ve gider kayıtları'],['prod','Ürünler','🧩','Ürün maliyet kartları'],['mat','Malzeme','🧵','Filament stoku'],['cus','Müşteriler','👥','Müşteri bakiyeleri'],['rapor','Rapor','📊','Aylık özet ve karşılaştırma'],['debt','Borçlar','🏦','Taksit ve kredi ödemeleri'],['oneri','Öneriler','💡','Satış fırsatları']],MAIN=['ozet','ord','job','tx'];
+const SUPABASE_URL = 'https://woogrfdcjonaurwgwoor.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_PD0uw5raOZWLs8n0W6iPMA_ILeoWdcm';
+const sb = (SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length>20) ? window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY) : null;
+let DB=null,pend=0,rp=td().slice(0,7),workspaceId=null,workspaceCode=null,realtime=null;
+let S={set:{hr:15,fire:10},job:[],debt:[],mat:[],prod:[],ord:[],tx:[]},tab='ozet',ref=null,tm;
+const authMsg=m=>$('#authmsg').textContent=m||'';
+async function login(){if(!sb)return authMsg('Önce Supabase bilgilerini bu dosyaya ekleyin.');authMsg('Giriş yapılıyor…');const {error}=await sb.auth.signInWithPassword({email:V('ae'),password:V('ap')});if(error)authMsg('Giriş başarısız: '+error.message);else await startApp()}
+async function signup(){if(!sb)return authMsg('Önce Supabase bilgilerini bu dosyaya ekleyin.');authMsg('Hesap oluşturuluyor…');const {data,error}=await sb.auth.signUp({email:V('ae'),password:V('ap')});if(error)authMsg('Kayıt başarısız: '+error.message);else if(data.session)await startApp();else authMsg('Hesap oluşturuldu. E-postanızdaki doğrulama bağlantısını açıp sonra giriş yapın.')}
+async function startApp(){
+ try{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){$('#auth').classList.remove('hidden');return}
+  authMsg('Ortak defter hazırlanıyor…');
+  await ensureWorkspace();
+  await load();
+  $('#auth').classList.add('hidden');
+  render();
+  await snap();
+ }catch(e){
+  console.error('Ortak muhasebe başlatılamadı:',e);
+  $('#auth').classList.remove('hidden');
+  authMsg('Bağlantı kurulamadı: '+(e?.message||e));
+ }
+}
+async function ensureWorkspace(){
+ const {data,error}=await sb.rpc('get_my_workspace');
+ if(error)throw error;
+ const mine=Array.isArray(data)?data[0]:data;
+ if(mine&&mine.workspace_id){
+  workspaceId=mine.workspace_id;workspaceCode=mine.invite_code;showWorkspace(mine.name,mine.invite_code);return;
+ }
+ const {data:c,error:ce}=await sb.rpc('create_workspace');
+ if(ce)throw ce;
+ const created=Array.isArray(c)?c[0]:c;
+ if(!created||!created.workspace_id)throw new Error('Çalışma alanı oluşturulamadı.');
+ workspaceId=created.workspace_id;workspaceCode=created.invite_code;showWorkspace(created.name,created.invite_code);
+}
+function showWorkspace(name,code){$('#ws').classList.remove('hidden');$('#ws').innerHTML=`<button class="g" onclick="copyInvite()">👥 ${E(name)} · Davet kodu</button><button class="g" onclick="joinWorkspace()">➕ Başka deftere katıl</button><button class="g" onclick="signout()">Çıkış</button>`;window._inviteCode=code}
+async function copyInvite(){try{await navigator.clipboard.writeText(window._inviteCode);toast('Davet kodu kopyalandı: '+window._inviteCode)}catch(e){toast('Davet kodunuz: '+window._inviteCode)}}
+async function signout(){if(realtime)await sb.removeChannel(realtime);await sb.auth.signOut();location.reload()}
+async function load(){
+ if(!workspaceId)throw new Error('Çalışma alanı bulunamadı.');
+ const {data,error}=await sb.from('books').select('data').eq('workspace_id',workspaceId).maybeSingle();
+ if(error && error.code!=='PGRST116')throw error;
+ if(data&&data.data)S=Object.assign(S,data.data);
+ ref={workspace_id:workspaceId};
+ realtime=sb.channel('book-'+workspaceId).on('postgres_changes',{event:'*',schema:'public',table:'books',filter:'workspace_id=eq.'+workspaceId},payload=>{const d=payload.new&&payload.new.data;if(d&&JSON.stringify(d)!==JSON.stringify(S)){S=Object.assign(S,d);document.activeElement&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)?pend=1:render()}}).subscribe();
+}
+function save(){clearTimeout(tm);tm=setTimeout(async()=>{try{await sb.from('books').upsert({workspace_id:workspaceId,data:S,updated_at:new Date().toISOString(),updated_by:(await sb.auth.getUser()).data.user.id})}catch(e){console.error(e);toast('Ortak kayıt sırasında hata oluştu.')}} ,400)}
+let tt;function toast(m,a,fn){const t=$('#t');t.innerHTML='<span>'+E(m)+'</span>'+(a?'<button class="b" id="ta">'+E(a)+'</button>':'');t.style.display='flex';if(a)$('#ta').onclick=()=>{t.style.display='none';fn()};clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',a?8000:3500)}
+const ds=()=>S.lastBak?Math.floor((Date.now()-S.lastBak)/864e5):null;
+const bn=()=>{const d=ds();return d===null||d>=7?`<div class="card" style="border-color:var(--bad)"><b class="bad">⚠ ${d===null?'Henüz yedek almadınız.':d+' gündür yedek almadınız.'}</b> Verilerinizi korumak için yedek indirin. <button class="b" style="margin-left:6px" onclick="bak()">Yedek indir</button></div>`:''};
+async function save2(name,data){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/octet-stream'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);return true}catch(e){toast('Dosya kaydedilemedi.');return false}}
+async function bak(){if(await save2('atolye-defteri-yedek.json',JSON.stringify(S,null,1))){S.lastBak=Date.now();upd();toast('Yedek kaydedildi.')}}
+function geri(e){const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!['mat','prod','ord','tx'].every(k=>Array.isArray(d[k])))throw 0;toast(`Yedekte ${d.ord.length} sipariş, ${d.tx.length} kayıt var. Mevcut defter değiştirilsin mi?`,'Evet, yükle',()=>{S=Object.assign({set:{hr:15,fire:10},job:[],debt:[]},d);upd();toast('Yedek geri yüklendi.')})}catch(x){toast('Geçersiz yedek dosyası.')}};r.readAsText(f)}
+const cell=v=>{v=typeof v==='number'?String(v).replace('.',','):String(v??'');if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'};
+async function csv(k){let h,rows;if(k==='ord'){h=['Müşteri','Ürün','Adet','Birim fiyat','Toplam','Ödenen','Kalan','Durum'];rows=S.ord.map(o=>{const p=prod(o.prod),t=o.qty*o.price;return[o.cust,p?p.n:'',o.qty,o.price,t,o.paid,t-o.paid,o.st]})}else{h=['Tarih','Tür','Tutar','Açıklama'];rows=S.tx.map(x=>[x.d,x.t,x.amt,x.desc])}
+ if(!rows.length){toast('Aktarılacak kayıt yok.');return}
+ if(await save2(k==='ord'?'siparisler.csv':'gelir-gider.csv','\ufeff'+[h,...rows].map(r=>r.map(cell).join(';')).join('\r\n')))toast('Dosya kaydedildi.')}
+const mat=i=>S.mat.find(m=>m.id===i),prod=i=>S.prod.find(p=>p.id===i);
+const pmin=p=>p.mins!=null?p.mins:Math.round((p.hours||0)*60);
+const gc=m=>m&&m.spool?m.price/m.spool:0;
+const pc=p=>{const m=mat(p.mat);return((p.gram*gc(m))+(pmin(p)/60)*S.set.hr+p.extra)*(1+S.set.fire/100)};
+const upd=()=>{save();render()};
+const fld=(i,l,t='text',v='',x='')=>`<div><label>${l}</label><input id="${i}" type="${t}" value="${E(v)}" ${x}></div>`;
+function sheet(b){$('#mo').style.display=b?'flex':'none'}
+function go(k,f){tab=k;sheet(false);render();scrollTo(0,0);if(f){const e=$('#'+f);if(e)e.focus()}}
+const qa=()=>`<div class="qa"><button class="b" onclick="go('ord','oc')">＋ Sipariş</button><button class="b" onclick="go('job','jq')">🖨️ Baskıya ver</button><button class="g" onclick="go('tx','xa')">＋ Gelir/Gider</button></div>`;
+function render(){
+ const cur=TABS.find(t=>t[0]===tab)||TABS[0],more=!MAIN.includes(cur[0]);
+ $('#bn').innerHTML=MAIN.map(k=>{const t=TABS.find(x=>x[0]===k);return `<button class="ni ${k===tab?'on':''}" onclick="go('${k}')"><i>${t[2]}</i><span>${t[1]}</span></button>`}).join('')+`<button class="ni ${more?'on':''}" onclick="sheet(true)"><i>${more?cur[2]:'⋯'}</i><span>${more?cur[1]:'Daha fazla'}</span></button>`;
+ $('#mg2').innerHTML=TABS.filter(t=>!MAIN.includes(t[0])).map(t=>`<button class="mc ${t[0]===tab?'on':''}" onclick="go('${t[0]}')"><i>${t[2]}</i><b>${t[1]}</b><small>${t[3]}</small></button>`).join('');
+ $('#v').innerHTML=`<div class="pt"><i>${cur[2]}</i><div><b>${cur[1]}</b><small>${cur[3]}</small></div></div>`+V_[tab]();
+ $('#bi').textContent=ds()===null?'Henüz yedek alınmadı.':'Son yedek: '+(ds()?ds()+' gün önce':'bugün');
+ $('#info').textContent=workspaceId?'Ortak defter: veriler paylaştığınız kişilerle senkron.':'Veriler bu tarayıcıda saklanıyor.';
+}
+const V_={
+ozet(){
+ const ym=td().slice(0,7),t=S.tx.filter(x=>x.d.startsWith(ym)),gl=t.filter(x=>x.t==='gelir').reduce((a,x)=>a+x.amt,0),gd=t.filter(x=>x.t==='gider').reduce((a,x)=>a+x.amt,0);
+ const al=S.ord.reduce((a,o)=>a+o.qty*o.price-o.paid,0),acik=S.ord.filter(o=>o.st!==ST[3]).length,low=S.mat.filter(m=>m.g<200);
+ return `${qa()}${bn()}<div class="grid"><div class="card kpi"><small>Bu ay gelir</small><b class="ok">${TL(gl)}</b></div><div class="card kpi"><small>Bu ay gider</small><b class="bad">${TL(gd)}</b></div><div class="card kpi"><small>Bu ay net</small><b>${TL(gl-gd)}</b></div><div class="card kpi"><small>Tahsil edilecek</small><b>${TL(al)}</b></div><div class="card kpi"><small>Açık sipariş</small><b>${acik}</b></div></div>
+ ${ac()}${dc()}<div class="card"><h2>Düşük stok (200 g altı)</h2>${low.length?low.map(m=>`<div>${E(m.n)}: <b class="bad">${Math.round(m.g)} g</b></div>`).join(''):'<span class="mu">Uyarı yok.</span>'}</div>
+ <div class="card"><h2>Maliyet ayarları</h2><div class="f">${fld('hr','Saatlik makine+elektrik (₺)','number',S.set.hr,'step="any"')}${fld('fire','Fire payı (%)','number',S.set.fire,'step="any"')}<button class="b" onclick="S.set={hr:N(V('hr')),fire:N(V('fire'))};upd()">Kaydet</button></div><p class="mu" style="font-size:12px;margin:8px 0 0">Başarısız baskıların maliyete yansıması için fire payı eklenir.</p></div>`},
+debt(){const a=S.debt.filter(x=>x.left>0).sort((p,q)=>p.due.localeCompare(q.due)),z=S.debt.filter(x=>x.left<=0),tot=a.reduce((t,x)=>t+x.amt*x.left,0),mo=a.reduce((t,x)=>t+x.amt,0),n30=a.filter(x=>dleft(x.due)<=30).reduce((t,x)=>t+x.amt,0);
+ return `<div class="grid"><div class="card kpi" style="--k:var(--bad)"><small>Kalan toplam borç</small><b>${TL(tot)}</b></div><div class="card kpi" style="--k:#f59e0b"><small>Aylık taksit yükü</small><b>${TL(mo)}</b></div><div class="card kpi" style="--k:#3b82f6"><small>30 gün içindeki taksitler</small><b>${TL(n30)}</b></div></div>
+ <div class="card"><h2>Borç / taksit ekle</h2><div class="f">${fld('dn','Borç adı (örn. Makine kredisi)')}${fld('dk','Banka / alacaklı')}${fld('da','Taksit tutarı (₺)','number','','step="any"')}${fld('dl','Kalan taksit sayısı','number','')}${fld('dd','Sıradaki vade tarihi','date',td())}<button class="b" onclick="addDebt()">Ekle</button></div><p class="mu" style="font-size:12px;margin:8px 0 0">Taksiti öde'ye basınca tutar gider olarak yazılır, kalan taksit bir azalır ve vade bir ay ileri gider.</p></div>
+ <div class="card"><h2>Aktif borçlar (${a.length})</h2>${a.map(dr).join('')||'<span class="mu">Kayıtlı borç yok.</span>'}</div>
+ ${z.length?`<div class="card"><h2>Tamamlananlar</h2>${z.map(dr).join('')}</div>`:''}`},
+oneri(){
+ if(!S.ord.length)return `<div class="card"><h2>Öneriler</h2><span class="mu">Öneri üretebilmem için önce birkaç sipariş girin. Siparişler arttıkça satış fırsatları burada görünecek.</span></div>`;
+ const C={},P={},days=d=>Math.floor((Date.now()-new Date(d))/864e5);
+ S.ord.forEach(o=>{const rev=o.qty*o.price,c=C[o.cust]=C[o.cust]||{rev:0,n:0,pr:new Set(),last:''};c.rev+=rev;c.n++;c.pr.add(o.prod);if(o.date&&o.date>c.last)c.last=o.date;const a=P[o.prod]=P[o.prod]||{q:0,cu:new Set()};a.q+=o.qty;a.cu.add(o.cust)});
+ const ck=Object.keys(C).sort((a,b)=>C[b].rev-C[a].rev),tot=ck.reduce((a,k)=>a+C[k].rev,0);
+ const best=S.prod.filter(p=>P[p.id]).sort((a,b)=>P[b.id].q-P[a.id].q),bm=Math.max(...best.map(p=>P[p.id].q),1);
+ const mg=p=>p.price?(p.price-pc(p))/p.price:0,wp=S.prod.filter(p=>p.price);
+ const am=wp.reduce((a,p)=>a+mg(p),0)/(wp.length||1),aq=S.prod.reduce((a,p)=>a+(P[p.id]?P[p.id].q:0),0)/(S.prod.length||1);
+ const hl=S.prod.length>=2?wp.filter(p=>P[p.id]&&mg(p)>=am&&P[p.id].q<=aq).sort((a,b)=>mg(b)-mg(a)).slice(0,3):[];
+ const unsold=S.prod.filter(p=>!P[p.id]).slice(0,4),dorm=ck.filter(k=>C[k].last&&days(C[k].last)>=30).slice(0,5);
+ const msg=t=>`<details style="width:100%"><summary class="mu" style="cursor:pointer;font-size:13px">Mesaj taslağı</summary><textarea readonly rows="3" onfocus="this.select()" style="margin-top:6px">${E(t)}</textarea></details>`;
+ const bar=(v,m)=>`<div style="height:8px;border-radius:6px;background:var(--ac);width:${Math.max(3,v/m*100)}%"></div>`;
+ const top3=best.slice(0,3).map((p,i)=>({p,i,miss:ck.filter(k=>!C[k].pr.has(p.id)).slice(0,4)})).filter(x=>x.miss.length);
+ const topc=ck[0],share=tot?C[topc].rev/tot:0;
+ return `<div class="card"><h2>🏆 En çok satan ürünler</h2>${best.slice(0,5).map((p,i)=>`<div style="margin-bottom:12px"><div class="sm" style="justify-content:space-between"><b>${i+1}. ${E(p.n)}</b><b>${P[p.id].q} adet</b></div><div class="mu" style="font-size:12px">${P[p.id].cu.size} müşteri aldı · marj %${Math.round(mg(p)*100)}</div>${bar(P[p.id].q,bm)}</div>`).join('')||'<span class="mu">Henüz satış yok.</span>'}</div>
+ ${top3.map(x=>`<div class="card"><h2>🎯 "${E(x.p.n)}" henüz almamış müşteriler</h2><p class="mu" style="margin:0 0 6px;font-size:13px">Bu ürün satış sıralamanızda ${x.i+1}. sırada ve ${P[x.p.id].cu.size} müşteri aldı. Bunlara da önerebilirsiniz:</p>${x.miss.map(k=>`<div class="row"><div><b>${E(k)}</b><br><span class="mu">${C[k].n} sipariş · toplam ${TL(C[k].rev)}</span></div>${msg('Merhaba '+k+', Tidex Technology olarak '+x.p.n+' ürünümüz en çok tercih edilen ürünlerimiz arasında. Size de uygun bir teklif hazırlayabiliriz, ilgilenir misiniz?')}</div>`).join('')}</div>`).join('')}
+ ${dorm.length?`<div class="card"><h2>⏰ Bir süredir sipariş vermeyenler</h2>${dorm.map(k=>`<div class="row"><div><b>${E(k)}</b><br><span class="mu">${days(C[k].last)} gündür sipariş yok · toplam ${TL(C[k].rev)}</span></div>${msg('Merhaba '+k+', bir süredir görüşemedik. Tidex Technology olarak yeni siparişleriniz için yardımcı olmaktan memnuniyet duyarız.')}</div>`).join('')}</div>`:''}
+ ${hl.length?`<div class="card"><h2>💎 Marjı yüksek ama az satılanlar</h2><p class="mu" style="margin:0 0 6px;font-size:13px">Kâr oranı ortalamanın üstünde, satışı ortalamanın altında. Öne çıkarmaya değer:</p>${hl.map(p=>`<div class="row"><b>${E(p.n)}</b><span class="mu">marj %${Math.round(mg(p)*100)} · ${P[p.id].q} adet</span></div>`).join('')}</div>`:''}
+ ${unsold.length?`<div class="card"><h2>📦 Hiç sipariş almayan ürünler</h2>${unsold.map(p=>`<div class="row"><b>${E(p.n)}</b><span class="mu">Müşterilere gösterin ya da örnek verin</span></div>`).join('')}</div>`:''}
+ ${share>=.4?`<div class="card" style="border-color:var(--bad)"><h2>⚠ Müşteri bağımlılığı</h2>Gelirinizin <b>%${Math.round(share*100)}</b> kadarı <b>${E(topc)}</b> müşterisinden geliyor. Tek müşteriye bağlı kalmamak için yeni müşteri kazanımına ağırlık verin. En çok satan ürünlerinizi yeni potansiyel müşterilere örnek olarak gösterebilirsiniz.</div>`:''}
+ <p class="mu" style="font-size:12px">Öneriler yalnızca deftere girdiğiniz siparişlere dayanır. Müşteri adları siparişlerde aynı yazılmadıysa farklı müşteri sayılır. "Bir süredir sipariş vermeyenler" için siparişte tarih kaydı olması gerekir.</p>`},
+rapor(){
+ const cur=td().slice(0,7),TR=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'],lb=k=>k==='all'?'Tüm zamanlar':TR[+k.slice(5)-1]+' '+k.slice(0,4);
+ const ms=[...new Set([cur,...S.tx.map(x=>x.d.slice(0,7)),...S.ord.filter(o=>o.date).map(o=>o.date.slice(0,7))])].sort().reverse();
+ if(rp!=='all'&&!ms.includes(rp))rp=cur;
+ const sm=(a,t)=>a.filter(x=>x.t===t).reduce((q,x)=>q+x.amt,0),inP=d=>rp==='all'||(d&&d.startsWith(rp));
+ const tx=S.tx.filter(x=>inP(x.d)),gl=sm(tx,'gelir'),gd=sm(tx,'gider'),net=gl-gd;
+ let cmp='';
+ if(rp!=='all'){const[y,m]=rp.split('-').map(Number),d0=new Date(y,m-2,1),pk=d0.getFullYear()+'-'+String(d0.getMonth()+1).padStart(2,'0'),pt=S.tx.filter(x=>x.d.startsWith(pk)),pn=sm(pt,'gelir')-sm(pt,'gider'),df=net-pn;cmp=`<p class="mu" style="margin:0">Geçen aya (${lb(pk)}) göre net: <b class="${df>=0?'ok':'bad'}">${df>=0?'+':''}${TL(df)}</b> (önceki ay ${TL(pn)})</p>`}
+ const os=S.ord.filter(o=>rp==='all'||inP(o.date)),und=S.ord.filter(o=>!o.date).length;
+ const pa={},ca={};
+ os.forEach(o=>{const p=prod(o.prod),rev=o.qty*o.price,kar=rev-(p?o.qty*pc(p):0),a=pa[o.prod]=pa[o.prod]||{n:p?p.n:'(silinmiş ürün)',q:0,rev:0,kar:0};a.q+=o.qty;a.rev+=rev;a.kar+=kar;const c=ca[o.cust]=ca[o.cust]||{rev:0,n:0,q:0};c.rev+=rev;c.n++;c.q+=o.qty});
+ const pl=Object.values(pa).sort((a,b)=>b.kar-a.kar).slice(0,5),cl=Object.entries(ca).sort((a,b)=>b[1].rev-a[1].rev).slice(0,5);
+ const bar=(v,mx,c)=>`<div style="height:8px;border-radius:6px;background:var(--${c});width:${mx?Math.max(2,Math.abs(v)/mx*100):0}%"></div>`;
+ const pm=Math.max(...pl.map(x=>Math.abs(x.kar)),0),cm=Math.max(...cl.map(x=>x[1].rev),0);
+ const mk=[];for(let i=5;i>=0;i--){const d0=new Date(new Date().getFullYear(),new Date().getMonth()-i,1),k=d0.getFullYear()+'-'+String(d0.getMonth()+1).padStart(2,'0'),t=S.tx.filter(x=>x.d.startsWith(k));mk.push({k,g:sm(t,'gelir'),r:sm(t,'gider')})}
+ const mx=Math.max(...mk.map(x=>Math.max(x.g,x.r)),0);
+ return `<div class="card"><label>Dönem</label><select id="rp" onchange="rp=this.value;render()">${ms.map(k=>`<option value="${k}" ${k===rp?'selected':''}>${lb(k)}</option>`).join('')}<option value="all" ${rp==='all'?'selected':''}>Tüm zamanlar</option></select></div>
+ <div class="grid"><div class="card kpi"><small>Gelir</small><b class="ok">${TL(gl)}</b></div><div class="card kpi"><small>Gider</small><b class="bad">${TL(gd)}</b></div><div class="card kpi"><small>Net</small><b>${TL(net)}</b></div><div class="card kpi"><small>Sipariş</small><b>${os.length}</b></div></div>
+ ${cmp?`<div class="card">${cmp}</div>`:''}
+ <div class="card"><h2>En kârlı ürünler</h2>${pl.map(x=>`<div style="margin-bottom:12px"><div class="sm" style="justify-content:space-between"><b>${E(x.n)}</b><b class="${x.kar>=0?'ok':'bad'}">${TL(x.kar)}</b></div><div class="mu" style="font-size:12px">${x.q} adet · ciro ${TL(x.rev)}</div>${bar(x.kar,pm,x.kar>=0?'ok':'bad')}</div>`).join('')||'<span class="mu">Bu dönemde sipariş yok.</span>'}<p class="mu" style="font-size:12px;margin:0">Kâr, ürünün güncel maliyet kartına göre tahmini hesaplanır.</p></div>
+ <div class="card"><h2>En çok alan müşteriler</h2>${cl.map(([n,x])=>`<div style="margin-bottom:12px"><div class="sm" style="justify-content:space-between"><b>${E(n)}</b><b>${TL(x.rev)}</b></div><div class="mu" style="font-size:12px">${x.n} sipariş · ${x.q} adet</div>${bar(x.rev,cm,'ac')}</div>`).join('')||'<span class="mu">Bu dönemde sipariş yok.</span>'}</div>
+ <div class="card"><h2>Son 6 ay</h2>${mk.map(x=>`<div style="margin-bottom:12px"><div class="sm" style="justify-content:space-between"><b>${lb(x.k)}</b><b class="${x.g-x.r>=0?'ok':'bad'}">Net ${TL(x.g-x.r)}</b></div>${bar(x.g,mx,'ok')}<div style="height:3px"></div>${bar(x.r,mx,'bad')}<div class="mu" style="font-size:12px">Gelir ${TL(x.g)} · Gider ${TL(x.r)}</div></div>`).join('')}</div>
+ ${und&&rp!=='all'?`<p class="mu" style="font-size:12px">${und} siparişin tarihi kayıtlı olmadığı için yalnızca "Tüm zamanlar" görünümünde sayılır. Yeni siparişlere tarih otomatik eklenir.</p>`:''}`},
+job(){const open=S.ord.filter(o=>o.st!==ST[3]),act=S.job.filter(j=>j.st==='Baskıda'),dn=S.job.filter(j=>j.st!=='Baskıda').slice(-10).reverse();
+ return `<div class="card"><h2>Baskıya ver</h2><div class="f"><div><label>Sipariş (isteğe bağlı)</label><select id="jo" onchange="jsel(this.value)"><option value="">Siparişsiz / stok için</option>${open.map(o=>`<option value="${o.id}">${E(o.cust)} · ${o.qty} × ${E(prod(o.prod)?.n||'?')} (kalan ${rem(o)})</option>`).join('')}</select></div><div><label>Ürün</label><select id="jp">${S.prod.map(p=>`<option value="${p.id}">${E(p.n)}</option>`).join('')}</select></div>${fld('jq','Adet','number',1)}<button class="b" onclick="addJob()">Baskıya ver</button></div><p class="mu" style="font-size:12px;margin:8px 0 0">Baskıya verince gereken filament stoktan otomatik düşer. Bir sipariş seçerseniz ürün ve kalan adet kendiliğinden gelir.</p></div>
+ <div class="card"><h2>Şu an baskıda (${act.length})</h2>${act.map(jr).join('')||'<span class="mu">Aktif baskı yok.</span>'}</div>
+ <div class="card"><h2>Son tamamlananlar</h2>${dn.map(jr).join('')||'<span class="mu">Henüz tamamlanan yok.</span>'}</div>`},
+mat(){return `<div class="card"><h2>Malzeme (filament/reçine) ekle</h2><div class="f">${fld('mn','Ad (aynı ad = stoğa ekle)','text','','list="ml"')}<datalist id="ml">${S.mat.map(m=>`<option value="${E(m.n)}">`).join('')}</datalist>${fld('mp','Makara fiyatı (₺)','number','','step="any"')}${fld('ms','Makara gramı','number',1000)}${fld('mq','Adet','number',1)}<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="mg" checked style="width:auto"> Gider yaz</label><button class="b" onclick="addMat()">Ekle</button></div></div>
+ <div class="card"><h2>Stok · değer ${TL(S.mat.reduce((a,m)=>a+Math.max(m.g,0)*gc(m),0))}</h2>${S.mat.length?S.mat.map(m=>`<div class="row"><div><b>${E(m.n)}</b><br><span class="mu">${TL(gc(m))} / g · değer ${TL(Math.max(m.g,0)*gc(m))}</span></div><div class="sm"><input type="number" value="${Math.round(m.g)}" onchange="mat('${m.id}').g=N(this.value);save()"> g<button class="g" onclick="delMat('${m.id}')">Sil</button></div></div>`).join(''):'<span class="mu">Henüz malzeme yok.</span>'}</div>`},
+prod(){return `<div class="card"><h2>Ürün maliyet kartı</h2><div class="f">${fld('pn','Ürün adı')}<div><label>Malzeme</label><select id="pm">${S.mat.map(m=>`<option value="${m.id}">${E(m.n)}</option>`).join('')}</select></div>${fld('pg','Gram','number','','step="any"')}${fld('ph','Baskı süresi (dakika)','number','','step="1"')}${fld('pe','Ek maliyet (₺)','number',0,'step="any"')}${fld('pf','Satış fiyatı (₺)','number','','step="any"')}<button class="b" onclick="addProd()">Ekle</button></div></div>
+ <div class="card">${S.prod.length?S.prod.map(p=>{const c=pc(p),k=p.price-c;return `<div class="row"><div><b>${E(p.n)}</b><br><span class="mu">${p.gram} g · ${pmin(p)} dk<br>Maliyet ${TL(c)} · Satış ${TL(p.price)}</span></div><div class="sm"><b class="${k>=0?'ok':'bad'}">Kâr ${TL(k)} (%${p.price?Math.round(k/p.price*100):0})</b><button class="g" onclick="del('prod','${p.id}')">Sil</button></div></div>`}).join(''):'<span class="mu">Önce malzeme, sonra ürün ekleyin.</span>'}</div>`},
+ord(){return `<div class="card"><h2>Yeni sipariş</h2><div class="f">${fld('oc','Müşteri')}<div><label>Ürün</label><select id="op" onchange="$('#oy').value=prod(this.value)?.price||''">${S.prod.map(p=>`<option value="${p.id}">${E(p.n)}</option>`).join('')}</select></div>${fld('oq','Adet','number',1)}${fld('oy','Birim fiyat (₺)','number',S.prod[0]?.price||'','step="any"')}${fld('ok','Kapora (₺)','number',0,'step="any"')}<button class="b" onclick="addOrd()">Ekle</button></div></div>
+ <div class="card">${S.ord.length?S.ord.slice().reverse().map(o=>{const p=prod(o.prod),tot=o.qty*o.price,kar=p?tot-o.qty*pc(p):0;return `<div class="row"><div><b>${E(o.cust)}</b> · ${o.qty} × ${E(p?p.n:'(silinmiş ürün)')}<br><span class="mu">${TL(tot)} · ödenen ${TL(o.paid)} · </span><b class="${tot-o.paid>0?'bad':'ok'}">kalan ${TL(tot-o.paid)}</b><br><span class="mu">Tahmini kâr ${TL(kar)}</span>${gl(o)}${jl(o)}</div><div class="sm"><select class="st s${ST.indexOf(o.st)}" onchange="setSt('${o.id}',this.value)">${ST.map(s=>`<option ${s===o.st?'selected':''}>${s}</option>`).join('')}</select><input id="p_${o.id}" type="number" placeholder="₺" step="any"><button class="g" onclick="pay('${o.id}')">Tahsil et</button><button class="g" onclick="goJob('${o.id}')">Baskıya ver</button><button class="g" onclick="del('ord','${o.id}')">Sil</button></div></div>`}).join(''):'<span class="mu">Henüz sipariş yok.</span>'}</div>`},
+tx(){const gl=S.tx.filter(x=>x.t==='gelir').reduce((a,x)=>a+x.amt,0),gd=S.tx.filter(x=>x.t==='gider').reduce((a,x)=>a+x.amt,0);
+ return `<div class="card"><h2>Kayıt ekle</h2><div class="f">${fld('xd','Tarih','date',td())}<div><label>Tür</label><select id="xt"><option value="gelir">Gelir</option><option value="gider">Gider</option></select></div>${fld('xa','Tutar (₺)','number','','step="any"')}${fld('xs','Açıklama')}<button class="b" onclick="addTx()">Ekle</button></div></div>
+ <div class="card"><h2>Toplam: <span class="ok">${TL(gl)}</span> − <span class="bad">${TL(gd)}</span> = ${TL(gl-gd)}</h2>${S.tx.slice().sort((a,b)=>b.d.localeCompare(a.d)).map(x=>`<div class="row"><div>${x.d} · ${E(x.desc)}</div><div class="sm"><b class="${x.t==='gelir'?'ok':'bad'}">${x.t==='gelir'?'+':'−'}${TL(x.amt)}</b><button class="g" onclick="del('tx','${x.id}')">Sil</button></div></div>`).join('')||'<span class="mu">Kayıt yok.</span>'}</div>`},
+cus(){const m={};S.ord.forEach(o=>{const c=m[o.cust]=m[o.cust]||{t:0,p:0,n:0};c.t+=o.qty*o.price;c.p+=o.paid;c.n++});
+ return `<div class="card"><h2>Müşteri bakiyeleri</h2>${Object.keys(m).map(k=>`<div class="row"><div><b>${E(k)}</b><br><span class="mu">${m[k].n} sipariş · toplam ${TL(m[k].t)}</span></div><b class="${m[k].t-m[k].p>0?'bad':'ok'}">Kalan ${TL(m[k].t-m[k].p)}</b></div>`).join('')||'<span class="mu">Siparişlerden otomatik oluşur.</span>'}</div>`}
+};
+function addTx(){const a=N(V('xa'));if(!a||!V('xs'))return;S.tx.push({id:uid(),d:V('xd')||td(),t:V('xt'),amt:a,desc:V('xs')});upd()}
+function addMat(){const n=V('mn'),p=N(V('mp')),s=N(V('ms')),q=N(V('mq'))||1;if(!n||!p||!s)return;const ex=S.mat.find(x=>x.n.trim().toLocaleLowerCase('tr')===n.trim().toLocaleLowerCase('tr')),ag=s*q;if(ex){const b=Math.max(ex.g,0),av=(b*gc(ex)+ag*(p/s))/(b+ag);ex.g+=ag;ex.spool=1000;ex.price=av*1000}else S.mat.push({id:uid(),n,g:ag,price:p,spool:s});if($('#mg').checked)S.tx.push({id:uid(),d:td(),t:'gider',amt:p*q,desc:'Malzeme: '+n});upd();if(ex)toast('Mevcut stoğa eklendi, ortalama maliyet '+TL(gc(ex))+' / g.')}
+function addProd(){const n=V('pn');if(!n||!V('pm'))return;S.prod.push({id:uid(),n,mat:V('pm'),gram:N(V('pg')),mins:N(V('ph')),extra:N(V('pe')),price:N(V('pf'))});upd()}
+function addOrd(){const c=V('oc');if(!c||!V('op'))return;const k=N(V('ok')),o={id:uid(),cust:c,prod:V('op'),qty:N(V('oq'))||1,price:N(V('oy')),paid:k,st:ST[0],ded:false,date:td()};S.ord.push(o);if(k)S.tx.push({id:uid(),d:td(),t:'gelir',amt:k,desc:'Kapora: '+c});upd()}
+function pay(i){const o=S.ord.find(x=>x.id===i),a=N(V('p_'+i));if(!a)return;o.paid+=a;S.tx.push({id:uid(),d:td(),t:'gelir',amt:a,desc:'Tahsilat: '+o.cust});upd()}
+function setSt(i,s){const o=S.ord.find(x=>x.id===i);o.st=s;if(ST.indexOf(s)>=1&&!o.ded&&!o.dj){const p=prod(o.prod),m=p&&mat(p.mat);if(m)m.g-=p.gram*o.qty*(1+S.set.fire/100);o.ded=true}upd()}
+function del(k,i){toast('Kayıt silinsin mi?','Evet, sil',()=>{S[k]=S[k].filter(x=>x.id!==i);upd()})}
+const jobs=o=>S.job.filter(j=>j.ord===o.id),rem=o=>Math.max(0,o.qty-jobs(o).reduce((x,j)=>x+j.qty,0));
+const jl=o=>{const a=jobs(o);if(!a.length)return '';const d=a.filter(j=>j.st==='Tamamlandı').reduce((x,j)=>x+j.qty,0),b=a.filter(j=>j.st==='Baskıda').reduce((x,j)=>x+j.qty,0);return `<br><span class="mu">Üretim: ${d} tamamlandı${b?', '+b+' baskıda':''} / ${o.qty}</span>`};
+const jr=j=>{const p=prod(j.prod),o=S.ord.find(x=>x.id===j.ord);return `<div class="row"><div><b>${j.qty} × ${E(p?p.n:'(silinmiş ürün)')}</b><br><span class="mu">${o?'👤 '+E(o.cust)+' siparişi':'📦 Stok üretimi'} · ${j.d}${j.g?' · '+Math.round(j.g)+' g':''}</span></div><div class="sm">${j.st==='Baskıda'?`<button class="b" onclick="doneJob('${j.id}')">Tamamlandı</button>`:`<span class="st s3" style="padding:5px 10px;border-radius:20px;font-size:13px;font-weight:700">Tamamlandı</span>`}<button class="g" onclick="delJob('${j.id}')">Sil</button></div></div>`};
+const ac=()=>{const a=S.job.filter(j=>j.st==='Baskıda');return `<div class="card"><h2>Şu an baskıda (${a.length})</h2>${a.map(jr).join('')||'<span class="mu">Aktif baskı yok. Üretim sekmesinden baskıya verebilirsiniz.</span>'}</div>`};
+function jsel(v){const o=S.ord.find(x=>x.id===v);if(o){$('#jp').value=o.prod;$('#jq').value=rem(o)||o.qty}}
+function goJob(i){tab='job';render();$('#jo').value=i;jsel(i);scrollTo(0,0)}
+function addJob(){const oid=V('jo')||null,o=oid&&S.ord.find(x=>x.id===oid),pid=o?o.prod:V('jp'),q=N(V('jq')),p=prod(pid);if(!p||!q)return;
+ let g=0,sh=0;const m=mat(p.mat);if(m&&!(o&&o.ded)){g=p.gram*q*(1+S.set.fire/100);sh=g-m.g;m.g-=g}
+ if(o){o.dj=true;if(ST.indexOf(o.st)<1)o.st=ST[1]}
+ S.job.push({id:uid(),prod:pid,qty:q,ord:oid,st:'Baskıda',d:td(),g});upd();if(sh>0)toast('Dikkat: stokta '+fg(sh)+' g eksik, stok eksiye düştü. Malzeme sekmesinden makara ekleyin.')}
+function doneJob(i){const j=S.job.find(x=>x.id===i);j.st='Tamamlandı';const o=S.ord.find(x=>x.id===j.ord);if(o){const d=jobs(o).filter(x=>x.st==='Tamamlandı').reduce((a,x)=>a+x.qty,0);if(d>=o.qty&&ST.indexOf(o.st)<2)o.st=ST[2]}upd()}
+function delJob(i){const j=S.job.find(x=>x.id===i),act=j.st==='Baskıda'&&j.g;toast(act?'Baskı silinsin mi? Stoktan düşülen filament geri eklenir.':'Kayıt silinsin mi?','Evet, sil',()=>{if(act){const p=prod(j.prod),m=p&&mat(p.mat);if(m)m.g+=j.g}S.job=S.job.filter(x=>x.id!==i);upd()})}
+const fg=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n);
+const gl=o=>{const p=prod(o.prod);if(!p)return '';const n=p.gram*o.qty,f=n*(1+S.set.fire/100),m=mat(p.mat),short=!o.ded&&!o.dj&&ST.indexOf(o.st)<1&&m&&m.g<f;return `<br><span class="mu">Filament: <b>${fg(n)} g</b> (fire dahil ${fg(f)} g${m?' · '+E(m.n):''})</span>${short?` <b class="bad">Stok yetersiz, ${fg(f-m.g)} g eksik</b>`:''}`};
+function delMat(i){const u=S.prod.filter(p=>p.mat===i).length;if(u)return toast('Bu malzeme '+u+' üründe kullanılıyor, önce o ürünleri silin.');del('mat',i)}
+const pd2=n=>String(n).padStart(2,'0');
+const addM=(d,day)=>{const[y,m]=d.split('-').map(Number),t=new Date(y,m,1),l=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();return t.getFullYear()+'-'+pd2(t.getMonth()+1)+'-'+pd2(Math.min(day,l))};
+const dleft=d=>Math.round((new Date(d+'T00:00:00')-new Date(td()+'T00:00:00'))/864e5);
+const dchip=n=>n<0?`<b class="bad">${-n} gün gecikti</b>`:n===0?'<b style="color:#f59e0b">Bugün</b>':n<=7?`<b style="color:#f59e0b">${n} gün sonra</b>`:`<span class="mu">${n} gün sonra</span>`;
+const dr=x=>{const done=x.left<=0;return `<div class="row"><div><b>${E(x.n)}</b>${x.bank?' · '+E(x.bank):''}<br><span class="mu">Taksit ${TL(x.amt)} · ${done?'tamamlandı':x.left+' taksit kaldı · kalan '+TL(x.amt*x.left)}</span>${done?'':'<br>'+dchip(dleft(x.due))+' <span class="mu">· '+x.due+'</span>'}</div><div class="sm">${done?'<span class="st s3" style="padding:5px 10px;border-radius:20px;font-size:13px;font-weight:700">Bitti</span>':`<input type="date" value="${x.due}" onchange="dueEdit('${x.id}',this.value)" style="width:150px"><button class="b" onclick="payDebt('${x.id}')">Taksiti öde</button>`}<button class="g" onclick="del('debt','${x.id}')">Sil</button></div></div>`};
+const dc=()=>{const a=S.debt.filter(x=>x.left>0).sort((p,q)=>p.due.localeCompare(q.due));if(!a.length)return '';const late=a.some(x=>dleft(x.due)<0);return `<div class="card" ${late?'style="border-color:var(--bad)"':''}><h2>🏦 Yaklaşan taksitler</h2>${a.slice(0,3).map(x=>`<div class="row"><div><b>${E(x.n)}</b><br>${dchip(dleft(x.due))}</div><b>${TL(x.amt)}</b></div>`).join('')}<div class="mu" style="font-size:12px">Toplam kalan borç ${TL(a.reduce((t,x)=>t+x.amt*x.left,0))}</div></div>`};
+function addDebt(){const n=V('dn'),a=N(V('da')),l=Math.floor(N(V('dl'))),d=V('dd');if(!n||!a||l<1||!d)return;S.debt.push({id:uid(),n,bank:V('dk'),amt:a,left:l,due:d,day:Number(d.slice(8))});upd()}
+function dueEdit(i,v){const x=S.debt.find(d=>d.id===i);if(!x||!v)return;x.due=v;x.day=Number(v.slice(8));upd()}
+function payDebt(i){const x=S.debt.find(d=>d.id===i);if(!x||x.left<=0)return;const prev=x.due,tid=uid();S.tx.push({id:tid,d:td(),t:'gider',amt:x.amt,desc:'Taksit: '+x.n+(x.bank?' ('+x.bank+')':'')});x.left--;x.due=addM(x.due,x.day);upd();
+ toast('Taksit ödendi ve gidere yazıldı.','Geri al',()=>{const y=S.debt.find(d=>d.id===i);if(y){y.left++;y.due=prev}S.tx=S.tx.filter(t=>t.id!==tid);upd()})}
+async function snap(){
+ if(!workspaceId||!(S.ord.length||S.tx.length||S.mat.length||S.prod.length))return;
+ try{const k=td();const {data:old}=await sb.from('backups').select('id').eq('workspace_id',workspaceId).eq('id',k).maybeSingle();if(!old)await sb.from('backups').insert({workspace_id:workspaceId,id:k,json:S});
+ const {data:ids}=await sb.from('backups').select('id').eq('workspace_id',workspaceId).order('id',{ascending:false});if(ids&&ids.length>14){const gone=ids.slice(14).map(x=>x.id);await sb.from('backups').delete().eq('workspace_id',workspaceId).in('id',gone)}}catch(e){console.error(e)}}
+async function abList(){const el=$('#ab');if(!workspaceId){el.innerHTML='<span class="mu">Önce giriş yapın.</span>';return}try{const {data:rows,error}=await sb.from('backups').select('id').eq('workspace_id',workspaceId).order('id',{ascending:false});if(error)throw error;el.innerHTML=rows&&rows.length?rows.map(x=>`<div class="row"><span>${E(x.id)} gün başı yedeği</span><button class="g" onclick="abRestore('${E(x.id)}')">Geri yükle</button></div>`).join(''):'<span class="mu">Henüz otomatik yedek yok.</span>'}catch(e){el.innerHTML='<span class="mu">Yedekler okunamadı.</span>'}}
+async function abRestore(k){try{const {data:o,error}=await sb.from('backups').select('json').eq('workspace_id',workspaceId).eq('id',k).single();if(error)throw error;toast(k+' tarihli yedek yüklensin mi?','Evet, yükle',async()=>{S=Object.assign({set:{hr:15,fire:10},job:[],debt:[]},o.json);upd();toast('Yedek geri yüklendi.')})}catch(e){toast('Yedek okunamadı.')}}
+async function joinWorkspace(){const code=prompt('Arkadaşınızın verdiği davet kodunu girin:');if(!code)return;const {data,error}=await sb.rpc('join_workspace',{p_invite_code:code.trim()});if(error){toast('Katılım başarısız: '+error.message);return}toast('Ortak deftere katıldınız. Sayfa yenileniyor…');setTimeout(()=>location.reload(),700)}
+document.addEventListener('focusout',()=>{if(pend){pend=0;setTimeout(render,80)}});
+if(sb)sb.auth.getSession().then(({data})=>{if(data.session)startApp();else $('#auth').classList.remove('hidden')});else $('#auth').classList.remove('hidden');
+</script>
+</body>
+</html>
