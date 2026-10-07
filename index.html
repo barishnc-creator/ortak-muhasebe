@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tidex Technology · Atölye Defteri</title>
+<meta name="theme-color" content="#05222b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Atölye Defteri">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#eef4f5;--card:#ffffff;--tx:#14282d;--mu:#5f7479;--ln:#d7e3e6;--ac:#0b7f95;--act:#fff;--ac2:#e0f6fa;--ok:#2b8a3e;--bad:#c92a2a;--hd:#05222b;--sh:0 1px 2px rgba(5,34,43,.05),0 8px 24px rgba(5,34,43,.08);--in:#f5fafb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -280,6 +286,15 @@ async function abRestore(k){try{const {data:o,error}=await sb.from('backups').se
 async function joinWorkspace(){const code=prompt('Arkadaşınızın verdiği davet kodunu girin:');if(!code)return;const {data,error}=await sb.rpc('join_workspace',{p_invite_code:code.trim()});if(error){toast('Katılım başarısız: '+error.message);return}toast('Ortak deftere katıldınız. Sayfa yenileniyor…');setTimeout(()=>location.reload(),700)}
 document.addEventListener('focusout',()=>{if(pend){pend=0;setTimeout(render,80)}});
 if(sb)sb.auth.getSession().then(({data})=>{if(data.session)startApp();else $('#auth').classList.remove('hidden')});else $('#auth').classList.remove('hidden');
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function (err) {
+      console.warn('PWA service worker kaydı başarısız:', err);
+    });
+  });
+}
 </script>
 </body>
 </html>
