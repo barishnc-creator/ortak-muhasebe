@@ -141,7 +141,15 @@ async function load(){
  ref={workspace_id:workspaceId};
  realtime=sb.channel('book-'+workspaceId).on('postgres_changes',{event:'*',schema:'public',table:'books',filter:'workspace_id=eq.'+workspaceId},payload=>{const d=payload.new&&payload.new.data;if(d&&JSON.stringify(d)!==JSON.stringify(S)){S=Object.assign(S,d);document.activeElement&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)?pend=1:render()}}).subscribe();
 }
-function save(){clearTimeout(tm);tm=setTimeout(async()=>{try{await sb.from('books').upsert({workspace_id:workspaceId,data:S,updated_at:new Date().toISOString(),updated_by:(await sb.auth.getUser()).data.user.id})}catch(e){console.error(e);toast('Ortak kayıt sırasında hata oluştu.')}} ,400)}
+async function saveNow(){
+ try{
+  const {data:{user}}=await sb.auth.getUser();
+  const {error}=await sb.from('books').upsert({workspace_id:workspaceId,data:S,updated_at:new Date().toISOString(),updated_by:user?.id});
+  if(error)throw error;
+  return true;
+ }catch(e){console.error(e);toast('Ortak kayıt sırasında hata oluştu: '+(e?.message||e));return false}
+}
+function save(){clearTimeout(tm);tm=setTimeout(()=>saveNow(),400)}
 let tt;function toast(m,a,fn){const t=$('#t');t.innerHTML='<span>'+E(m)+'</span>'+(a?'<button class="b" id="ta">'+E(a)+'</button>':'');t.style.display='flex';if(a)$('#ta').onclick=()=>{t.style.display='none';fn()};clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',a?8000:3500)}
 const ds=()=>S.lastBak?Math.floor((Date.now()-S.lastBak)/864e5):null;
 const bn=()=>{const d=ds();return d===null||d>=7?`<div class="card" style="border-color:var(--bad)"><b class="bad">⚠ ${d===null?'Henüz yedek almadınız.':d+' gündür yedek almadınız.'}</b> Verilerinizi korumak için yedek indirin. <button class="b" style="margin-left:6px" onclick="bak()">Yedek indir</button></div>`:''};
@@ -243,10 +251,41 @@ cus(){const m={};S.ord.forEach(o=>{const c=m[o.cust]=m[o.cust]||{t:0,p:0,n:0};c.
 };
 function addTx(){const a=N(V('xa'));if(!a||!V('xs'))return;S.tx.push({id:uid(),d:V('xd')||td(),t:V('xt'),amt:a,desc:V('xs')});upd()}
 function addMat(){const n=V('mn'),p=N(V('mp')),s=N(V('ms')),q=N(V('mq'))||1;if(!n||!p||!s)return;const ex=S.mat.find(x=>x.n.trim().toLocaleLowerCase('tr')===n.trim().toLocaleLowerCase('tr')),ag=s*q;if(ex){const b=Math.max(ex.g,0),av=(b*gc(ex)+ag*(p/s))/(b+ag);ex.g+=ag;ex.spool=1000;ex.price=av*1000}else S.mat.push({id:uid(),n,g:ag,price:p,spool:s});if($('#mg').checked)S.tx.push({id:uid(),d:td(),t:'gider',amt:p*q,desc:'Malzeme: '+n});upd();if(ex)toast('Mevcut stoğa eklendi, ortalama maliyet '+TL(gc(ex))+' / g.')}
-async function addProd(){const n=V('pn');if(!n||!V('pm')){toast('Ürün adı ve malzeme gerekli.');return}const p={id:uid(),n,mat:V('pm'),gram:N(V('pg')),mins:N(V('ph')),extra:N(V('pe')),price:N(V('pf')),catalogDescription:V('pdesc')||'',catalogVisible:!!$('#pvis')?.checked};S.prod.push(p);upd();const img=$('#pimg')?.files?.[0],vid=$('#pvid')?.files?.[0];if(img)await uploadProductMedia(p.id,'image',img);if(vid)await uploadProductMedia(p.id,'video',vid);toast('Ürün eklendi.')}
+async function addProd(){
+ const n=V('pn');
+ if(!n||!V('pm')){toast('Ürün adı ve malzeme gerekli.');return}
+ const p={id:uid(),n,mat:V('pm'),gram:N(V('pg')),mins:N(V('ph')),extra:N(V('pe')),price:N(V('pf')),catalogDescription:V('pdesc')||'',catalogVisible:!!$('#pvis')?.checked};
+ S.prod.push(p);
+ const img=$('#pimg')?.files?.[0],vid=$('#pvid')?.files?.[0];
+ if(img)await uploadProductMedia(p.id,'image',img);
+ if(vid)await uploadProductMedia(p.id,'video',vid);
+ if(!img&&!vid)upd();
+ else render();
+ toast('Ürün eklendi.');
+}
 function toggleNewCustomer(){const on=V('oc')==='__new';const w=$('#newCustomerWrap');if(w)w.style.display=on?'block':'none'}
 function editProdField(id,key,value){const p=prod(id);if(!p)return;p[key]=value;save()}
-async function uploadProductMedia(id,type,file){if(!file)return;const p=prod(id);if(!p)return;if(type==='image'&&!file.type.startsWith('image/')){toast('Lütfen bir fotoğraf seçin.');return}if(type==='video'&&!file.type.startsWith('video/')){toast('Lütfen bir video seçin.');return}if(file.size>25*1024*1024){toast("Dosya 25 MB'dan küçük olmalı.");return}try{const ext=(file.name.split('.').pop()||'bin').toLowerCase(),path=`${workspaceId}/${id}/${type}-${Date.now()}.${ext}`;const {error}=await sb.storage.from('catalog-media').upload(path,file,{upsert:true,contentType:file.type});if(error)throw error;const {data}=sb.storage.from('catalog-media').getPublicUrl(path);p[type==='image'?'catalogImage':'catalogVideo']=data.publicUrl;save();render();toast(type==='image'?'Fotoğraf yüklendi.':'Video yüklendi.')}catch(e){console.error(e);toast('Medya yüklenemedi: '+(e.message||e))}}
+async function uploadProductMedia(id,type,file){
+ if(!file)return;
+ let p=prod(id);if(!p)return;
+ if(type==='image'&&!file.type.startsWith('image/')){toast('Lütfen bir fotoğraf seçin.');return}
+ if(type==='video'&&!file.type.startsWith('video/')){toast('Lütfen bir video seçin.');return}
+ if(file.size>25*1024*1024){toast("Dosya 25 MB'dan küçük olmalı.");return}
+ try{
+  const ext=(file.name.split('.').pop()||'bin').toLowerCase();
+  const path=`${workspaceId}/${id}/${type}-${Date.now()}.${ext}`;
+  const {error}=await sb.storage.from('catalog-media').upload(path,file,{upsert:true,contentType:file.type});
+  if(error)throw error;
+  const {data}=sb.storage.from('catalog-media').getPublicUrl(path);
+  p=prod(id);
+  if(!p)throw new Error('Ürün kayıt sırasında kayboldu.');
+  p[type==='image'?'catalogImage':'catalogVideo']=data.publicUrl;
+  const ok=await saveNow();
+  if(!ok)throw new Error('Fotoğraf adresi ortak deftere kaydedilemedi.');
+  render();
+  toast(type==='image'?'Fotoğraf yüklendi.':'Video yüklendi.');
+ }catch(e){console.error(e);toast('Medya yüklenemedi: '+(e.message||e))}
+}
 function addOrd(){let c=V('oc');if(c==='__new')c=V('ocn');if(!c||!V('op')){toast('Müşteri ve ürün seçin.');return}const k=N(V('ok')),o={id:uid(),cust:c,prod:V('op'),qty:N(V('oq'))||1,price:N(V('oy')),paid:k,st:ST[0],ded:false,date:td()};S.ord.push(o);if(k)S.tx.push({id:uid(),d:td(),t:'gelir',amt:k,desc:'Kapora: '+c});upd()}
 function pay(i){const o=S.ord.find(x=>x.id===i),a=N(V('p_'+i));if(!a)return;o.paid+=a;S.tx.push({id:uid(),d:td(),t:'gelir',amt:a,desc:'Tahsilat: '+o.cust});upd()}
 function setSt(i,s){const o=S.ord.find(x=>x.id===i);o.st=s;if(ST.indexOf(s)>=1&&!o.ded&&!o.dj){const p=prod(o.prod),m=p&&mat(p.mat);if(m)m.g-=p.gram*o.qty*(1+S.set.fire/100);o.ded=true}upd()}
