@@ -2,6 +2,7 @@ const CACHE = 'atolye-defteri-v1';
 const APP_SHELL = [
   './',
   './index.html',
+  './catalog.html',
   './manifest.webmanifest',
   './icon-180.png',
   './icon-192.png',
@@ -31,9 +32,9 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(req).then(res => {
         const copy = res.clone();
-        caches.open(CACHE).then(cache => cache.put('./index.html', copy));
+        caches.open(CACHE).then(cache => cache.put(new URL(req.url).pathname.endsWith('/catalog.html') ? './catalog.html' : './index.html', copy));
         return res;
-      }).catch(() => caches.match('./index.html'))
+      }).catch(() => caches.match(new URL(req.url).pathname.endsWith('/catalog.html') ? './catalog.html' : './index.html'))
     );
     return;
   }
