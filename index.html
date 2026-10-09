@@ -194,11 +194,11 @@ async function load(){
  if(error && error.code!=='PGRST116')throw error;
  if(data&&data.data)S=Object.assign(S,data.data);
  ref={workspace_id:workspaceId};
- realtime=sb.channel('book-'+workspaceId).on('postgres_changes',{event:'*',schema:'public',table:'books',filter:'workspace_id=eq.'+workspaceId},payload=>{
-  const d=payload.new&&payload.new.data;
-  if(!d||JSON.stringify(d)===JSON.stringify(S))return;
+ const applyRemoteData=(d)=>{
+  if(!d||!Array.isArray(d.ord))return;
   const oldIds=new Set((S.ord||[]).map(o=>String(o.id)));
-  const added=(Array.isArray(d.ord)?d.ord:[]).filter(o=>o&&o.source==='catalog'&&!oldIds.has(String(o.id)));
+  const added=d.ord.filter(o=>o&&o.source==='catalog'&&!oldIds.has(String(o.id)));
+  if(JSON.stringify(d)===JSON.stringify(S))return;
   S=Object.assign(S,d);
   if(added.length){
    const groups=new Map();
@@ -211,7 +211,20 @@ async function load(){
    save();
   }
   document.activeElement&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)?pend=1:render();
+ };
+ const checkRemoteOrders=async()=>{
+  try{
+   const {data,error}=await sb.from('books').select('data').eq('workspace_id',workspaceId).maybeSingle();
+   if(error)throw error;
+   if(data&&data.data)applyRemoteData(data.data);
+  }catch(e){console.warn('Katalog sipariş kontrolü başarısız:',e?.message||e)}
+ };
+ realtime=sb.channel('book-'+workspaceId).on('postgres_changes',{event:'*',schema:'public',table:'books',filter:'workspace_id=eq.'+workspaceId},payload=>{
+  const d=payload.new&&payload.new.data;
+  applyRemoteData(d);
  }).subscribe();
+ if(window._catalogOrderPoll)clearInterval(window._catalogOrderPoll);
+ window._catalogOrderPoll=setInterval(checkRemoteOrders,5000);
 }
 async function saveNow(){clearTimeout(tm);const userResult=await sb.auth.getUser();if(userResult.error)throw userResult.error;const result=await sb.from('books').upsert({workspace_id:workspaceId,data:S,updated_at:new Date().toISOString(),updated_by:userResult.data.user.id});if(result.error)throw result.error}
 function save(){clearTimeout(tm);tm=setTimeout(async()=>{try{await saveNow()}catch(e){console.error(e);toast('Ortak kayıt sırasında hata oluştu: '+(e?.message||e))}} ,400)}
