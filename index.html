@@ -118,6 +118,7 @@ input,select,textarea{border-radius:12px;border-color:var(--ln);background:var(-
 .t{border:1px solid rgba(99,230,209,.2);box-shadow:0 12px 34px rgba(0,0,0,.4)}
 @media(max-width:700px){.hd{padding:16px 14px 22px}.logo{width:46px;height:46px;border-radius:14px}h1{font-size:19px}main{padding-left:10px;padding-right:10px}.grid{gap:9px}.grid .card{padding:13px;min-height:98px}.card{padding:14px;border-radius:15px}.row{gap:8px}.sm{max-width:100%}.sm input{width:78px}}
 @media(prefers-reduced-motion:no-preference){.card,.b,.g,input,select,textarea{transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease}}
+.notify-dot{color:var(--bad);font-size:12px;margin-left:3px}.ni em{font-style:normal}
 </style>
 
 </head>
@@ -144,7 +145,7 @@ const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({
 const TL=n=>new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:2}).format(n||0);
 const uid=()=>Math.random().toString(36).slice(2,9),td=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')},N=v=>parseFloat(v)||0,V=i=>$('#'+i).value;
 const ST=['Sipariş alındı','Baskıda','Hazır','Teslim edildi'];
-const TABS=[['ozet','Özet','🏠','Genel durum ve hızlı işlemler'],['ord','Siparişler','📋','Müşteri siparişleri ve tahsilat'],['job','Üretim','🖨️','Baskıdaki işler'],['tx','Kasa','💰','Gelir ve gider kayıtları'],['prod','Ürünler','🧩','Ürün maliyet kartları'],['mat','Malzeme','🧵','Filament stoku'],['cus','Müşteriler','👥','Müşteri bakiyeleri'],['rapor','Rapor','📊','Aylık özet ve karşılaştırma'],['debt','Borçlar','🏦','Taksit ve kredi ödemeleri'],['oneri','Öneriler','💡','Satış fırsatları']],MAIN=['ozet','ord','job','tx'];
+const TABS=[['ozet','Özet','🏠','Genel durum ve hızlı işlemler'],['ord','Siparişler','📋','Müşteri siparişleri ve tahsilat'],['job','Üretim','🖨️','Baskıdaki işler'],['tx','Kasa','💰','Gelir ve gider kayıtları'],['prod','Ürünler','🧩','Ürün maliyet kartları'],['mat','Malzeme','🧵','Filament stoku'],['cus','Müşteriler','👥','Müşteri bakiyeleri'],['rapor','Rapor','📊','Aylık özet ve karşılaştırma'],['debt','Borçlar','🏦','Taksit ve kredi ödemeleri'],['oneri','Öneriler','💡','Satış fırsatları'],['notify','Bildirimler','🔔','Sipariş ve bakiye uyarıları']],MAIN=['ozet','ord','job','tx'];
 const SUPABASE_URL = 'https://woogrfdcjonaurwgwoor.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_PD0uw5raOZWLs8n0W6iPMA_ILeoWdcm';
 const sb = (SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length>20) ? window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY) : null;
@@ -218,13 +219,22 @@ function go(k,f){tab=k;sheet(false);render();scrollTo(0,0);if(f){const e=$('#'+f
 const qa=()=>`<div class="qa"><button class="b" onclick="go('ord','oc')">＋ Sipariş</button><button class="b" onclick="go('job','jq')">🖨️ Baskıya ver</button><button class="g" onclick="go('tx','xa')">＋ Gelir/Gider</button></div>`;
 function render(){
  const cur=TABS.find(t=>t[0]===tab)||TABS[0],more=!MAIN.includes(cur[0]);
- $('#bn').innerHTML=MAIN.map(k=>{const t=TABS.find(x=>x[0]===k);return `<button class="ni ${k===tab?'on':''}" onclick="go('${k}')"><i>${t[2]}</i><span>${t[1]}</span></button>`}).join('')+`<button class="ni ${more?'on':''}" onclick="sheet(true)"><i>${more?cur[2]:'⋯'}</i><span>${more?cur[1]:'Daha fazla'}</span></button>`;
+ $('#bn').innerHTML=MAIN.map(k=>{const t=TABS.find(x=>x[0]===k);return `<button class="ni ${k===tab?'on':''}" onclick="go('${k}')"><i>${t[2]}</i><span>${t[1]}</span>${k==='notify'&&(S.notifs||[]).some(n=>!n.read)?'<em class="notify-dot">●</em>':''}</button>`}).join('')+`<button class="ni ${more?'on':''}" onclick="sheet(true)"><i>${more?cur[2]:'⋯'}</i><span>${more?cur[1]:'Daha fazla'}</span></button>`;
  $('#mg2').innerHTML=TABS.filter(t=>!MAIN.includes(t[0])).map(t=>`<button class="mc ${t[0]===tab?'on':''}" onclick="go('${t[0]}')"><i>${t[2]}</i><b>${t[1]}</b><small>${t[3]}</small></button>`).join('');
  $('#v').innerHTML=`<div class="pt"><i>${cur[2]}</i><div><b>${cur[1]}</b><small>${cur[3]}</small></div></div>`+V_[tab]();
  $('#bi').textContent=ds()===null?'Henüz yedek alınmadı.':'Son yedek: '+(ds()?ds()+' gün önce':'bugün');
  $('#info').textContent=workspaceId?'Ortak defter: veriler paylaştığınız kişilerle senkron.':'Veriler bu tarayıcıda saklanıyor.';
 }
 const V_={
+notify(){
+ S.notifs=Array.isArray(S.notifs)?S.notifs:[];
+ const unread=S.notifs.filter(n=>!n.read).length;
+ const alerts=S.ord.filter(o=>N(o.qty)*N(o.price)-N(o.paid)>0).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+ return `<div class="grid"><div class="card kpi"><small>Bildirim</small><b>${S.notifs.length}</b></div><div class="card kpi"><small>Okunmamış</small><b>${unread}</b></div><div class="card kpi"><small>Bakiyesi olan sipariş</small><b>${alerts.length}</b></div></div>
+ <div class="card"><div class="sm" style="justify-content:space-between"><h2>Bildirim geçmişi</h2><button class="g" onclick="markAllNotificationsRead()">Tümünü okundu işaretle</button></div>
+ ${S.notifs.slice().reverse().map(n=>`<div class="row"><div><b>${n.read?'':'🔵 '}${E(n.title||'Bildirim')}</b><br><span class="mu">${E(n.message||'')} · ${E(n.date||'')}</span></div><div class="sm">${n.read?'<span class="mu">Okundu</span>':`<button class="g" onclick="markNotificationRead('${n.id}')">Okundu</button>`}</div></div>`).join('')||'<p class="mu">Henüz bildirim yok. Yeni siparişler ve sipariş durumu değişiklikleri burada görünecek.</p>'}</div>
+ <div class="card"><h2>Ödenmemiş bakiye hatırlatmaları</h2>${alerts.slice(0,12).map(o=>`<div class="row"><div><b>${E(o.cust)}</b><br><span class="mu">${E(o.date||'')} · ${E(o.st||'')}</span></div><b class="bad">${TL(N(o.qty)*N(o.price)-N(o.paid))}</b></div>`).join('')||'<span class="mu">Ödenmemiş bakiye bulunmuyor.</span>'}</div>`
+},
 ozet(){
  const ym=td().slice(0,7),t=S.tx.filter(x=>x.d.startsWith(ym)),gl=t.filter(x=>x.t==='gelir').reduce((a,x)=>a+x.amt,0),gd=t.filter(x=>x.t==='gider').reduce((a,x)=>a+x.amt,0);
  const al=S.ord.reduce((a,o)=>a+o.qty*o.price-o.paid,0),acik=S.ord.filter(o=>o.st!==ST[3]).length,low=S.mat.filter(m=>m.g<200);
@@ -403,9 +413,12 @@ async function addProd(){const n=V('pn');if(!n||!V('pm')){toast('Ürün adı ve 
 function toggleNewCustomer(){const on=V('oc')==='__new';const w=$('#newCustomerWrap');if(w)w.style.display=on?'block':'none'}
 function editProdField(id,key,value){const p=prod(id);if(!p)return;p[key]=value;save()}
 async function uploadProductMedia(id,type,file){if(!file)return;const p=prod(id);if(!p)return;if(type==='image'&&!file.type.startsWith('image/')){toast('Lütfen bir fotoğraf seçin.');return}if(type==='video'&&!file.type.startsWith('video/')){toast('Lütfen bir video seçin.');return}if(file.size>25*1024*1024){toast("Dosya 25 MB'dan küçük olmalı.");return}try{const ext=(file.name.split('.').pop()||'bin').toLowerCase(),path=`${workspaceId}/${id}/${type}-${Date.now()}.${ext}`;const {error}=await sb.storage.from('catalog-media').upload(path,file,{upsert:false,contentType:file.type});if(error)throw error;const {data}=sb.storage.from('catalog-media').getPublicUrl(path);p[type==='image'?'catalogImage':'catalogVideo']=data.publicUrl;save();render();toast(type==='image'?'Fotoğraf yüklendi.':'Video yüklendi.')}catch(e){console.error(e);toast('Medya yüklenemedi: '+(e.message||e))}}
-function addOrd(){let c=V('oc');if(c==='__new')c=V('ocn');if(!c||!V('op')){toast('Müşteri ve ürün seçin.');return}const k=N(V('ok')),o={id:uid(),cust:c,prod:V('op'),qty:N(V('oq'))||1,price:N(V('oy')),paid:k,st:ST[0],ded:false,date:td()};S.ord.push(o);if(k)S.tx.push({id:uid(),d:td(),t:'gelir',amt:k,desc:'Kapora: '+c});upd()}
+function addNotification(title,message){S.notifs=Array.isArray(S.notifs)?S.notifs:[];S.notifs.push({id:uid(),title,message,date:new Date().toLocaleString('tr-TR'),read:false});if(S.notifs.length>200)S.notifs=S.notifs.slice(-200)}
+function markNotificationRead(id){S.notifs=(S.notifs||[]).map(n=>n.id===id?{...n,read:true}:n);upd()}
+function markAllNotificationsRead(){S.notifs=(S.notifs||[]).map(n=>({...n,read:true}));upd();toast('Bildirimler okundu olarak işaretlendi.')}
+function addOrd(){let c=V('oc');if(c==='__new')c=V('ocn');if(!c||!V('op')){toast('Müşteri ve ürün seçin.');return}const k=N(V('ok')),o={id:uid(),cust:c,prod:V('op'),qty:N(V('oq'))||1,price:N(V('oy')),paid:k,st:ST[0],ded:false,date:td()};S.ord.push(o);addNotification('Yeni sipariş',c+' müşterisi için '+o.qty+' adet sipariş oluşturuldu.');if(k)S.tx.push({id:uid(),d:td(),t:'gelir',amt:k,desc:'Kapora: '+c});upd();toast('Sipariş oluşturuldu; bildirim eklendi.')}
 function pay(i){const o=S.ord.find(x=>x.id===i),a=N(V('p_'+i));if(!a)return;o.paid+=a;S.tx.push({id:uid(),d:td(),t:'gelir',amt:a,desc:'Tahsilat: '+o.cust});upd()}
-function setSt(i,s){const o=S.ord.find(x=>x.id===i);o.st=s;if(ST.indexOf(s)>=1&&!o.ded&&!o.dj){const p=prod(o.prod),m=p&&mat(p.mat);if(m)m.g-=p.gram*o.qty*(1+S.set.fire/100);o.ded=true}upd()}
+function setSt(i,s){const o=S.ord.find(x=>x.id===i);const previous=o.st;o.st=s;if(previous!==s)addNotification('Sipariş durumu değişti',(o.cust||'Müşteri')+': '+previous+' → '+s);if(ST.indexOf(s)>=1&&!o.ded&&!o.dj){const p=prod(o.prod),m=p&&mat(p.mat);if(m)m.g-=p.gram*o.qty*(1+S.set.fire/100);o.ded=true}upd()}
 function del(k,i){toast('Kayıt silinsin mi?','Evet, sil',()=>{S[k]=S[k].filter(x=>x.id!==i);upd()})}
 const jobs=o=>S.job.filter(j=>j.ord===o.id),rem=o=>Math.max(0,o.qty-jobs(o).reduce((x,j)=>x+j.qty,0));
 const jl=o=>{const a=jobs(o);if(!a.length)return '';const d=a.filter(j=>j.st==='Tamamlandı').reduce((x,j)=>x+j.qty,0),b=a.filter(j=>j.st==='Baskıda').reduce((x,j)=>x+j.qty,0);return `<br><span class="mu">Üretim: ${d} tamamlandı${b?', '+b+' baskıda':''} / ${o.qty}</span>`};
