@@ -76,6 +76,20 @@ input,select,textarea{font-size:16px;padding:11px}
 .edit-foot{display:flex;justify-content:flex-end;gap:9px;border-top:1px solid var(--ln);padding-top:16px}
 @media(max-width:600px){.edit-overlay{padding:8px}.edit-dialog{padding:15px;border-radius:15px;max-height:96vh}.edit-grid{grid-template-columns:1fr}.edit-wide{grid-column:auto}.edit-foot button{flex:1}}
 
+.customer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px;margin-top:14px}
+.customer-card{position:relative;display:flex;flex-direction:column;gap:14px;padding:18px;border:1px solid var(--ln);border-radius:18px;background:linear-gradient(145deg,var(--card),color-mix(in srgb,var(--card) 82%,var(--ac2)));box-shadow:var(--sh);min-width:0;transition:transform .16s,border-color .16s}
+.customer-card:hover{transform:translateY(-2px);border-color:var(--ac)}
+.customer-card-head{display:flex;gap:12px;align-items:flex-start;min-width:0}
+.customer-avatar{flex:0 0 44px;height:44px;display:grid;place-items:center;border-radius:14px;background:var(--ac2);color:var(--ac);font-size:20px;font-weight:800}
+.customer-name{font-size:16px;font-weight:800;overflow-wrap:anywhere;line-height:1.35}.customer-sub{font-size:12px;color:var(--mu);margin-top:4px}
+.customer-contact{display:grid;gap:7px;color:var(--mu);font-size:13px}.customer-contact div{overflow-wrap:anywhere}.customer-contact b{color:var(--tx);font-weight:700;margin-right:5px}
+.customer-balance{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 13px;border-radius:13px;background:var(--in);border:1px solid var(--ln)}.customer-balance small{display:block;color:var(--mu);font-size:11px}.customer-balance strong{font-size:18px;font-weight:800}
+.customer-stats{display:flex;flex-wrap:wrap;gap:8px}.customer-stat{padding:7px 10px;border:1px solid var(--ln);border-radius:10px;font-size:12px;color:var(--mu)}.customer-stat b{color:var(--tx)}
+.customer-actions{display:flex;gap:8px;margin-top:auto}.customer-actions button{flex:1}.customer-empty{padding:24px;text-align:center;color:var(--mu);border:1px dashed var(--ln);border-radius:14px}
+.edit-grid textarea{min-height:86px;resize:vertical}
+@media(max-width:600px){.customer-grid{grid-template-columns:1fr}.customer-card{padding:15px}.customer-actions button{padding:10px 8px}}
+
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -286,12 +300,17 @@ cus(){
  const names=[...new Set([...list.map(c=>String(c.name||'').trim()),...S.ord.map(o=>String(o.cust||'').trim())].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr'));
  const records=names.map(name=>{const saved=list.find(c=>String(c.name||'').trim().toLocaleLowerCase('tr-TR')===name.toLocaleLowerCase('tr-TR'))||{};const t=totals[name.toLocaleLowerCase('tr-TR')]||{t:0,p:0,n:0};return {...saved,name,...t}});
  return `<div class="card"><h2>＋ Müşteri kartı ekle</h2><div class="f">${fld('cn','Ad soyad / Firma')} ${fld('cphone','Telefon','tel')} ${fld('cemail','E-posta','email')} ${fld('caddress','Adres')} <div><label>Notlar</label><textarea id="cnote" rows="2" placeholder="Ödeme tercihi, teslimat bilgisi, özel not..."></textarea></div><button class="b" onclick="addCustomer()">Müşteriyi kaydet</button></div><p class="mu" style="font-size:12px;margin-bottom:0">Müşteri bilgileri ortak deftere kaydedilir. Sipariş toplamı ve kalan bakiye mevcut sipariş kayıtlarından hesaplanır.</p></div>
- <div class="card"><h2>Müşteri listesi (${records.length})</h2>${fld('csearch','Müşteri ara')}<div id="customerList">${records.map(customerCard).join('')||'<span class="mu">Henüz müşteri yok. Yukarıdaki formdan ekleyebilir veya sipariş ekleyerek otomatik oluşturabilirsiniz.</span>'}</div></div>`
+ <div class="card"><h2>Müşteri listesi (${records.length})</h2>${fld('csearch','Müşteri ara')}<div id="customerList" class="customer-grid">${records.map(customerCard).join('')||'<div class="customer-empty">Henüz müşteri yok. Yukarıdaki formdan ekleyebilir veya sipariş ekleyerek otomatik oluşturabilirsiniz.</div>'}</div></div>`
 }
 };
 function customerCard(c){
- const balance=N(c.t)-N(c.p),id=String(c.id||'');
- return `<div class="row customer-record" data-customer="${E((c.name||'')+' '+(c.phone||'')+' '+(c.email||'')).toLocaleLowerCase('tr-TR')}"><div style="flex:1;min-width:180px"><b>${E(c.name)}</b><br><span class="mu">${E(c.phone||'Telefon yok')}${c.email?' · '+E(c.email):''}</span>${c.address?`<br><span class="mu">${E(c.address)}</span>`:''}${c.notes?`<br><span class="mu">Not: ${E(c.notes)}</span>`:''}<br><span class="mu">${c.n||0} sipariş · toplam ${TL(c.t||0)} · ödenen ${TL(c.p||0)}</span></div><div class="sm"><b class="${balance>0?'bad':'ok'}">Kalan ${TL(balance)}</b>${id?`<button class="g" onclick="editCustomer('${E(id)}')">Düzenle</button><button class="g" onclick="deleteCustomer('${E(id)}')">Sil</button>`:`<button class="g" onclick="addCustomerFromOrder('${E(c.name)}')">Kart oluştur</button>`}</div></div>`;
+ const balance=N(c.t)-N(c.p),id=String(c.id||''),initial=(String(c.name||'?').trim().charAt(0)||'?').toLocaleUpperCase('tr-TR');
+ return `<article class="customer-card customer-record" data-customer="${E((c.name||'')+' '+(c.phone||'')+' '+(c.email||'')+' '+(c.address||'')).toLocaleLowerCase('tr-TR')}">
+ <div class="customer-card-head"><div class="customer-avatar">${E(initial)}</div><div style="min-width:0;flex:1"><div class="customer-name">${E(c.name)}</div><div class="customer-sub">${c.n||0} sipariş kaydı</div></div></div>
+ <div class="customer-contact"><div><b>☎</b>${E(c.phone||'Telefon eklenmemiş')}</div><div><b>✉</b>${E(c.email||'E-posta eklenmemiş')}</div>${c.address?`<div><b>⌖</b>${E(c.address)}</div>`:''}${c.notes?`<div><b>Not</b>${E(c.notes)}</div>`:''}</div>
+ <div class="customer-stats"><span class="customer-stat">Toplam <b>${TL(c.t||0)}</b></span><span class="customer-stat">Ödenen <b>${TL(c.p||0)}</b></span></div>
+ <div class="customer-balance"><div><small>KALAN BAKİYE</small><strong class="${balance>0?'bad':'ok'}">${TL(balance)}</strong></div><span aria-hidden="true">${balance>0?'◷':'✓'}</span></div>
+ <div class="customer-actions">${id?`<button class="g" onclick="editCustomer('${E(id)}')">✎ Düzenle</button><button class="g" onclick="deleteCustomer('${E(id)}')">Sil</button>`:`<button class="g" onclick="addCustomerFromOrder('${E(c.name)}')">Kart oluştur</button>`}</div></article>`;
 }
 function addCustomer(){
  const name=V('cn').trim(),phone=V('cphone').trim(),email=V('cemail').trim(),address=V('caddress').trim(),notes=V('cnote').trim();
@@ -307,12 +326,26 @@ function addCustomerFromOrder(name){
 }
 function editCustomer(id){
  const c=(S.customers||[]).find(x=>x.id===id);if(!c)return;
- const name=prompt('Ad soyad / Firma',c.name||'');if(name===null)return;if(!name.trim())return toast('Müşteri adı boş olamaz.');
- const phone=prompt('Telefon',c.phone||'');if(phone===null)return;const email=prompt('E-posta',c.email||'');if(email===null)return;const address=prompt('Adres',c.address||'');if(address===null)return;const notes=prompt('Notlar',c.notes||'');if(notes===null)return;
- if((S.customers||[]).some(x=>x.id!==id&&String(x.name||'').trim().toLocaleLowerCase('tr-TR')===name.trim().toLocaleLowerCase('tr-TR')))return toast('Bu isimde başka bir müşteri kartı var.');
- const oldName=String(c.name||'').trim();Object.assign(c,{name:name.trim(),phone:phone.trim(),email:email.trim(),address:address.trim(),notes:notes.trim()});if(oldName!==c.name)S.ord.forEach(o=>{if(String(o.cust||'').trim().toLocaleLowerCase('tr-TR')===oldName.toLocaleLowerCase('tr-TR'))o.cust=c.name});upd();toast('Müşteri kartı güncellendi.');
+ const old=document.getElementById('customerEditModal');if(old)old.remove();
+ const modal=document.createElement('div');modal.id='customerEditModal';modal.className='edit-overlay';
+ modal.innerHTML=`<div class="edit-dialog" role="dialog" aria-modal="true" aria-labelledby="editCustomerTitle">
+ <div class="edit-head"><div><h2 id="editCustomerTitle">Müşteri kartını düzenle</h2><p>İletişim bilgilerini ve müşteri notlarını güncelleyin.</p></div><button type="button" class="edit-close" aria-label="Kapat" onclick="document.getElementById('customerEditModal')?.remove()">×</button></div>
+ <form id="customerEditForm"><div class="edit-section"><h3>Müşteri bilgileri</h3><div class="edit-grid">
+ <label class="edit-wide">Ad soyad / Firma<input name="name" required maxlength="180" value="${E(c.name||'')}"></label>
+ <label>Telefon<input name="phone" type="tel" maxlength="60" value="${E(c.phone||'')}"></label>
+ <label>E-posta<input name="email" type="email" maxlength="180" value="${E(c.email||'')}"></label>
+ <label class="edit-wide">Adres<textarea name="address" rows="2" maxlength="1000">${E(c.address||'')}</textarea></label>
+ <label class="edit-wide">Notlar<textarea name="notes" rows="3" maxlength="1500" placeholder="Ödeme tercihi, teslimat bilgisi, özel not...">${E(c.notes||'')}</textarea></label>
+ </div></div><div class="edit-foot"><button type="button" class="g" onclick="document.getElementById('customerEditModal')?.remove()">Vazgeç</button><button type="submit" class="b">Değişiklikleri kaydet</button></div></form></div>`;
+ document.body.appendChild(modal);modal.addEventListener('click',e=>{if(e.target===modal)modal.remove()});
+ modal.querySelector('form').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.currentTarget),name=String(f.get('name')||'').trim();if(!name){toast('Müşteri adı boş olamaz.');return}
+ if((S.customers||[]).some(x=>x.id!==id&&String(x.name||'').trim().toLocaleLowerCase('tr-TR')===name.toLocaleLowerCase('tr-TR')))return toast('Bu isimde başka bir müşteri kartı var.');
+ const oldName=String(c.name||'').trim();Object.assign(c,{name,phone:String(f.get('phone')||'').trim(),email:String(f.get('email')||'').trim(),address:String(f.get('address')||'').trim(),notes:String(f.get('notes')||'').trim()});
+ if(oldName!==c.name)S.ord.forEach(o=>{if(String(o.cust||'').trim().toLocaleLowerCase('tr-TR')===oldName.toLocaleLowerCase('tr-TR'))o.cust=c.name});modal.remove();upd();toast('Müşteri kartı güncellendi.');
+ });
 }
-function deleteCustomer(id){const c=(S.customers||[]).find(x=>x.id===id);if(!c)return;if(!confirm('“'+c.name+'” müşteri kartı silinsin mi? Siparişler ve tahsilat kayıtları silinmez.'))return;S.customers=S.customers.filter(x=>x.id!==id);upd();toast('Müşteri kartı silindi; sipariş geçmişi korundu.');}
+function deleteCustomer(id){const c=(S.customers||[]).find(x=>x.id===id);if(!c)return;const old=document.getElementById('customerDeleteModal');if(old)old.remove();const modal=document.createElement('div');modal.id='customerDeleteModal';modal.className='edit-overlay';modal.innerHTML=`<div class="edit-dialog" role="dialog" aria-modal="true" style="width:min(460px,100%)"><div class="edit-head"><div><h2>Müşteri kartını sil?</h2><p>“${E(c.name)}” kartı kaldırılacak. Sipariş ve tahsilat kayıtları korunacak.</p></div><button class="edit-close" type="button" onclick="document.getElementById('customerDeleteModal')?.remove()">×</button></div><div class="edit-foot"><button class="g" onclick="document.getElementById('customerDeleteModal')?.remove()">Vazgeç</button><button class="b" style="background:var(--bad);color:#fff" onclick="confirmDeleteCustomer('${E(id)}')">Kartı sil</button></div></div>`;document.body.appendChild(modal);modal.addEventListener('click',e=>{if(e.target===modal)modal.remove()})}
+function confirmDeleteCustomer(id){const c=(S.customers||[]).find(x=>x.id===id);if(!c)return;S.customers=S.customers.filter(x=>x.id!==id);document.getElementById('customerDeleteModal')?.remove();upd();toast('Müşteri kartı silindi; sipariş geçmişi korundu.');}
 function filterCustomers(){const q=(document.getElementById('csearch')?.value||'').trim().toLocaleLowerCase('tr-TR');document.querySelectorAll('.customer-record').forEach(el=>el.style.display=el.dataset.customer.includes(q)?'flex':'none');}
 function editProduct(id){
  const p=prod(id);if(!p)return;
