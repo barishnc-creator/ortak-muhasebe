@@ -64,11 +64,11 @@ function normCategory(c){return String(c??'').trim().toLocaleLowerCase('tr-TR')}
 function renderCategories(){
  const cats=[...new Set(catalog.products.map(p=>(p.catalogCategory||'').trim()).filter(Boolean))];
  const values=['Tümü',...cats];
- $('categories').innerHTML=values.map(c=>{const on=normCategory(c)===normCategory(activeCategory);return `<button type="button" class="chip ${on?'on':''}" data-category="${esc(c)}" aria-pressed="${on?'true':'false'}">${esc(c)}</button>`}).join('');
+ $('categories').innerHTML=values.map(c=>{const on=normCategory(c)===normCategory(activeCategory);const encoded=encodeURIComponent(c);return `<button type="button" class="chip ${on?'on':''}" data-category="${esc(c)}" aria-pressed="${on?'true':'false'}" onclick="setCategory(decodeURIComponent('${encoded}'))">${esc(c)}</button>`}).join('');
 }
 // Delegated click handler is robust even when category buttons are re-rendered.
-document.addEventListener('click',event=>{const button=event.target.closest('#categories [data-category]');if(!button)return;event.preventDefault();setCategory(button.getAttribute('data-category'));});
-function setCategory(c){activeCategory=String(c||'Tümü').trim()||'Tümü';renderCategories();renderProducts();}
+document.addEventListener('click',event=>{const button=event.target.closest('button[data-category]');if(!button||!$('categories')||!$('categories').contains(button))return;event.preventDefault();setCategory(button.getAttribute('data-category'));});
+function setCategory(c){activeCategory=String(c||'Tümü').trim()||'Tümü';renderCategories();renderProducts();$('categories').querySelectorAll('[data-category]').forEach(b=>{const selected=normCategory(b.getAttribute('data-category'))===normCategory(activeCategory);b.classList.toggle('on',selected);b.setAttribute('aria-pressed',selected?'true':'false')});}
 
 function renderProducts(){
  const q=($('search').value||'').toLocaleLowerCase('tr').trim();
