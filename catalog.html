@@ -31,6 +31,39 @@ html{background:#080d16}body{background:radial-gradient(ellipse at 12% 0%,rgba(4
 @media(hover:none){.card:hover{transform:none;box-shadow:var(--sh);border-color:#27364a}.card:hover .media img{transform:none}}
 @media(prefers-reduced-motion:reduce){.media img,.media video{transition:none}}
 
+
+/* Tidex product-card refinement: premium hierarchy and responsive polish */
+:root{--ac:#70e1d1;--ac2:#163b3c;--card:#111a29;--tx:#f1f5fb;--mu:#9ba9bd;--ln:#26344a}
+.grid{gap:22px}
+.card{position:relative;background:linear-gradient(155deg,rgba(21,33,51,.98),rgba(13,22,36,.98));border:1px solid rgba(151,181,207,.15);border-radius:22px;box-shadow:0 12px 28px rgba(0,0,0,.18);isolation:isolate}
+.card:after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 1px rgba(255,255,255,.035);z-index:3}
+.card:hover{transform:translateY(-5px);border-color:rgba(112,225,209,.42);box-shadow:0 22px 48px rgba(0,0,0,.32),0 0 0 1px rgba(112,225,209,.06)}
+.media{aspect-ratio:1/0.92;background:radial-gradient(circle at 50% 30%,rgba(68,112,139,.22),transparent 58%),linear-gradient(145deg,#172538,#0d1522);border-bottom:1px solid rgba(151,181,207,.11)}
+.media img,.media video{transition:transform .45s cubic-bezier(.2,.75,.2,1);object-fit:contain;padding:10px}
+.card:hover .media img{transform:scale(1.045)}
+.tag{top:13px;left:13px;background:rgba(8,18,29,.86);color:#a9f5e9;border:1px solid rgba(112,225,209,.26);backdrop-filter:blur(12px);font-size:10px;letter-spacing:.3px;padding:7px 11px}
+.body{padding:18px;gap:2px}
+.body h3{font-size:15px;line-height:1.45;letter-spacing:-.25px;color:#f2f7fc;min-height:42px}
+.desc{color:#94a7bc;font-size:12px;line-height:1.65;min-height:40px}
+.price{color:#a4f1e5;font-size:23px;letter-spacing:-.7px;margin:15px 0 5px;font-variant-numeric:tabular-nums}
+.body small{color:#91a3b8}
+.qty{gap:7px}
+.qty button{background:#172c3a;color:#a8f4e8;border:1px solid rgba(112,225,209,.2);border-radius:10px;min-width:37px}
+.qty button:hover{background:#1e414a;border-color:rgba(112,225,209,.45)}
+.add{margin-top:15px;border:1px solid rgba(153,255,240,.22);background:linear-gradient(135deg,#75e4d3,#43bba9);color:#061b20;box-shadow:0 7px 18px rgba(73,201,182,.12);font-weight:850;letter-spacing:.05px}
+.add:hover{background:linear-gradient(135deg,#a1f4e8,#5dd5c3);transform:translateY(-1px)}
+.chip{background:#111c2b;color:#b5c3d4;border-color:#2a3a50;box-shadow:none}
+.chip:hover{background:#172c3b;color:#c4fff5;border-color:#4a9e9a}
+.chip.on{background:linear-gradient(135deg,#75e4d3,#43bba9);color:#071c20;border-color:transparent;box-shadow:0 7px 18px rgba(73,201,182,.16)}
+.search{background-color:#101a29;border-color:#29384e;color:#f1f5fb}
+.sheet{background:linear-gradient(155deg,#121d2d,#0d1522);border-color:#2a3b51;color:#f1f5fb}
+.field input,.field textarea{background:#0b1421;border-color:#2b3d53;color:#f1f5fb}
+.field input::placeholder,.field textarea::placeholder{color:#71849a}
+.line{border-color:#27374b}
+@media(max-width:950px){.grid{gap:15px}.body{padding:15px}}
+@media(max-width:650px){.grid{gap:10px}.card{border-radius:17px}.media{aspect-ratio:1/0.88}.body{padding:11px}.body h3{font-size:13px;min-height:37px}.desc{font-size:10.5px;min-height:34px}.price{font-size:19px;margin-top:11px}.tag{left:8px;top:8px;padding:5px 8px;font-size:9px}.add{margin-top:12px;min-height:40px}.qty button{min-width:32px;padding:6px 8px}}
+@media(prefers-reduced-motion:reduce){.card,.media img{transition:none!important}}
+
 </style>
 </head>
 <body>
