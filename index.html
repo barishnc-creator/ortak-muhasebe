@@ -135,7 +135,7 @@ const SUPABASE_URL = 'https://woogrfdcjonaurwgwoor.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_PD0uw5raOZWLs8n0W6iPMA_ILeoWdcm';
 const sb = (SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length>20) ? window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY) : null;
 let DB=null,pend=0,rp=td().slice(0,7),workspaceId=null,workspaceCode=null,realtime=null;
-let S={set:{hr:15,fire:10},job:[],debt:[],mat:[],prod:[],ord:[],tx:[]},tab='ozet',ref=null,tm;
+let S={set:{hr:15,fire:10},job:[],debt:[],mat:[],prod:[],ord:[],tx:[],customers:[]},tab='ozet',ref=null,tm;
 const authMsg=m=>$('#authmsg').textContent=m||'';
 async function login(){if(!sb)return authMsg('Önce Supabase bilgilerini bu dosyaya ekleyin.');authMsg('Giriş yapılıyor…');const {error}=await sb.auth.signInWithPassword({email:V('ae'),password:V('ap')});if(error)authMsg('Giriş başarısız: '+error.message);else await startApp()}
 async function signup(){if(!sb)return authMsg('Önce Supabase bilgilerini bu dosyaya ekleyin.');authMsg('Hesap oluşturuluyor…');const {data,error}=await sb.auth.signUp({email:V('ae'),password:V('ap')});if(error)authMsg('Kayıt başarısız: '+error.message);else if(data.session)await startApp();else authMsg('Hesap oluşturuldu. E-postanızdaki doğrulama bağlantısını açıp sonra giriş yapın.')}
@@ -280,9 +280,40 @@ ord(){const customers=[...new Set(S.ord.map(o=>(o.cust||'').trim()).filter(Boole
 tx(){const gl=S.tx.filter(x=>x.t==='gelir').reduce((a,x)=>a+x.amt,0),gd=S.tx.filter(x=>x.t==='gider').reduce((a,x)=>a+x.amt,0);
  return `<div class="card"><h2>Kayıt ekle</h2><div class="f">${fld('xd','Tarih','date',td())}<div><label>Tür</label><select id="xt"><option value="gelir">Gelir</option><option value="gider">Gider</option></select></div>${fld('xa','Tutar (₺)','number','','step="any"')}${fld('xs','Açıklama')}<button class="b" onclick="addTx()">Ekle</button></div></div>
  <div class="card"><h2>Toplam: <span class="ok">${TL(gl)}</span> − <span class="bad">${TL(gd)}</span> = ${TL(gl-gd)}</h2>${S.tx.slice().sort((a,b)=>b.d.localeCompare(a.d)).map(x=>`<div class="row"><div>${x.d} · ${E(x.desc)}</div><div class="sm"><b class="${x.t==='gelir'?'ok':'bad'}">${x.t==='gelir'?'+':'−'}${TL(x.amt)}</b><button class="g" onclick="editTx('${x.id}')">Düzenle</button><button class="g" onclick="del('tx','${x.id}')">Sil</button></div></div>`).join('')||'<span class="mu">Kayıt yok.</span>'}</div>`},
-cus(){const m={};S.ord.forEach(o=>{const c=m[o.cust]=m[o.cust]||{t:0,p:0,n:0};c.t+=o.qty*o.price;c.p+=o.paid;c.n++});
- return `<div class="card"><h2>Müşteri bakiyeleri</h2>${Object.keys(m).map(k=>`<div class="row"><div><b>${E(k)}</b><br><span class="mu">${m[k].n} sipariş · toplam ${TL(m[k].t)}</span></div><b class="${m[k].t-m[k].p>0?'bad':'ok'}">Kalan ${TL(m[k].t-m[k].p)}</b></div>`).join('')||'<span class="mu">Siparişlerden otomatik oluşur.</span>'}</div>`}
+cus(){
+ const list=Array.isArray(S.customers)?S.customers:(S.customers=[]), totals={};
+ S.ord.forEach(o=>{const key=String(o.cust||'').trim().toLocaleLowerCase('tr-TR');if(!key)return;const c=totals[key]=totals[key]||{name:String(o.cust).trim(),t:0,p:0,n:0};c.t+=N(o.qty)*N(o.price);c.p+=N(o.paid);c.n++});
+ const names=[...new Set([...list.map(c=>String(c.name||'').trim()),...S.ord.map(o=>String(o.cust||'').trim())].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr'));
+ const records=names.map(name=>{const saved=list.find(c=>String(c.name||'').trim().toLocaleLowerCase('tr-TR')===name.toLocaleLowerCase('tr-TR'))||{};const t=totals[name.toLocaleLowerCase('tr-TR')]||{t:0,p:0,n:0};return {...saved,name,...t}});
+ return `<div class="card"><h2>＋ Müşteri kartı ekle</h2><div class="f">${fld('cn','Ad soyad / Firma')} ${fld('cphone','Telefon','tel')} ${fld('cemail','E-posta','email')} ${fld('caddress','Adres')} <div><label>Notlar</label><textarea id="cnote" rows="2" placeholder="Ödeme tercihi, teslimat bilgisi, özel not..."></textarea></div><button class="b" onclick="addCustomer()">Müşteriyi kaydet</button></div><p class="mu" style="font-size:12px;margin-bottom:0">Müşteri bilgileri ortak deftere kaydedilir. Sipariş toplamı ve kalan bakiye mevcut sipariş kayıtlarından hesaplanır.</p></div>
+ <div class="card"><h2>Müşteri listesi (${records.length})</h2>${fld('csearch','Müşteri ara')}<div id="customerList">${records.map(customerCard).join('')||'<span class="mu">Henüz müşteri yok. Yukarıdaki formdan ekleyebilir veya sipariş ekleyerek otomatik oluşturabilirsiniz.</span>'}</div></div>`
+}
 };
+function customerCard(c){
+ const balance=N(c.t)-N(c.p),id=String(c.id||'');
+ return `<div class="row customer-record" data-customer="${E((c.name||'')+' '+(c.phone||'')+' '+(c.email||'')).toLocaleLowerCase('tr-TR')}"><div style="flex:1;min-width:180px"><b>${E(c.name)}</b><br><span class="mu">${E(c.phone||'Telefon yok')}${c.email?' · '+E(c.email):''}</span>${c.address?`<br><span class="mu">${E(c.address)}</span>`:''}${c.notes?`<br><span class="mu">Not: ${E(c.notes)}</span>`:''}<br><span class="mu">${c.n||0} sipariş · toplam ${TL(c.t||0)} · ödenen ${TL(c.p||0)}</span></div><div class="sm"><b class="${balance>0?'bad':'ok'}">Kalan ${TL(balance)}</b>${id?`<button class="g" onclick="editCustomer('${E(id)}')">Düzenle</button><button class="g" onclick="deleteCustomer('${E(id)}')">Sil</button>`:`<button class="g" onclick="addCustomerFromOrder('${E(c.name)}')">Kart oluştur</button>`}</div></div>`;
+}
+function addCustomer(){
+ const name=V('cn').trim(),phone=V('cphone').trim(),email=V('cemail').trim(),address=V('caddress').trim(),notes=V('cnote').trim();
+ if(!name)return toast('Müşteri adı / firma adı gerekli.');
+ S.customers=Array.isArray(S.customers)?S.customers:[];
+ if(S.customers.some(c=>String(c.name||'').trim().toLocaleLowerCase('tr-TR')===name.toLocaleLowerCase('tr-TR')))return toast('Bu müşteri kartı zaten var. Mevcut kartı düzenleyin.');
+ S.customers.push({id:uid(),name,phone,email,address,notes,createdAt:td()});upd();toast('Müşteri kartı kaydedildi.');
+}
+function addCustomerFromOrder(name){
+ const existing=(S.customers||[]).find(c=>String(c.name||'').trim().toLocaleLowerCase('tr-TR')===name.trim().toLocaleLowerCase('tr-TR'));
+ if(existing)return editCustomer(existing.id);
+ S.customers=Array.isArray(S.customers)?S.customers:[];S.customers.push({id:uid(),name,phone:'',email:'',address:'',notes:'',createdAt:td()});upd();toast('Müşteri kartı oluşturuldu.');
+}
+function editCustomer(id){
+ const c=(S.customers||[]).find(x=>x.id===id);if(!c)return;
+ const name=prompt('Ad soyad / Firma',c.name||'');if(name===null)return;if(!name.trim())return toast('Müşteri adı boş olamaz.');
+ const phone=prompt('Telefon',c.phone||'');if(phone===null)return;const email=prompt('E-posta',c.email||'');if(email===null)return;const address=prompt('Adres',c.address||'');if(address===null)return;const notes=prompt('Notlar',c.notes||'');if(notes===null)return;
+ if((S.customers||[]).some(x=>x.id!==id&&String(x.name||'').trim().toLocaleLowerCase('tr-TR')===name.trim().toLocaleLowerCase('tr-TR')))return toast('Bu isimde başka bir müşteri kartı var.');
+ const oldName=String(c.name||'').trim();Object.assign(c,{name:name.trim(),phone:phone.trim(),email:email.trim(),address:address.trim(),notes:notes.trim()});if(oldName!==c.name)S.ord.forEach(o=>{if(String(o.cust||'').trim().toLocaleLowerCase('tr-TR')===oldName.toLocaleLowerCase('tr-TR'))o.cust=c.name});upd();toast('Müşteri kartı güncellendi.');
+}
+function deleteCustomer(id){const c=(S.customers||[]).find(x=>x.id===id);if(!c)return;if(!confirm('“'+c.name+'” müşteri kartı silinsin mi? Siparişler ve tahsilat kayıtları silinmez.'))return;S.customers=S.customers.filter(x=>x.id!==id);upd();toast('Müşteri kartı silindi; sipariş geçmişi korundu.');}
+function filterCustomers(){const q=(document.getElementById('csearch')?.value||'').trim().toLocaleLowerCase('tr-TR');document.querySelectorAll('.customer-record').forEach(el=>el.style.display=el.dataset.customer.includes(q)?'flex':'none');}
 function editProduct(id){
  const p=prod(id);if(!p)return;
  const old=document.getElementById('productEditModal');if(old)old.remove();
@@ -373,8 +404,9 @@ async function snap(){
  try{const k=td();const {data:old}=await sb.from('backups').select('id').eq('workspace_id',workspaceId).eq('id',k).maybeSingle();if(!old)await sb.from('backups').insert({workspace_id:workspaceId,id:k,json:S});
  const {data:ids}=await sb.from('backups').select('id').eq('workspace_id',workspaceId).order('id',{ascending:false});if(ids&&ids.length>14){const gone=ids.slice(14).map(x=>x.id);await sb.from('backups').delete().eq('workspace_id',workspaceId).in('id',gone)}}catch(e){console.error(e)}}
 async function abList(){const el=$('#ab');if(!workspaceId){el.innerHTML='<span class="mu">Önce giriş yapın.</span>';return}try{const {data:rows,error}=await sb.from('backups').select('id').eq('workspace_id',workspaceId).order('id',{ascending:false});if(error)throw error;el.innerHTML=rows&&rows.length?rows.map(x=>`<div class="row"><span>${E(x.id)} gün başı yedeği</span><button class="g" onclick="abRestore('${E(x.id)}')">Geri yükle</button></div>`).join(''):'<span class="mu">Henüz otomatik yedek yok.</span>'}catch(e){el.innerHTML='<span class="mu">Yedekler okunamadı.</span>'}}
-async function abRestore(k){try{const {data:o,error}=await sb.from('backups').select('json').eq('workspace_id',workspaceId).eq('id',k).single();if(error)throw error;toast(k+' tarihli yedek yüklensin mi?','Evet, yükle',async()=>{S=Object.assign({set:{hr:15,fire:10},job:[],debt:[]},o.json);upd();toast('Yedek geri yüklendi.')})}catch(e){toast('Yedek okunamadı.')}}
+async function abRestore(k){try{const {data:o,error}=await sb.from('backups').select('json').eq('workspace_id',workspaceId).eq('id',k).single();if(error)throw error;toast(k+' tarihli yedek yüklensin mi?','Evet, yükle',async()=>{S=Object.assign({set:{hr:15,fire:10},job:[],debt:[],mat:[],prod:[],ord:[],tx:[],customers:[]},o.json);upd();toast('Yedek geri yüklendi.')})}catch(e){toast('Yedek okunamadı.')}}
 async function joinWorkspace(){const code=prompt('Arkadaşınızın verdiği davet kodunu girin:');if(!code)return;const {data,error}=await sb.rpc('join_workspace',{p_invite_code:code.trim()});if(error){toast('Katılım başarısız: '+error.message);return}toast('Ortak deftere katıldınız. Sayfa yenileniyor…');setTimeout(()=>location.reload(),700)}
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='csearch')filterCustomers()});
 document.addEventListener('focusout',()=>{if(pend){pend=0;setTimeout(render,80)}});
 if(sb)sb.auth.getSession().then(({data})=>{if(data.session)startApp();else $('#auth').classList.remove('hidden')});else $('#auth').classList.remove('hidden');
 </script>
