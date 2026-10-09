@@ -60,6 +60,22 @@ input,select,textarea{font-size:16px;padding:11px}
 .mc i{font-style:normal;font-size:24px;display:block;margin-bottom:4px}.mc b{display:block}.mc small{color:var(--mu)}
 .mc.on{border-color:var(--ac);background:var(--ac2)}
 .t{bottom:calc(88px + env(safe-area-inset-bottom,0px));width:max-content;max-width:92vw}
+
+.edit-overlay{position:fixed;inset:0;z-index:10000;background:rgba(13,30,38,.62);display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
+.edit-dialog{width:min(820px,100%);max-height:92vh;overflow:auto;background:var(--card,#fff);color:var(--tx,#16323a);border:1px solid var(--ln,#d7e2e6);border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.25);padding:22px}
+.edit-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid var(--ln);padding-bottom:14px;margin-bottom:16px}
+.edit-head h2{margin:0;font-size:22px}.edit-head p{margin:5px 0 0;color:var(--muted,#607782);font-size:13px}
+.edit-close{border:1px solid var(--ln);background:transparent;color:inherit;border-radius:10px;font-size:24px;width:40px;height:40px;cursor:pointer}
+.edit-section{padding:8px 0 16px}.edit-section h3{font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--ac,#07899a);margin:0 0 12px}
+.edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.edit-grid label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:650;color:var(--tx)}
+.edit-grid input:not([type=checkbox]),.edit-grid select,.edit-grid textarea{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--ln);border-radius:10px;background:var(--in,#f4f8f9);color:inherit;font:inherit;font-weight:400}
+.edit-grid .edit-check{display:flex;flex-direction:row;align-items:center;gap:9px;padding:11px 12px;border:1px solid var(--ln);border-radius:10px;background:var(--in,#f4f8f9)}
+.edit-check input{width:17px;height:17px;accent-color:var(--ac,#07899a)}
+.edit-wide{grid-column:1/-1}.edit-hint{font-size:11px;color:var(--muted,#607782);font-weight:400}
+.edit-foot{display:flex;justify-content:flex-end;gap:9px;border-top:1px solid var(--ln);padding-top:16px}
+@media(max-width:600px){.edit-overlay{padding:8px}.edit-dialog{padding:15px;border-radius:15px;max-height:96vh}.edit-grid{grid-template-columns:1fr}.edit-wide{grid-column:auto}.edit-foot button{flex:1}}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -242,7 +258,45 @@ tx(){const gl=S.tx.filter(x=>x.t==='gelir').reduce((a,x)=>a+x.amt,0),gd=S.tx.fil
 cus(){const m={};S.ord.forEach(o=>{const c=m[o.cust]=m[o.cust]||{t:0,p:0,n:0};c.t+=o.qty*o.price;c.p+=o.paid;c.n++});
  return `<div class="card"><h2>Müşteri bakiyeleri</h2>${Object.keys(m).map(k=>`<div class="row"><div><b>${E(k)}</b><br><span class="mu">${m[k].n} sipariş · toplam ${TL(m[k].t)}</span></div><b class="${m[k].t-m[k].p>0?'bad':'ok'}">Kalan ${TL(m[k].t-m[k].p)}</b></div>`).join('')||'<span class="mu">Siparişlerden otomatik oluşur.</span>'}</div>`}
 };
-function editProduct(id){const p=prod(id);if(!p)return;const ask=(label,val)=>prompt(label,val??'');const n=ask('Ürün adı',p.n);if(n===null)return;if(!n.trim())return toast('Ürün adı boş olamaz.');const matId=ask('Malzeme ID (değiştirmek istemiyorsanız aynı bırakın)',p.mat);if(matId===null)return;if(matId&&!mat(matId)&&matId!==p.mat)return toast('Malzeme ID bulunamadı.');const gram=ask('Gram',p.gram||0);if(gram===null)return;const mins=ask('Baskı süresi (dakika)',p.mins||0);if(mins===null)return;const extra=ask('Ek maliyet (₺)',p.extra||0);if(extra===null)return;const price=ask('Satış fiyatı (₺)',p.price||0);if(price===null)return;const desc=ask('Katalog açıklaması',p.catalogDescription||'');if(desc===null)return;const category=ask('Kategori',p.catalogCategory||'');if(category===null)return;const min=ask('Minimum sipariş adedi',p.catalogMin||25);if(min===null)return;const step=ask('Adet artış miktarı',p.catalogStep||25);if(step===null)return;const minN=Math.floor(Number(min)),stepN=Math.floor(Number(step));if(!Number.isFinite(minN)||minN<1||!Number.isFinite(stepN)||stepN<1)return toast('Minimum ve artış miktarı en az 1 olmalı.');Object.assign(p,{n:n.trim(),mat:matId||p.mat,gram:Math.max(0,Number(gram)||0),mins:Math.max(0,Number(mins)||0),extra:Number(extra)||0,price:Math.max(0,Number(price)||0),catalogDescription:desc,catalogCategory:category.trim(),catalogMin:minN,catalogStep:stepN});upd();toast('Ürün bilgileri kaydedildi.');}
+function editProduct(id){
+ const p=prod(id);if(!p)return;
+ const old=document.getElementById('productEditModal');if(old)old.remove();
+ const cats=[...new Set([...(S.catalogCategories||[]),...(S.prod||[]).map(x=>(x.catalogCategory||'').trim()).filter(Boolean)])];
+ const modal=document.createElement('div');modal.id='productEditModal';modal.className='edit-overlay';
+ modal.innerHTML=`<div class="edit-dialog" role="dialog" aria-modal="true" aria-labelledby="editProductTitle">
+ <div class="edit-head"><div><h2 id="editProductTitle">Ürünü düzenle</h2><p>Ürün bilgilerini tek ekrandan güncelle</p></div><button type="button" class="edit-close" onclick="document.getElementById('productEditModal').remove()" aria-label="Kapat">×</button></div>
+ <form id="productEditForm">
+ <div class="edit-section"><h3>Temel bilgiler</h3><div class="edit-grid">
+ <label>Ürün adı<input name="n" required maxlength="120" value="${E(p.n||'')}"></label>
+ <label>Malzeme<select name="mat">${(S.mat||[]).map(m=>`<option value="${E(m.id)}" ${m.id===p.mat?'selected':''}>${E(m.n||m.name||m.id)}</option>`).join('')}</select></label>
+ <label>Gram (g)<input name="gram" type="number" min="0" step="any" value="${Number(p.gram)||0}"></label>
+ <label>Baskı süresi (dakika)<input name="mins" type="number" min="0" step="any" value="${Number(p.mins)||0}"></label>
+ <label>Ek maliyet (₺)<input name="extra" type="number" step="any" value="${Number(p.extra)||0}"></label>
+ <label>Satış fiyatı (₺)<input name="price" type="number" min="0" step="any" value="${Number(p.price)||0}"></label>
+ </div></div>
+ <div class="edit-section"><h3>Katalog ayarları</h3><div class="edit-grid">
+ <label>Kategori<select name="catalogCategory"><option value="">Kategorisiz</option>${cats.map(c=>`<option value="${E(c)}" ${(p.catalogCategory||'')===c?'selected':''}>${E(c)}</option>`).join('')}</select><span class="edit-hint">Yeni kategori için önce Kategori Yönetimi bölümünden ekleyin.</span></label>
+ <label>Minimum sipariş adedi<input name="catalogMin" type="number" min="1" step="1" required value="${Math.max(1,Number(p.catalogMin)||25)}"></label>
+ <label>Adet artış miktarı<input name="catalogStep" type="number" min="1" step="1" required value="${Math.max(1,Number(p.catalogStep)||25)}"></label>
+ <label class="edit-check"><input name="catalogVisible" type="checkbox" ${p.catalogVisible!==false?'checked':''}> Katalogda göster</label>
+ <label class="edit-check"><input name="catalogActive" type="checkbox" ${p.catalogActive!==false?'checked':''}> Aktif / siparişe açık</label>
+ <label class="edit-check"><input name="catalogBestSeller" type="checkbox" ${p.catalogBestSeller?'checked':''}> Çok satanlarda göster</label>
+ <label class="edit-wide">Katalog açıklaması<textarea name="catalogDescription" rows="3" maxlength="1000">${E(p.catalogDescription||'')}</textarea></label>
+ </div></div>
+ <div class="edit-foot"><button type="button" class="g" onclick="document.getElementById('productEditModal').remove()">Vazgeç</button><button type="submit" class="b">Değişiklikleri kaydet</button></div>
+ </form></div>`;
+ document.body.appendChild(modal);
+ modal.addEventListener('click',e=>{if(e.target===modal)modal.remove()});
+ modal.querySelector('form').addEventListener('submit',e=>{
+  e.preventDefault();const f=new FormData(e.currentTarget),n=String(f.get('n')||'').trim(),min=Math.floor(Number(f.get('catalogMin'))),step=Math.floor(Number(f.get('catalogStep')));
+  if(!n){toast('Ürün adı boş olamaz.');return}
+  if(!Number.isFinite(min)||min<1||!Number.isFinite(step)||step<1){toast('Minimum adet ve artış miktarı en az 1 olmalı.');return}
+  const matId=String(f.get('mat')||p.mat||'');if(matId&&!mat(matId)&&matId!==p.mat){toast('Seçilen malzeme bulunamadı.');return}
+  Object.assign(p,{n,mat:matId,gram:Math.max(0,Number(f.get('gram'))||0),mins:Math.max(0,Number(f.get('mins'))||0),extra:Number(f.get('extra'))||0,price:Math.max(0,Number(f.get('price'))||0),catalogDescription:String(f.get('catalogDescription')||'').trim(),catalogCategory:String(f.get('catalogCategory')||'').trim(),catalogMin:min,catalogStep:step,catalogVisible:f.has('catalogVisible'),catalogActive:f.has('catalogActive'),catalogBestSeller:f.has('catalogBestSeller')});
+  upd();modal.remove();toast('Ürün bilgileri kaydedildi.');render();
+ });
+ const first=modal.querySelector('input[name="n"]');if(first)first.focus();
+}
 function editTx(id){const x=S.tx.find(x=>x.id===id);if(!x)return;const d=prompt('Tarih (YYYY-AA-GG)',x.d);if(d===null)return;const t=prompt('Tür: gelir veya gider',x.t);if(t===null)return;const a=prompt('Tutar (₺)',x.amt);if(a===null)return;const desc=prompt('Açıklama',x.desc);if(desc===null)return;if(!['gelir','gider'].includes(t.trim())||!Number.isFinite(Number(a))||Number(a)<=0)return toast('Tür veya tutar geçersiz.');Object.assign(x,{d,t:t.trim(),amt:Number(a),desc});upd();}
 function editMat(id){const m=mat(id);if(!m)return;const n=prompt('Malzeme adı',m.n);if(n===null)return;if(!n.trim())return toast('Ad boş olamaz.');const g=prompt('Stok gramı',m.g);if(g===null)return;const price=prompt('Makara fiyatı (₺)',m.price);if(price===null)return;const spool=prompt('Makara gramı',m.spool||1000);if(spool===null)return;if(Number(g)<0||Number(price)<0||Number(spool)<=0)return toast('Değerleri kontrol edin.');Object.assign(m,{n:n.trim(),g:Number(g),price:Number(price),spool:Number(spool)});upd();}
 function editOrd(id){const o=S.ord.find(x=>x.id===id);if(!o)return;const cust=prompt('Müşteri adı',o.cust);if(cust===null)return;if(!cust.trim())return toast('Müşteri adı boş olamaz.');const qty=prompt('Adet',o.qty);if(qty===null)return;const price=prompt('Birim fiyat (₺)',o.price);if(price===null)return;const paid=prompt('Ödenen toplam (₺)',o.paid);if(paid===null)return;if(Number(qty)<=0||Number(price)<0||Number(paid)<0)return toast('Adet veya tutar geçersiz.');Object.assign(o,{cust:cust.trim(),qty:Number(qty),price:Number(price),paid:Number(paid)});upd();}
