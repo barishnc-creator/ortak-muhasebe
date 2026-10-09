@@ -29,7 +29,7 @@ button,input,textarea{font:inherit}button{border:0;border-radius:14px;padding:12
 <div class="nav"><span>Ürünler</span><span>Hakkımızda</span></div>
 <button class="cartbtn" onclick="openCart()">🛒 Sepet <span id="count">0</span></button></div>
 <section class="hero"><h1>Size özel ürünleri keşfedin</h1><p>Beğendiğiniz ürünleri seçin, sepetinize ekleyin ve siparişinizi kolayca bize iletin. Her sipariş özenle hazırlanır.</p><div class="chips"><span class="chip">✨ Özenli üretim</span><span class="chip">📦 Kolay sipariş</span><span class="chip">💬 Sipariş notu ekleyin</span></div></section>
-<input class="search" id="search" placeholder="⌕  Ürün adı veya açıklama ara..." oninput="renderProducts()"><div id="categories" class="chips" style="margin:12px 0"></div><div id="bestTitle" style="display:none;font-weight:800;font-size:20px;margin:18px 0 10px">Çok satanlar</div><div id="bestProducts" class="grid"></div>
+<input class="search" id="search" placeholder="⌕  Ürün adı veya açıklama ara..." oninput="renderProducts()"><div id="categories" class="chips" style="margin:12px 0"></div>
 <div id="msg" class="msg">Ürünler hazırlanıyor…</div><div id="products" class="grid"></div></main>
 <div id="panel" class="panel"><section class="sheet"><div class="sheethead"><h2 style="margin:0">🛒 Sepetiniz</h2><button onclick="closeCart()">✕</button></div><div id="cart"></div><div id="checkout"></div></section></div>
 <div id="toast" class="toast"></div>
@@ -63,7 +63,7 @@ function retryLoad(){$('msg').textContent='Katalog yeniden yükleniyor…';load(
 function normCategory(c){return String(c??'').trim().toLocaleLowerCase('tr-TR')}
 function renderCategories(){
  const cats=[...new Set(catalog.products.map(p=>(p.catalogCategory||'').trim()).filter(Boolean))];
- const values=['Tümü',...cats];
+ const values=['Tümü',...cats,'Çok Satanlar'];
  $('categories').innerHTML=values.map(c=>{const on=normCategory(c)===normCategory(activeCategory);const encoded=encodeURIComponent(c);return `<button type="button" class="chip ${on?'on':''}" data-category="${esc(c)}" aria-pressed="${on?'true':'false'}" onclick="setCategory(decodeURIComponent('${encoded}'))">${esc(c)}</button>`}).join('');
 }
 // Delegated click handler is robust even when category buttons are re-rendered.
@@ -72,7 +72,7 @@ function setCategory(c){activeCategory=String(c||'Tümü').trim()||'Tümü';rend
 
 function renderProducts(){
  const q=($('search').value||'').toLocaleLowerCase('tr').trim();
- const eligible=(catalog.products||[]).filter(p=>{const pc=String(p.catalogCategory||'').trim().toLocaleLowerCase('tr');const selected=String(activeCategory||'Tümü').trim().toLocaleLowerCase('tr');const categoryOK=selected==='tümü'||pc===selected;const text=((p.name||p.n||'').toLocaleLowerCase('tr').includes(q))||((p.catalogDescription||p.description||p.desc||'').toLocaleLowerCase('tr').includes(q));return categoryOK&&text});
+ const eligible=(catalog.products||[]).filter(p=>{const pc=String(p.catalogCategory||'').trim().toLocaleLowerCase('tr');const selected=String(activeCategory||'Tümü').trim().toLocaleLowerCase('tr');const categoryOK=selected==='tümü'||(selected==='çok satanlar'?!!p.catalogBestSeller:pc===selected);const text=((p.name||p.n||'').toLocaleLowerCase('tr').includes(q))||((p.catalogDescription||p.description||p.desc||'').toLocaleLowerCase('tr').includes(q));return categoryOK&&text});
  const draw=ps=>ps.length?ps.map(p=>{
   const image=p.catalogImage||p.image||'',video=p.catalogVideo||p.video||'',name=p.name||p.n||'Ürün',desc=p.catalogDescription||p.description||p.desc||'',price=Number(p.price??p.fiyat??0),min=Math.max(1,Math.floor(Number(p.catalogMin)||25)),step=Math.max(1,Math.floor(Number(p.catalogStep)||25));
   const media=image?`<img src="${esc(image)}" alt="${esc(name)}" loading="lazy">`:video?`<video src="${esc(video)}" controls playsinline preload="metadata"></video>`:'<div class="placeholder">✦</div>';
@@ -80,8 +80,6 @@ function renderProducts(){
   return `<article class="card"><div class="media">${media}<span class="tag">${p.catalogBestSeller?'Çok satan':esc(p.catalogCategory||'Ürün')}</span></div><div class="body"><h3>${esc(name)}</h3><div class="desc">${esc(desc)}</div><div class="price">${money(price)}</div><small>Minimum ${min} adet · ${step}’er adet artar</small><div class="qty" style="margin:10px 0"><button onclick="cardQty('${esc(p.id)}',-1)">−</button><b id="q_${esc(p.id)}">${qty}</b><button onclick="cardQty('${esc(p.id)}',1)">+</button></div><button class="add" onclick="add('${esc(p.id)}')">🛒 Sepete ekle</button></div></article>`
  }).join(''):'<div class="empty">Aradığınız ürün bulunamadı.</div>';
  $('products').innerHTML=draw(eligible);
- const best=(catalog.products||[]).filter(p=>p.catalogBestSeller&&((p.name||p.n||'').toLocaleLowerCase('tr').includes(q)||(p.catalogDescription||p.description||'').toLocaleLowerCase('tr').includes(q)));
- $('bestTitle').style.display=best.length?'block':'none';$('bestProducts').innerHTML=draw(best);
 }
 function persistCart(){try{sessionStorage.setItem('tidex-cart',JSON.stringify(cart))}catch(e){}}
 function cardQty(id,d){const p=catalog.products.find(x=>x.id===id);if(!p)return;const min=Math.max(1,Math.floor(Number(p.catalogMin)||25)),step=Math.max(1,Math.floor(Number(p.catalogStep)||25)),x=cart.find(x=>x.product_id===id);if(!x&&d<0)return;let q=x?x.qty:min;q=Math.max(min,q+d*step);if(x)x.qty=q;else cart.push({product_id:id,name:p.name||p.n||'Ürün',price:Number(p.price??p.fiyat??0),qty:q,min,step});persistCart();updateCount();renderProducts();renderCart()}
