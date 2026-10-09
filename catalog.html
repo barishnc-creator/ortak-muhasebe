@@ -60,9 +60,16 @@ async function load(){
   }catch(e){console.error(e);$('msg').innerHTML='<div class="err">Katalog yüklenemedi.<br>'+esc(e?.message||e)+'</div><button class="cartbtn" style="margin-top:12px" onclick="retryLoad()">Tekrar dene</button>'}
 }
 function retryLoad(){$('msg').textContent='Katalog yeniden yükleniyor…';load()}
-function renderCategories(){const cats=[...new Set(catalog.products.map(p=>(p.catalogCategory||'').trim()).filter(Boolean))];$('categories').innerHTML=['Tümü',...cats].map(c=>`<button type="button" class="chip ${String(c).trim().toLocaleLowerCase('tr')===String(activeCategory).trim().toLocaleLowerCase('tr')?'on':''}" onclick="setCategory(${JSON.stringify(c).replace(/</g,'\\u003c')})" aria-pressed="${String(c).trim().toLocaleLowerCase('tr')===String(activeCategory).trim().toLocaleLowerCase('tr')?'true':'false'}">${esc(c)}</button>`).join('')}
+function normCategory(c){return String(c??'').trim().toLocaleLowerCase('tr-TR')}
+function renderCategories(){
+ const cats=[...new Set(catalog.products.map(p=>(p.catalogCategory||'').trim()).filter(Boolean))];
+ const values=['Tümü',...cats];
+ $('categories').innerHTML=values.map(c=>{const on=normCategory(c)===normCategory(activeCategory);return `<button type="button" class="chip ${on?'on':''}" data-category="${esc(c)}" aria-pressed="${on?'true':'false'}">${esc(c)}</button>`}).join('');
+}
+// Delegated click handler is robust even when category buttons are re-rendered.
+document.addEventListener('click',event=>{const button=event.target.closest('#categories [data-category]');if(!button)return;event.preventDefault();setCategory(button.getAttribute('data-category'));});
+function setCategory(c){activeCategory=String(c||'Tümü').trim()||'Tümü';renderCategories();renderProducts();}
 
-function setCategory(c){activeCategory=c;renderCategories();renderProducts()}
 function renderProducts(){
  const q=($('search').value||'').toLocaleLowerCase('tr').trim();
  const eligible=(catalog.products||[]).filter(p=>{const pc=String(p.catalogCategory||'').trim().toLocaleLowerCase('tr');const selected=String(activeCategory||'Tümü').trim().toLocaleLowerCase('tr');const categoryOK=selected==='tümü'||pc===selected;const text=((p.name||p.n||'').toLocaleLowerCase('tr').includes(q))||((p.catalogDescription||p.description||p.desc||'').toLocaleLowerCase('tr').includes(q));return categoryOK&&text});
