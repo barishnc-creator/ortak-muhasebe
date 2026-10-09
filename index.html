@@ -82,6 +82,30 @@ input,select,textarea{font-size:16px;padding:11px}
 <style>
 .auth{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px}.authbox{width:min(440px,100%);background:var(--card);border:1px solid var(--ln);border-radius:22px;padding:24px;box-shadow:var(--sh)}.authbox h2{margin:0 0 6px}.authbox p{color:var(--mu);margin:0 0 18px}.authbox input{width:100%;margin:6px 0 10px}.authrow{display:flex;gap:8px;flex-wrap:wrap}.authmsg{min-height:22px;margin-top:10px;font-size:13px}.workspace{position:fixed;right:14px;top:14px;z-index:20;display:flex;gap:6px;align-items:center}.workspace .g{background:var(--card)}.hidden{display:none!important}
 </style>
+
+<style id="tidex-premium-admin-theme">
+/* Tidex Technology premium admin theme: visual-only overrides; application logic unchanged */
+:root{color-scheme:dark;--bg:#080d16;--card:#101a2a;--tx:#edf5ff;--mu:#9aabc4;--ln:#26364e;--ac:#63e6d1;--act:#08242b;--ac2:#172e40;--ok:#69e5a4;--bad:#ff8293;--hd:#0b1424;--sh:0 12px 34px rgba(0,0,0,.24);--in:#0b1423}
+:root[data-theme="light"]{color-scheme:light;--bg:#f2f6fb;--card:#fff;--tx:#172338;--mu:#63748d;--ln:#dbe4ef;--ac:#087f8c;--act:#fff;--ac2:#e5f8f5;--ok:#22865a;--bad:#c43e56;--hd:#10243a;--sh:0 8px 24px rgba(22,45,77,.08);--in:#f7f9fc}
+body{background:radial-gradient(ellipse at 12% 0%,rgba(48,104,145,.16),transparent 34%),var(--bg);letter-spacing:.005em}
+.hd{background:radial-gradient(ellipse at 85% 0%,rgba(99,230,209,.18),transparent 34%),linear-gradient(125deg,#091322,#122c42 58%,#123d48);border-bottom:1px solid rgba(99,230,209,.16);box-shadow:0 14px 40px rgba(0,0,0,.18)}
+.logo{border-color:rgba(99,230,209,.35);box-shadow:0 0 0 5px rgba(99,230,209,.06),0 8px 24px rgba(0,0,0,.25)}
+main{max-width:1180px}
+.card{border-radius:18px;border-color:var(--ln);background:linear-gradient(155deg,rgba(255,255,255,.025),transparent 42%),var(--card);box-shadow:var(--sh)}
+.grid .card{min-height:108px}.kpi{border-left:3px solid var(--k,var(--ac));position:relative;overflow:hidden}.kpi:after{content:"";position:absolute;width:90px;height:90px;right:-30px;top:-38px;border-radius:50%;background:var(--k,var(--ac));opacity:.07;pointer-events:none}.kpi b{font-size:clamp(20px,2vw,26px);letter-spacing:-.04em}
+h2{color:var(--tx);font-size:12px;letter-spacing:.09em}label{color:var(--mu)}
+input,select,textarea{border-radius:12px;border-color:var(--ln);background:var(--in)}input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 16%,transparent)}
+.b{background:linear-gradient(135deg,#7aefdc,#42cdbd);color:#05252b;box-shadow:0 7px 20px rgba(67,211,190,.16);border:1px solid rgba(255,255,255,.12)}.b:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.g{border-color:var(--ln);background:rgba(255,255,255,.025);border-radius:10px}.g:hover{background:var(--ac2)}
+.row{border-top-color:var(--ln);padding:13px 10px}.row:hover{background:color-mix(in srgb,var(--ac) 7%,transparent)}
+.s0,.s1,.s2,.s3{border:1px solid var(--ln);border-radius:999px;padding:5px 10px}.s0{background:#293449;color:#d6e0ee}.s1{background:#47391d;color:#ffe1a0}.s2{background:#173b5a;color:#a8d8ff}.s3{background:#173d35;color:#9cf0c3}
+.auth{background:radial-gradient(ellipse at 50% 0%,rgba(54,126,158,.18),transparent 42%),var(--bg)}.authbox{border-radius:24px;background:linear-gradient(155deg,rgba(255,255,255,.035),transparent 45%),var(--card);border-color:var(--ln);box-shadow:0 28px 90px rgba(0,0,0,.35)}
+.edit-overlay{background:rgba(2,7,14,.78);backdrop-filter:blur(10px)}.edit-dialog{border-radius:22px;background:linear-gradient(155deg,rgba(255,255,255,.035),transparent 45%),var(--card);border-color:var(--ln);box-shadow:0 30px 100px rgba(0,0,0,.5)}.edit-head,.edit-foot{border-color:var(--ln)}.edit-grid input:not([type=checkbox]),.edit-grid select,.edit-grid textarea,.edit-grid .edit-check{background:var(--in);border-color:var(--ln)}
+.t{border:1px solid rgba(99,230,209,.2);box-shadow:0 12px 34px rgba(0,0,0,.4)}
+@media(max-width:700px){.hd{padding:16px 14px 22px}.logo{width:46px;height:46px;border-radius:14px}h1{font-size:19px}main{padding-left:10px;padding-right:10px}.grid{gap:9px}.grid .card{padding:13px;min-height:98px}.card{padding:14px;border-radius:15px}.row{gap:8px}.sm{max-width:100%}.sm input{width:78px}}
+@media(prefers-reduced-motion:no-preference){.card,.b,.g,input,select,textarea{transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease}}
+</style>
+
 </head>
 <body>
 <div id="auth" class="auth"><div class="authbox">
