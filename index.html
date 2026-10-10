@@ -185,7 +185,7 @@ async function ensureWorkspace(){
 }
 function catalogLink(){const u=new URL(location.href);u.pathname=u.pathname.replace(/index\.html?$/,'catalog.html');u.search='?w='+encodeURIComponent(workspaceId);return u.toString()}
 async function copyCatalogLink(){try{await navigator.clipboard.writeText(catalogLink());toast('Müşteri katalog linki kopyalandı.')}catch(e){toast('Katalog linki: '+catalogLink())}}
-function showWorkspace(name,code){$('#ws').classList.remove('hidden');$('#ws').innerHTML=`<button class="g" onclick="copyInvite()">👥 ${E(name)} · Davet kodu</button><button class="g" onclick="copyCatalogLink()">🛍️ Katalog linki</button><button class="g" onclick="joinWorkspace()">➕ Başka deftere katıl</button><button class="g" onclick="signout()">Çıkış</button>`;window._inviteCode=code}
+function showWorkspace(name,code){$('#ws').classList.remove('hidden');$('#ws').innerHTML=`<button class="g" onclick="copyInvite()">👥 ${E(name)} · Davet kodu</button><button class="g" onclick="copyCatalogLink()">🛍️ Katalog linki</button><button class="g" onclick="enablePushNotifications()">🔔 Bildirimleri aç</button><button class="g" onclick="joinWorkspace()">➕ Başka deftere katıl</button><button class="g" onclick="signout()">Çıkış</button>`;window._inviteCode=code}
 async function copyInvite(){try{await navigator.clipboard.writeText(window._inviteCode);toast('Davet kodu kopyalandı: '+window._inviteCode)}catch(e){toast('Davet kodunuz: '+window._inviteCode)}}
 async function signout(){if(realtime)await sb.removeChannel(realtime);await sb.auth.signOut();location.reload()}
 async function load(){
@@ -487,7 +487,47 @@ async function joinWorkspace(){const code=prompt('Arkadaşınızın verdiği dav
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='csearch')filterCustomers()});
 document.addEventListener('focusout',()=>{if(pend){pend=0;setTimeout(render,80)}});
 if(sb)sb.auth.getSession().then(({data})=>{if(data.session)startApp();else $('#auth').classList.remove('hidden')});else $('#auth').classList.remove('hidden');
+
  const VAPID_PUBLIC_KEY = "BE7rVnkCeJKAXWyEDJMq8Rs6gsj2yjWl_pNQ6OLEnXz5992w79IYWqgTLeXth8Co3TcA7om-mJxDvpr3dyK0nhw";
+ const CATALOG_PUSH_URL = "https://woogrfdcjonaurwgwoor.supabase.co/functions/v1/catalog-push";
+ function b64UrlToBytes(base64String){
+  const padding='='.repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(base64);const out=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
+  return out;
+ }
+ async function enablePushNotifications(){
+  try{
+   if(!workspaceId)throw new Error('Önce çalışma alanı yüklenmeli.');
+   if(!('serviceWorker' in navigator)||!('PushManager' in window))throw new Error('Bu tarayıcı web push bildirimlerini desteklemiyor.');
+   if(!('Notification' in window))throw new Error('Bildirim izni bu tarayıcıda kullanılamıyor.');
+   if(location.protocol!=='https:'&&location.hostname!=='localhost')throw new Error('Bildirimler için HTTPS gerekli.');
+   const permission=await Notification.requestPermission();
+   if(permission!=='granted')throw new Error('Tarayıcı bildirim izni verilmedi.');
+   const registration=await navigator.serviceWorker.register('./sw.js');
+   await navigator.serviceWorker.ready;
+   let subscription=await registration.pushManager.getSubscription();
+   if(!subscription)subscription=await registration.pushManager.subscribe({
+    userVisibleOnly:true,
+    applicationServerKey:b64UrlToBytes(VAPID_PUBLIC_KEY)
+   });
+   const sessionResult=await sb.auth.getSession();
+   const accessToken=sessionResult?.data?.session?.access_token;
+   const response=await fetch(CATALOG_PUSH_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json',...(accessToken?{Authorization:'Bearer '+accessToken}:{})},
+    body:JSON.stringify({mode:'subscribe',workspaceId,subscription:subscription.toJSON()})
+   });
+   const body=await response.json().catch(()=>({}));
+   if(!response.ok||body.ok===false)throw new Error(body.error||body.message||('Abonelik kaydedilemedi (HTTP '+response.status+').'));
+   toast('Bildirimler açıldı. Bu cihaz sipariş bildirimlerini alabilir.');
+  }catch(e){
+   console.error('Push aboneliği hatası:',e);
+   toast('Bildirim açılamadı: '+(e?.message||e));
+  }
+ }
+
 </script>
 </body>
 </html>
