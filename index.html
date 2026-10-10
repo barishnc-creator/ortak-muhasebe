@@ -90,6 +90,18 @@ input,select,textarea{font-size:16px;padding:11px}
 @media(max-width:600px){.customer-grid{grid-template-columns:1fr}.customer-card{padding:15px}.customer-actions button{padding:10px 8px}}
 
 
+
+/* Mobilde çalışma alanı kısayollarını hamburger menüsüne al */
+.workspace{position:relative}
+.ws-menu-toggle{display:none}
+@media(max-width:700px){
+  .workspace{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;padding:10px}
+  .ws-menu-toggle{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;order:-1}
+  .workspace.ws-collapsed > button:not(.ws-menu-toggle){display:none!important}
+  .workspace.ws-collapsed{padding:8px}
+  .workspace:not(.hidden):not(.ws-collapsed) > button:not(.ws-menu-toggle){flex:1 1 42%;min-width:0}
+}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -185,7 +197,8 @@ async function ensureWorkspace(){
 }
 function catalogLink(){const u=new URL(location.href);u.pathname=u.pathname.replace(/index\.html?$/,'catalog.html');u.search='?w='+encodeURIComponent(workspaceId);return u.toString()}
 async function copyCatalogLink(){try{await navigator.clipboard.writeText(catalogLink());toast('Müşteri katalog linki kopyalandı.')}catch(e){toast('Katalog linki: '+catalogLink())}}
-function showWorkspace(name,code){$('#ws').classList.remove('hidden');$('#ws').innerHTML=`<button class="g" onclick="copyInvite()">👥 ${E(name)} · Davet kodu</button><button class="g" onclick="copyCatalogLink()">🛍️ Katalog linki</button><button class="g" onclick="enablePushNotifications()">🔔 Bildirimleri aç</button><button class="g" onclick="joinWorkspace()">➕ Başka deftere katıl</button><button class="g" onclick="signout()">Çıkış</button>`;window._inviteCode=code}
+function toggleWorkspaceMenu(){const el=$('#ws');el.classList.toggle('ws-collapsed')}
+function showWorkspace(name,code){$('#ws').classList.remove('hidden');$('#ws').classList.add('ws-collapsed');$('#ws').innerHTML=`<button class="g ws-menu-toggle" aria-label="Menüyü aç veya kapat" onclick="toggleWorkspaceMenu()">☰</button><button class="g" onclick="copyInvite()">👥 ${E(name)} · Davet kodu</button><button class="g" onclick="copyCatalogLink()">🛍️ Katalog linki</button><button class="g" onclick="joinWorkspace()">➕ Başka deftere katıl</button><button class="g" onclick="signout()">Çıkış</button>`;window._inviteCode=code}
 async function copyInvite(){try{await navigator.clipboard.writeText(window._inviteCode);toast('Davet kodu kopyalandı: '+window._inviteCode)}catch(e){toast('Davet kodunuz: '+window._inviteCode)}}
 async function signout(){if(realtime)await sb.removeChannel(realtime);await sb.auth.signOut();location.reload()}
 async function load(){
@@ -262,7 +275,7 @@ notify(){
  const alerts=S.ord.filter(o=>N(o.qty)*N(o.price)-N(o.paid)>0).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
  return `<div class="grid"><div class="card kpi"><small>Bildirim</small><b>${S.notifs.length}</b></div><div class="card kpi"><small>Okunmamış</small><b>${unread}</b></div><div class="card kpi"><small>Bakiyesi olan sipariş</small><b>${alerts.length}</b></div></div>
  <div class="card"><div class="sm" style="justify-content:space-between"><h2>Bildirim geçmişi</h2><button class="g" onclick="markAllNotificationsRead()">Tümünü okundu işaretle</button></div>
- ${S.notifs.slice().reverse().map(n=>`<div class="row"><div><b>${n.read?'':'🔵 '}${E(n.title||'Bildirim')}</b><br><span class="mu">${E(n.message||'')} · ${E(n.date||'')}</span></div><div class="sm">${n.read?'<span class="mu">Okundu</span>':`<button class="g" onclick="markNotificationRead('${n.id}')">Okundu</button>`}</div></div>`).join('')||'<p class="mu">Henüz bildirim yok. Yeni siparişler ve sipariş durumu değişiklikleri burada görünecek.</p>'}</div>
+ ${S.notifs.slice().reverse().map(n=>`<div class="row"><div><b>${n.read?'':'🔵 '}${E(n.title||'Bildirim')}</b><br><span class="mu">${E(n.message||'')} · ${E(n.date||'')}</span></div><div class="sm">${n.read?'<span class="mu">Okundu</span>':`<button class="g" onclick="markNotificationRead('${n.id}')">Okundu</button>`}<button class="g" onclick="deleteNotification('${n.id}')">Sil</button></div></div>`).join('')||'<p class="mu">Henüz bildirim yok. Yeni siparişler ve sipariş durumu değişiklikleri burada görünecek.</p>'}</div>
  <div class="card"><h2>Ödenmemiş bakiye hatırlatmaları</h2>${alerts.slice(0,12).map(o=>`<div class="row"><div><b>${E(o.cust)}</b><br><span class="mu">${E(o.date||'')} · ${E(o.st||'')}</span></div><b class="bad">${TL(N(o.qty)*N(o.price)-N(o.paid))}</b></div>`).join('')||'<span class="mu">Ödenmemiş bakiye bulunmuyor.</span>'}</div>`
 },
 ozet(){
@@ -447,6 +460,7 @@ function editProdField(id,key,value){const p=prod(id);if(!p)return;p[key]=value;
 async function uploadProductMedia(id,type,file){if(!file)return;const p=prod(id);if(!p)return;if(type==='image'&&!file.type.startsWith('image/')){toast('Lütfen bir fotoğraf seçin.');return}if(type==='video'&&!file.type.startsWith('video/')){toast('Lütfen bir video seçin.');return}if(file.size>25*1024*1024){toast("Dosya 25 MB'dan küçük olmalı.");return}try{const ext=(file.name.split('.').pop()||'bin').toLowerCase(),path=`${workspaceId}/${id}/${type}-${Date.now()}.${ext}`;const {error}=await sb.storage.from('catalog-media').upload(path,file,{upsert:false,contentType:file.type});if(error)throw error;const {data}=sb.storage.from('catalog-media').getPublicUrl(path);p[type==='image'?'catalogImage':'catalogVideo']=data.publicUrl;save();render();toast(type==='image'?'Fotoğraf yüklendi.':'Video yüklendi.')}catch(e){console.error(e);toast('Medya yüklenemedi: '+(e.message||e))}}
 function addNotification(title,message){S.notifs=Array.isArray(S.notifs)?S.notifs:[];S.notifs.push({id:uid(),title,message,date:new Date().toLocaleString('tr-TR'),read:false});if(S.notifs.length>200)S.notifs=S.notifs.slice(-200)}
 function markNotificationRead(id){S.notifs=(S.notifs||[]).map(n=>n.id===id?{...n,read:true}:n);upd()}
+function deleteNotification(id){S.notifs=(S.notifs||[]).filter(n=>n.id!==id);upd();toast('Bildirim silindi.')}
 function markAllNotificationsRead(){S.notifs=(S.notifs||[]).map(n=>({...n,read:true}));upd();toast('Bildirimler okundu olarak işaretlendi.')}
 function addOrd(){let c=V('oc');if(c==='__new')c=V('ocn');if(!c||!V('op')){toast('Müşteri ve ürün seçin.');return}const k=N(V('ok')),o={id:uid(),cust:c,prod:V('op'),qty:N(V('oq'))||1,price:N(V('oy')),paid:k,st:ST[0],ded:false,date:td()};S.ord.push(o);addNotification('Yeni sipariş',c+' müşterisi için '+o.qty+' adet sipariş oluşturuldu.');if(k)S.tx.push({id:uid(),d:td(),t:'gelir',amt:k,desc:'Kapora: '+c});upd();toast('Sipariş oluşturuldu; bildirim eklendi.')}
 function pay(i){const o=S.ord.find(x=>x.id===i),a=N(V('p_'+i));if(!a)return;o.paid+=a;S.tx.push({id:uid(),d:td(),t:'gelir',amt:a,desc:'Tahsilat: '+o.cust});upd()}
@@ -487,47 +501,6 @@ async function joinWorkspace(){const code=prompt('Arkadaşınızın verdiği dav
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='csearch')filterCustomers()});
 document.addEventListener('focusout',()=>{if(pend){pend=0;setTimeout(render,80)}});
 if(sb)sb.auth.getSession().then(({data})=>{if(data.session)startApp();else $('#auth').classList.remove('hidden')});else $('#auth').classList.remove('hidden');
-
- const VAPID_PUBLIC_KEY = "BE7rVnkCeJKAXWyEDJMq8Rs6gsj2yjWl_pNQ6OLEnXz5992w79IYWqgTLeXth8Co3TcA7om-mJxDvpr3dyK0nhw";
- const CATALOG_PUSH_URL = "https://woogrfdcjonaurwgwoor.supabase.co/functions/v1/catalog-push";
- function b64UrlToBytes(base64String){
-  const padding='='.repeat((4-base64String.length%4)%4);
-  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
-  const raw=atob(base64);const out=new Uint8Array(raw.length);
-  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
-  return out;
- }
- async function enablePushNotifications(){
-  try{
-   if(!workspaceId)throw new Error('Önce çalışma alanı yüklenmeli.');
-   if(!('serviceWorker' in navigator)||!('PushManager' in window))throw new Error('Bu tarayıcı web push bildirimlerini desteklemiyor.');
-   if(!('Notification' in window))throw new Error('Bildirim izni bu tarayıcıda kullanılamıyor.');
-   if(location.protocol!=='https:'&&location.hostname!=='localhost')throw new Error('Bildirimler için HTTPS gerekli.');
-   const permission=await Notification.requestPermission();
-   if(permission!=='granted')throw new Error('Tarayıcı bildirim izni verilmedi.');
-   const registration=await navigator.serviceWorker.register('./sw.js');
-   await navigator.serviceWorker.ready;
-   let subscription=await registration.pushManager.getSubscription();
-   if(!subscription)subscription=await registration.pushManager.subscribe({
-    userVisibleOnly:true,
-    applicationServerKey:b64UrlToBytes(VAPID_PUBLIC_KEY)
-   });
-   const sessionResult=await sb.auth.getSession();
-   const accessToken=sessionResult?.data?.session?.access_token;
-   const response=await fetch(CATALOG_PUSH_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json',...(accessToken?{Authorization:'Bearer '+accessToken}:{})},
-    body:JSON.stringify({mode:'subscribe',workspaceId,subscription:subscription.toJSON()})
-   });
-   const body=await response.json().catch(()=>({}));
-   if(!response.ok||body.ok===false)throw new Error(body.error||body.message||('Abonelik kaydedilemedi (HTTP '+response.status+').'));
-   toast('Bildirimler açıldı. Bu cihaz sipariş bildirimlerini alabilir.');
-  }catch(e){
-   console.error('Push aboneliği hatası:',e);
-   toast('Bildirim açılamadı: '+(e?.message||e));
-  }
- }
-
 </script>
 </body>
 </html>
