@@ -487,6 +487,7 @@ async function joinWorkspace(){const code=prompt('Arkadaşınızın verdiği dav
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='csearch')filterCustomers()});
 document.addEventListener('focusout',()=>{if(pend){pend=0;setTimeout(render,80)}});
 if(sb)sb.auth.getSession().then(({data})=>{if(data.session)startApp();else $('#auth').classList.remove('hidden')});else $('#auth').classList.remove('hidden');
+ const VAPID_PUBLIC_KEY = "BE7rVnkCeJKAXWyEDJMq8Rs6gsj2yjWl_pNQ6OLEnXz5992w79IYWqgTLeXth8Co3TcA7om-mJxDvpr3dyK0nhw";
 </script>
 </body>
 </html>
