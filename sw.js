@@ -10,6 +10,9 @@ self.addEventListener('push', (event) => {
     data.title || 'Yeni katalog siparişi',
     {
       body: data.body || 'Yeni bir katalog siparişi var.',
+      icon: './icon-192.png',
+      badge: './badge-96.png',
+      tag: data.tag || undefined,
       data: { url: data.url || './index.html' }
     }
   ));
