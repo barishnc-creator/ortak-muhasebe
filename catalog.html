@@ -3,256 +3,628 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#05222b">
+<meta name="theme-color" content="#0A1520">
 <title>Ürün Kataloğu · Tidex Technology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#f4f6fa;--card:#fff;--tx:#172033;--mu:#68758a;--ln:#e3e8f0;--ac:#3155d9;--ac2:#edf1ff;--hero1:#111c3c;--hero2:#3155d9;--ok:#16865b;--bad:#c33b52;--sh:0 10px 28px rgba(23,32,51,.07);--sh2:0 18px 45px rgba(23,32,51,.12)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1480px;margin:auto;padding:24px 36px 84px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 30px;padding:8px 0}.brand{display:flex;align-items:center;gap:14px;min-width:0}.brand img{width:54px;height:54px;object-fit:contain;border-radius:15px;background:#fff;box-shadow:0 5px 18px rgba(23,32,51,.08)}.brand b{display:block;font-size:21px;letter-spacing:-.55px;font-weight:850}.brand small{color:var(--mu);display:block;margin-top:2px;font-size:12px;letter-spacing:.15px}
-button,input,textarea{font:inherit}button{border:0;border-radius:13px;padding:11px 14px;cursor:pointer;transition:transform .16s,background .16s,box-shadow .16s}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #a8b8ff;outline-offset:2px}.cartbtn{background:var(--ac);color:#fff;font-weight:800;padding:13px 19px;box-shadow:0 8px 20px rgba(49,85,217,.22);white-space:nowrap}.cartbtn:hover,.add:hover{background:#2545bf;transform:translateY(-1px);box-shadow:0 10px 22px rgba(49,85,217,.25)}
-.hero{background:linear-gradient(118deg,var(--hero1) 0%,#202f62 52%,var(--hero2) 100%);border-radius:28px;padding:46px 50px;color:#fff;position:relative;overflow:hidden;margin-bottom:26px;box-shadow:var(--sh2)}.hero:before{content:"";position:absolute;width:380px;height:380px;border:1px solid rgba(255,255,255,.13);border-radius:50%;right:-85px;top:-195px;box-shadow:0 0 0 35px rgba(255,255,255,.035),0 0 0 75px rgba(255,255,255,.025)}.hero:after{content:"";position:absolute;width:200px;height:200px;border-radius:50%;right:15%;bottom:-155px;background:rgba(116,153,255,.18);filter:blur(4px)}.hero h1{font-size:clamp(32px,4vw,52px);line-height:1.08;margin:0 0 14px;letter-spacing:-1.8px;position:relative;z-index:1;font-weight:850;max-width:850px}.hero p{font-size:16px;line-height:1.7;color:#e2e8ff;max-width:760px;margin:0 0 24px;position:relative;z-index:1}.chips{display:flex;gap:9px;flex-wrap:wrap;position:relative;z-index:1}.hero .chip{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.09);color:#fff;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:750}
-.search{display:block;width:100%;padding:16px 19px 16px 46px;border:1px solid var(--ln);border-radius:15px;background:#fff;margin:0 0 17px;box-shadow:0 4px 16px rgba(23,32,51,.035);outline:none;background-image:linear-gradient(transparent,transparent);font-size:15px}.search:focus{border-color:#aab9ff;box-shadow:0 0 0 4px rgba(49,85,217,.09)}#categories{gap:9px;margin:0 0 23px!important}.chip{border:1px solid #dce2ee;background:#fff;color:#4d5a70;padding:9px 15px;border-radius:999px;font-size:13px;font-weight:750;box-shadow:0 2px 5px rgba(23,32,51,.025)}.chip:hover{border-color:#aab9ff;color:var(--ac);background:#f8f9ff}.chip.on{background:var(--ac);color:#fff;border-color:var(--ac);box-shadow:0 5px 13px rgba(49,85,217,.18)}
-.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}.card{background:var(--card);border:1px solid #e6eaf2;border-radius:20px;overflow:hidden;box-shadow:var(--sh);display:flex;flex-direction:column;min-width:0;transition:transform .2s,box-shadow .2s,border-color .2s}.card:hover{transform:translateY(-3px);box-shadow:var(--sh2);border-color:#d4dcf0}.media{aspect-ratio:1/1;background:linear-gradient(145deg,#f0f3f9,#e8edf6);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}.media img,.media video{width:100%;height:100%;object-fit:cover}.tag{position:absolute;left:11px;top:11px;background:rgba(255,255,255,.94);color:#3149a8;border:1px solid rgba(49,85,217,.1);border-radius:999px;padding:6px 10px;font-size:10px;font-weight:850;box-shadow:0 3px 9px rgba(23,32,51,.07)}.placeholder{font-size:42px;color:#8b9ac0}
-.body{padding:16px;display:flex;flex-direction:column;flex:1}.body h3{margin:0 0 7px;font-size:16px;line-height:1.35;letter-spacing:-.2px;font-weight:800}.desc{color:var(--mu);font-size:12px;line-height:1.55;min-height:38px}.price{font-size:20px;font-weight:900;letter-spacing:-.5px;margin:13px 0 8px;color:#17264d}.body small{font-size:11px;color:var(--mu)}.qty{display:flex;align-items:center;gap:8px}.qty button{padding:7px 11px;background:#f0f3ff;color:#3149a8;font-weight:850;border:1px solid #e2e7ff}.qty button:hover{background:#e1e7ff}.add{width:100%;background:var(--ac);color:#fff;font-weight:800;margin-top:auto;min-height:44px;border-radius:12px;font-size:13px}
-.empty,.msg{text-align:center;padding:50px 10px;color:var(--mu);grid-column:1/-1}.err{color:var(--bad);white-space:pre-wrap}.panel{display:none;width:100%;margin:28px 0 0;scroll-margin-top:18px}.sheet{background:#fff;width:100%;max-width:980px;margin:0 auto;border:1px solid var(--ln);border-radius:22px;padding:24px;box-shadow:var(--sh2)}.sheethead{display:flex;justify-content:space-between;align-items:center}.line{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--ln);padding:16px 0}.line small{color:var(--mu)}.line>.qty b{white-space:nowrap;font-size:13px}.field{margin-top:15px}.field label{display:block;font-size:12px;color:var(--mu);font-weight:750;margin-bottom:7px}.req{color:var(--bad);font-weight:900}.field input,.field textarea{width:100%;padding:13px 14px;border:1px solid var(--ln);border-radius:12px;outline:none;background:#fbfcff}.field input:focus,.field textarea:focus{border-color:#aab9ff}.note{font-size:12px;color:var(--mu);margin-top:6px}.total{display:flex;justify-content:space-between;padding:19px 0;font-size:19px}.submit{width:100%;margin-top:15px;background:var(--ok);color:#fff;font-weight:850;padding:14px;border-radius:12px}.submit:hover{background:#10754d}.submit:disabled{opacity:.65;cursor:wait}.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#172033;color:#fff;padding:12px 17px;border-radius:12px;display:none;z-index:50;box-shadow:var(--sh2);max-width:calc(100% - 28px)}
-@media(max-width:1200px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:950px){.wrap{padding:18px 22px 70px}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{padding:36px 32px}}@media(max-width:650px){.wrap{padding:12px 12px 56px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.hero{padding:27px 22px;border-radius:22px;margin-bottom:18px}.hero h1{font-size:33px;letter-spacing:-1px}.hero p{font-size:14px;margin-bottom:18px}.brand img{width:44px;height:44px;border-radius:12px}.brand b{font-size:16px}.brand small{font-size:11px}.top{margin-bottom:18px;gap:8px}.cartbtn{padding:11px 12px;font-size:13px}.body{padding:12px}.body h3{font-size:14px}.desc{font-size:11px;min-height:34px}.price{font-size:17px;margin:10px 0 6px}.body small{font-size:10px}.add{font-size:12px;min-height:41px}.chip{padding:8px 12px;font-size:12px}.line{align-items:flex-start;flex-wrap:wrap}.sheet{padding:16px;border-radius:18px}.total{font-size:17px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+:root{
+ color-scheme:dark;
+ --bg:#0A1520;--surface:#0F1E2C;--surface-2:#142739;--line:#21374B;--line-2:#2C4760;
+ --text:#EAF2F7;--muted:#8FA6B8;--faint:#5F7A90;
+ --teal:#3FD0C9;--teal-2:#7BE6E0;--teal-ink:#04282B;--teal-soft:rgba(63,208,201,.12);
+ --amber:#F5B544;--amber-ink:#2E1D00;--danger:#FF8A93;--ok:#4ADE9B;
+ --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+ --body:"Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+ --r-lg:28px;--r-md:18px;--r-sm:12px;
+ --gutter:clamp(16px,4vw,40px);
+}
+*{box-sizing:border-box}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+body.locked{overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--teal-2);outline-offset:3px;border-radius:8px}
+img,video{display:block;max-width:100%}
+.wrap{max-width:1320px;margin:0 auto;padding:0 var(--gutter)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* Tidex premium night theme — full visual layer, existing commerce logic untouched */
-:root{color-scheme:dark;--bg:#080d16;--card:#111a29;--tx:#f1f5fb;--mu:#9ba9bd;--ln:#26344a;--ac:#70e1d1;--ac2:#163b3c;--hero1:#101a2b;--hero2:#173b4a;--ok:#27c99a;--bad:#ff7388;--sh:0 14px 36px rgba(0,0,0,.22);--sh2:0 24px 60px rgba(0,0,0,.34)}
-html{background:#080d16}body{background:radial-gradient(ellipse at 12% 0%,rgba(42,93,117,.20),transparent 35%),radial-gradient(ellipse at 100% 25%,rgba(42,82,102,.13),transparent 32%),var(--bg);color:var(--tx)}
-.wrap{max-width:1540px;padding-top:28px}.top{padding:12px 16px;margin-bottom:26px;border:1px solid rgba(153,184,211,.14);border-radius:22px;background:rgba(13,22,36,.78);backdrop-filter:blur(18px);box-shadow:0 10px 35px rgba(0,0,0,.15)}.brand img{background:#eaf1f7;border:1px solid rgba(255,255,255,.14);box-shadow:0 0 0 5px rgba(112,225,209,.07)}.brand b{color:#f4f8ff;letter-spacing:-.7px}.brand small{color:#91a5bb}
-.cartbtn{background:linear-gradient(135deg,#75e4d3,#43bba9);color:#061b20;box-shadow:0 8px 24px rgba(73,201,182,.17)}.cartbtn:hover,.add:hover{background:linear-gradient(135deg,#94f0e2,#58cdbc);box-shadow:0 12px 28px rgba(73,201,182,.22)}
-.hero{background:radial-gradient(circle at 82% 10%,rgba(87,220,208,.18),transparent 26%),linear-gradient(120deg,#111b2c 0%,#122b3b 56%,#153f4a 100%);border:1px solid rgba(139,208,212,.16);border-radius:30px;padding:clamp(30px,4.5vw,62px);box-shadow:0 24px 65px rgba(0,0,0,.25)}.hero:before{border-color:rgba(155,239,227,.15);box-shadow:0 0 0 35px rgba(155,239,227,.035),0 0 0 75px rgba(155,239,227,.02)}.hero:after{background:rgba(80,222,202,.12);filter:blur(22px)}.hero h1{color:#f4fbff;letter-spacing:-2px}.hero p{color:#b9cbd9}.hero .chip{background:rgba(8,22,32,.42);border-color:rgba(154,225,218,.22);color:#d8f8f3}
-.search{color:var(--tx);background:#101a29;border-color:#29384e;box-shadow:inset 0 1px rgba(255,255,255,.025),0 10px 24px rgba(0,0,0,.12);border-radius:16px;padding:17px 20px 17px 48px}.search::placeholder{color:#8495ab}.search:focus{border-color:#55cdbd;box-shadow:0 0 0 4px rgba(85,205,189,.11)}#categories{gap:10px;margin-bottom:26px!important}.chip{background:#111b2a;border-color:#29384d;color:#b7c4d6;box-shadow:inset 0 1px rgba(255,255,255,.025);padding:10px 16px}.chip:hover{background:#17283a;border-color:#3f938e;color:#b6fff2}.chip.on{background:linear-gradient(135deg,#7be5d4,#42bca9);border-color:transparent;color:#062329;box-shadow:0 7px 20px rgba(66,188,169,.2)}
-.grid{gap:20px}.card{background:linear-gradient(160deg,#141f30,#101826 78%);border-color:#27364a;border-radius:22px;box-shadow:0 12px 30px rgba(0,0,0,.19);position:relative}.card:hover{border-color:rgba(112,225,209,.46);box-shadow:0 22px 42px rgba(0,0,0,.30),0 0 0 1px rgba(112,225,209,.05);transform:translateY(-4px)}.media{background:radial-gradient(ellipse at 50% 35%,#25394b,#111a28 72%);border-bottom:1px solid rgba(155,184,211,.09)}.media img,.media video{transition:transform .35s ease}.card:hover .media img{transform:scale(1.035)}.tag{background:rgba(8,17,28,.88);backdrop-filter:blur(10px);color:#a5f4e8;border-color:rgba(112,225,209,.25);box-shadow:0 5px 18px rgba(0,0,0,.22)}.placeholder{color:#5d7c92}.body{padding:17px}.body h3{color:#f0f5fc;font-size:16px;letter-spacing:-.25px}.desc{color:#9baac0}.price{color:#8be8d9;font-size:22px;letter-spacing:-.7px}.body small{color:#8d9db2}.qty button{background:#172b3b;color:#9ef1e5;border-color:#2b4b5b}.qty button:hover{background:#1d3a49}.add{background:linear-gradient(135deg,#77e4d4,#48c2b0);color:#062229;box-shadow:0 7px 20px rgba(73,201,182,.12);border-radius:13px}.add:hover{color:#03191d}
-.empty,.msg{color:#a1b1c5}.panel{scroll-margin-top:16px}.sheet{background:linear-gradient(145deg,#141f30,#101826);border-color:#29384d;border-radius:24px}.sheet h2,.sheet h3{color:#f1f6fc}.line{border-color:#28374a}.line small{color:#9baac0}.field label{color:#aebdd0}.field input,.field textarea{background:#0c1421;color:#eef5fc;border-color:#2b3a4f}.field input::placeholder,.field textarea::placeholder{color:#71849b}.field input:focus,.field textarea:focus{border-color:#55cdbd;box-shadow:0 0 0 3px rgba(85,205,189,.1)}.note{color:#8ea0b6}.total{border-top:1px solid #28374a;color:#f2f8ff}.submit{background:linear-gradient(135deg,#3dd6a6,#20ae83);color:#05241b;box-shadow:0 8px 22px rgba(39,201,154,.14)}.submit:hover{background:linear-gradient(135deg,#60e7bb,#2cc795)}.toast{background:#eafbf8;color:#0c2928;border:1px solid #7ed8ca;box-shadow:0 18px 45px rgba(0,0,0,.35)}
-@media(max-width:650px){.wrap{padding:10px 10px 50px}.top{padding:10px 11px;border-radius:17px;margin-bottom:17px}.brand{gap:10px}.brand img{width:40px;height:40px}.brand b{font-size:15px}.brand small{font-size:10px}.hero{border-radius:23px;padding:28px 20px}.hero h1{font-size:32px;line-height:1.1}.hero p{font-size:13px}.grid{gap:10px}.card{border-radius:17px}.media{aspect-ratio: .92/1}.body{padding:11px}.body h3{font-size:13px}.price{font-size:17px}.add{min-height:42px}.chip{padding:8px 11px}.search{padding:14px 15px 14px 42px}.sheet{background:#111b2a;padding:14px}.cartbtn{font-size:12px;padding:10px 11px}}
-@media(hover:none){.card:hover{transform:none;box-shadow:var(--sh);border-color:#27364a}.card:hover .media img{transform:none}}
-@media(prefers-reduced-motion:reduce){.media img,.media video{transition:none}}
+/* Üst çubuk */
+.top{position:sticky;top:0;z-index:30;background:rgba(10,21,32,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid transparent;transition:border-color .2s}
+.top.scrolled{border-bottom-color:var(--line)}
+.top .wrap{display:flex;align-items:center;gap:14px;height:72px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;margin-right:auto;text-decoration:none;color:inherit}
+.brand img{width:42px;height:42px;border-radius:12px;object-fit:cover}
+.brand b{display:block;font:700 18px/1.1 var(--display);letter-spacing:-.01em}
+.brand small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.tbtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;height:44px;padding:0 16px;border-radius:var(--r-sm);font-weight:600;font-size:15px;white-space:nowrap;transition:background .15s,border-color .15s,color .15s}
+.tbtn svg{width:19px;height:19px;flex:none}
+.ghost{border:1px solid var(--line-2);color:var(--text)}
+.ghost:hover{border-color:var(--teal);color:var(--teal-2)}
+.solid{background:var(--teal);color:var(--teal-ink)}
+.solid:hover{background:var(--teal-2)}
+.count{min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--teal-ink);color:var(--teal-2);display:inline-grid;place-items:center;font-size:12.5px;font-weight:700}
 
+/* Giriş */
+.hero{position:relative;margin-top:18px;border-radius:var(--r-lg);overflow:hidden;background:var(--surface);border:1px solid var(--line);isolation:isolate}
+.hero:before{content:"";position:absolute;inset:0;z-index:-1;background:repeating-linear-gradient(0deg,rgba(123,230,224,.045) 0 1px,transparent 1px 5px);-webkit-mask-image:linear-gradient(100deg,transparent 30%,#000 75%);mask-image:linear-gradient(100deg,transparent 30%,#000 75%)}
+.hero-in{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);align-items:center;min-height:440px}
+.hero-copy{padding:clamp(32px,5vw,64px)}
+.hero h1{font:800 clamp(38px,5.2vw,68px)/.98 var(--display);letter-spacing:-.035em;margin:0 0 20px;max-width:12ch;text-wrap:balance}
+.hero p{color:var(--muted);font-size:clamp(16px,1.4vw,18px);max-width:46ch;margin:0 0 28px}
+.hero-cta{display:flex;gap:10px;flex-wrap:wrap}
+.hero-cta .tbtn{height:50px;padding:0 22px;font-size:16px}
+.stage{position:relative;height:100%;min-height:360px;display:grid;place-items:center;perspective:900px}
+.plate{position:absolute;left:8%;right:8%;bottom:14%;height:46%;transform:rotateX(64deg);transform-origin:50% 100%;border-radius:22px;background:
+ linear-gradient(var(--line-2) 1px,transparent 1px) 0 0/28px 28px,
+ linear-gradient(90deg,var(--line-2) 1px,transparent 1px) 0 0/28px 28px,
+ radial-gradient(ellipse at 50% 40%,#1A3347,#0F1E2C 70%);border:1px solid var(--line-2);box-shadow:0 30px 60px rgba(0,0,0,.35)}
+.plate:after{content:"";position:absolute;left:50%;top:44%;width:46%;height:30%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(63,208,201,.28),transparent);filter:blur(6px)}
+.hero-product{position:relative;width:min(78%,380px);aspect-ratio:1;margin-bottom:12%;display:grid;place-items:center;animation:rise 1.1s cubic-bezier(.2,.8,.2,1) both .15s}
+.hero-product img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 28px 26px rgba(0,0,0,.45))}
+.hero-tag{position:absolute;right:8%;top:10%;background:var(--bg);border:1px solid var(--line-2);border-radius:14px;padding:10px 14px;min-width:150px}
+.hero-tag small{display:block;color:var(--muted);font-size:12.5px}
+.hero-tag b{display:block;font:700 15px/1.25 var(--display)}
+.hero-tag span{color:var(--teal-2);font-weight:700;font-size:15px}
+@keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
 
-/* Tidex product-card refinement: premium hierarchy and responsive polish */
-:root{--ac:#70e1d1;--ac2:#163b3c;--card:#111a29;--tx:#f1f5fb;--mu:#9ba9bd;--ln:#26344a}
-.grid{gap:22px}
-.card{position:relative;background:linear-gradient(155deg,rgba(21,33,51,.98),rgba(13,22,36,.98));border:1px solid rgba(151,181,207,.15);border-radius:22px;box-shadow:0 12px 28px rgba(0,0,0,.18);isolation:isolate}
-.card:after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 1px rgba(255,255,255,.035);z-index:3}
-.card:hover{transform:translateY(-5px);border-color:rgba(112,225,209,.42);box-shadow:0 22px 48px rgba(0,0,0,.32),0 0 0 1px rgba(112,225,209,.06)}
-.media{aspect-ratio:1/0.92;background:radial-gradient(circle at 50% 30%,rgba(68,112,139,.22),transparent 58%),linear-gradient(145deg,#172538,#0d1522);border-bottom:1px solid rgba(151,181,207,.11)}
-.media img,.media video{transition:transform .45s cubic-bezier(.2,.75,.2,1);object-fit:contain;padding:10px}
-.card:hover .media img{transform:scale(1.045)}
-.tag{top:13px;left:13px;background:rgba(8,18,29,.86);color:#a9f5e9;border:1px solid rgba(112,225,209,.26);backdrop-filter:blur(12px);font-size:10px;letter-spacing:.3px;padding:7px 11px}
-.body{padding:18px;gap:2px}
-.body h3{font-size:15px;line-height:1.45;letter-spacing:-.25px;color:#f2f7fc;min-height:42px}
-.desc{color:#94a7bc;font-size:12px;line-height:1.65;min-height:40px}
-.price{color:#a4f1e5;font-size:23px;letter-spacing:-.7px;margin:15px 0 5px;font-variant-numeric:tabular-nums}
-.body small{color:#91a3b8}
-.qty{gap:7px}
-.qty button{background:#172c3a;color:#a8f4e8;border:1px solid rgba(112,225,209,.2);border-radius:10px;min-width:37px}
-.qty button:hover{background:#1e414a;border-color:rgba(112,225,209,.45)}
-.add{margin-top:15px;border:1px solid rgba(153,255,240,.22);background:linear-gradient(135deg,#75e4d3,#43bba9);color:#061b20;box-shadow:0 7px 18px rgba(73,201,182,.12);font-weight:850;letter-spacing:.05px}
-.add:hover{background:linear-gradient(135deg,#a1f4e8,#5dd5c3);transform:translateY(-1px)}
-.chip{background:#111c2b;color:#b5c3d4;border-color:#2a3a50;box-shadow:none}
-.chip:hover{background:#172c3b;color:#c4fff5;border-color:#4a9e9a}
-.chip.on{background:linear-gradient(135deg,#75e4d3,#43bba9);color:#071c20;border-color:transparent;box-shadow:0 7px 18px rgba(73,201,182,.16)}
-.search{background-color:#101a29;border-color:#29384e;color:#f1f5fb}
-.sheet{background:linear-gradient(155deg,#121d2d,#0d1522);border-color:#2a3b51;color:#f1f5fb}
-.field input,.field textarea{background:#0b1421;border-color:#2b3d53;color:#f1f5fb}
-.field input::placeholder,.field textarea::placeholder{color:#71849a}
-.line{border-color:#27374b}
-@media(max-width:950px){.grid{gap:15px}.body{padding:15px}}
-@media(max-width:650px){.grid{gap:10px}.card{border-radius:17px}.media{aspect-ratio:1/0.88}.body{padding:11px}.body h3{font-size:13px;min-height:37px}.desc{font-size:10.5px;min-height:34px}.price{font-size:19px;margin-top:11px}.tag{left:8px;top:8px;padding:5px 8px;font-size:9px}.add{margin-top:12px;min-height:40px}.qty button{min-width:32px;padding:6px 8px}}
-@media(prefers-reduced-motion:reduce){.card,.media img{transition:none!important}}
+/* Nasıl sipariş verilir */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:14px 0 0;padding:0;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
+.steps li{list-style:none;display:flex;gap:14px;align-items:flex-start;padding:18px 20px}
+.steps li+li{border-left:1px solid var(--line)}
+.steps .n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--teal);color:var(--teal-2);font:700 14px/1 var(--display)}
+.steps b{display:block;font-weight:600}
+.steps span{color:var(--muted);font-size:14px}
 
-</style>
+/* Araç çubuğu */
+.shop{margin-top:44px;scroll-margin-top:72px}
+.shop-head{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.shop-head h2{font:800 clamp(26px,3vw,36px)/1.05 var(--display);letter-spacing:-.025em;margin:0}
+.sync{display:inline-flex;align-items:center;gap:10px;color:var(--muted);font-size:14px}
+.sync .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(74,222,155,.14)}
+.sync.off .dot{background:var(--danger);box-shadow:0 0 0 4px rgba(255,138,147,.14)}
+.sync button{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border:1px solid var(--line-2);border-radius:10px;color:var(--text);font-weight:600;font-size:14px}
+.sync button:hover{border-color:var(--teal);color:var(--teal-2)}
+.sync button svg{width:16px;height:16px}
+.sync button.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;position:sticky;top:72px;z-index:20;padding:12px 0;background:var(--bg)}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);color:var(--muted);font-weight:600;font-size:14.5px;transition:background .15s,color .15s,border-color .15s}
+.chip:hover{color:var(--text);border-color:var(--faint)}
+.chip[aria-pressed="true"]{background:var(--text);border-color:var(--text);color:var(--bg)}
+.chip .c{opacity:.6;margin-left:6px;font-weight:500}
+.tools{display:flex;gap:8px}
+.search{position:relative}
+.search svg{position:absolute;left:13px;top:50%;width:18px;height:18px;transform:translateY(-50%);color:var(--faint);pointer-events:none}
+.search input{width:260px;height:44px;padding:0 14px 0 40px;border-radius:var(--r-sm);border:1px solid var(--line-2);background:var(--surface);outline:none}
+.search input::placeholder{color:var(--faint)}
+.search input:focus{border-color:var(--teal)}
+.sort{height:44px;padding:0 36px 0 14px;border-radius:var(--r-sm);border:1px solid var(--line-2);background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238FA6B8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center/16px;appearance:none;-webkit-appearance:none;outline:none}
+.sort:focus{border-color:var(--teal)}
 
-<style id="media-carousel-fix">
-.media{display:block;position:relative;overflow:hidden;isolation:isolate}
-.media-track{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;scroll-behavior:smooth}
-.media-track::-webkit-scrollbar{display:none}
-.media-slide{position:relative;flex:0 0 100%;width:100%;height:100%;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at center,rgba(42,65,82,.35),transparent 70%)}
-.media-slide img,.media-slide video{display:block;width:100%;height:100%;object-fit:contain;padding:8px;border:0}
-.media-nav{position:absolute;inset:0 0 0 0;display:flex;justify-content:space-between;align-items:center;padding:0 10px;pointer-events:none;opacity:0;transition:opacity .22s ease}
-.media:hover .media-nav,.media:focus-within .media-nav{opacity:1}
-.media-nav button{pointer-events:auto;display:grid;place-items:center;width:36px;height:36px;border:1px solid rgba(190,221,231,.22);border-radius:50%;background:rgba(7,17,28,.62);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#eafbf9;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:background .18s,border-color .18s,transform .18s}
-.media-nav button svg,.video-expand svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.media-nav button:hover{background:rgba(112,225,209,.94);color:#071b24;border-color:transparent;transform:scale(1.05)}
-.media-dots{position:absolute;bottom:9px;left:0;right:0;display:flex;justify-content:center;gap:6px;pointer-events:auto;padding:0;background:transparent}
-.media-dots button{width:6px;height:6px;padding:0;border:1px solid rgba(230,247,248,.4);border-radius:50%;background:rgba(10,23,35,.55);cursor:pointer;transition:width .2s,background .2s,border-color .2s}
-.media-dots button.active{width:17px;border-radius:9px;background:#8be8d9;border-color:#8be8d9}
-.media .tag{z-index:3}
-.video-expand{position:absolute;right:13px;top:13px;z-index:4;display:grid;place-items:center;width:35px;height:35px;border:1px solid rgba(226,246,248,.25);border-radius:11px;background:rgba(7,17,28,.68);color:#effffc;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);cursor:pointer;opacity:.9;transition:background .2s,transform .2s}
-.video-expand:hover{background:rgba(112,225,209,.95);color:#071b24;transform:scale(1.04)}
-.video-slide:fullscreen,.video-slide:-webkit-full-screen{background:#05090e;width:100vw;height:100vh}
-.video-slide:fullscreen video,.video-slide:-webkit-full-screen video{object-fit:contain;width:100%;height:100%;padding:0}
-.video-slide:fullscreen .video-expand,.video-slide:-webkit-full-screen .video-expand{top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right))}
-@media(max-width:650px){.media-nav{opacity:1;padding:0 7px}.media-nav button{width:31px;height:31px;background:rgba(7,17,28,.5);border-color:rgba(190,221,231,.18)}.media-slide img,.media-slide video{padding:5px}.media-dots{bottom:7px}.video-expand{width:34px;height:34px;right:9px;top:9px}}
-@media(hover:none){.media-nav{opacity:1}}
-@media(prefers-reduced-motion:reduce){.media-track{scroll-behavior:auto}.media-nav,.media-nav button,.media-dots button{transition:none}}
-</style>
-<style id="order-tracking">
-.topbtns{display:flex;gap:8px;align-items:center}
-.trackbtn{background:transparent;color:var(--tx);border:1px solid var(--ln);font-weight:800;padding:12px 15px;white-space:nowrap}
-.trackbtn:hover{border-color:var(--ac);color:var(--ac)}
-.tform{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;margin-top:6px}
-.tform .field{margin:0}
-.tform .submit{margin:0;width:auto;padding:13px 22px;white-space:nowrap}
-.tintro{color:var(--mu);font-size:13px;margin:6px 0 4px}
-.tcard{margin-top:22px;border:1px solid var(--ln);border-radius:18px;padding:18px;background:rgba(255,255,255,.02)}
-.thead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.thead small{display:block;color:var(--mu);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
-.thead b{font-size:17px;letter-spacing:.02em}
-.tsteps{display:grid;grid-template-columns:repeat(4,1fr);margin:22px 0 8px;position:relative;isolation:isolate}
-.tstep{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;position:relative}
-.tstep:before{content:"";position:absolute;top:16px;right:50%;width:100%;height:3px;background:var(--ln);z-index:0}
+/* Ürün kartları */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(264px,1fr));gap:18px;margin-top:8px}
+.card{display:flex;flex-direction:column;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;transition:border-color .2s}
+.card:hover{border-color:var(--line-2)}
+.card.in{border-color:rgba(63,208,201,.55)}
+.media{position:relative;aspect-ratio:1;background:radial-gradient(ellipse at 50% 38%,#1B3448,#112233 68%);overflow:hidden}
+.track{display:flex;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.track::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;height:100%;scroll-snap-align:start;display:grid;place-items:center}
+.slide img,.slide video{width:100%;height:100%;object-fit:contain;padding:14px}
+.slide video{padding:0;object-fit:cover;background:#081019}
+.ph{color:var(--faint);font:800 54px/1 var(--display)}
+.badge{position:absolute;left:12px;top:12px;z-index:2;padding:5px 10px;border-radius:999px;background:var(--amber);color:var(--amber-ink);font-weight:700;font-size:12.5px}
+.dots{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:6px;z-index:2}
+.dots button{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:999px;background:rgba(8,16,25,.72);color:var(--muted);font-size:12px;font-weight:600;border:1px solid var(--line-2)}
+.dots button[aria-pressed="true"]{color:var(--teal-ink);background:var(--teal);border-color:var(--teal)}
+.dots svg{width:12px;height:12px}
+.body{display:flex;flex-direction:column;flex:1;padding:16px 16px 16px}
+.body h3{margin:0;font:700 17px/1.25 var(--display);letter-spacing:-.01em;overflow-wrap:anywhere}
+.desc{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.price{margin:14px 0 2px;display:flex;align-items:baseline;gap:6px}
+.price b{font:800 24px/1 var(--display);letter-spacing:-.02em}
+.price span{color:var(--muted);font-size:14px}
+.rule{color:var(--faint);font-size:13px}
+.buy{display:flex;gap:8px;margin-top:auto;padding-top:16px}
+.step{display:flex;align-items:center;height:44px;border:1px solid var(--line-2);border-radius:var(--r-sm);flex:none}
+.step button{width:38px;height:100%;display:grid;place-items:center;color:var(--teal-2);font-size:20px;font-weight:600;border-radius:var(--r-sm)}
+.step button:hover{background:var(--teal-soft)}
+.step button:disabled{color:var(--faint);cursor:default;background:none}
+.step output{min-width:40px;text-align:center;font-weight:700}
+.add{flex:1;white-space:nowrap;height:44px;border-radius:var(--r-sm);background:var(--teal);color:var(--teal-ink);font-weight:700;font-size:15px;transition:background .15s}
+.add:hover{background:var(--teal-2)}
+.add.done{background:transparent;border:1px solid var(--teal);color:var(--teal-2)}
+.line-total{color:var(--muted);font-size:13px;margin-top:8px;min-height:20px}
+.line-total b{color:var(--text)}
+.state{grid-column:1/-1;text-align:center;padding:64px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:var(--r-md)}
+.state b{display:block;color:var(--text);font:700 20px/1.3 var(--display);margin-bottom:6px}
+.state .tbtn{margin-top:16px}
+.skel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);aspect-ratio:.72;position:relative;overflow:hidden}
+.skel:after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.04) 50%,transparent 70%);animation:sh 1.4s infinite}
+@keyframes sh{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+footer{margin:72px 0 0;padding:28px 0 calc(28px + env(safe-area-inset-bottom));border-top:1px solid var(--line);color:var(--faint);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* Çekmeceler: sepet ve takip */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(3,8,14,.62);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;z-index:50;width:min(480px,100%);background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;transform:translateX(102%);transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s linear .32s;visibility:hidden}
+.drawer.on{transform:none;visibility:visible;transition-delay:0s}
+.dh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 22px;border-bottom:1px solid var(--line)}
+.dh h2{margin:0;font:700 22px/1.2 var(--display);letter-spacing:-.015em}
+.x{width:40px;height:40px;border-radius:12px;border:1px solid var(--line-2);display:grid;place-items:center;color:var(--muted)}
+.x:hover{color:var(--text);border-color:var(--faint)}
+.x svg{width:18px;height:18px}
+.db{flex:1;overflow-y:auto;padding:8px 22px 22px;overscroll-behavior:contain}
+.df{padding:18px 22px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--surface)}
+.ci{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:14px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.ci .th{width:64px;height:64px;border-radius:12px;background:radial-gradient(ellipse at 50% 38%,#1B3448,#112233 70%);display:grid;place-items:center;overflow:hidden}
+.ci .th img{width:100%;height:100%;object-fit:contain;padding:5px}
+.ci b{display:block;font-weight:600;line-height:1.3}
+.ci small{color:var(--muted);font-size:13px}
+.ci .step{height:36px;margin-top:8px;width:max-content}
+.ci .step button{width:32px;font-size:17px}
+.ci .step output{min-width:34px;font-size:14px}
+.ci .amt{text-align:right;font-weight:700}
+.ci .rm{display:block;margin:6px 0 0 auto;color:var(--faint);font-size:13px;text-decoration:underline;text-underline-offset:3px}
+.ci .rm:hover{color:var(--danger)}
+.sumrow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.sumrow span{color:var(--muted)}
+.sumrow b{font:800 26px/1 var(--display);letter-spacing:-.02em}
+.form{display:grid;gap:14px;margin-top:22px}
+.form h3{margin:0;font:700 17px/1.3 var(--display)}
+.field label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:6px}
+.field label i{font-style:normal;color:var(--faint);font-weight:500}
+.field input,.field textarea{width:100%;padding:12px 14px;border-radius:var(--r-sm);border:1px solid var(--line-2);background:var(--bg);outline:none;font-size:16px}
+.field input:focus,.field textarea:focus{border-color:var(--teal)}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+.field .hint{color:var(--faint);font-size:13px;margin-top:6px}
+.primary{width:100%;height:52px;border-radius:var(--r-sm);background:var(--teal);color:var(--teal-ink);font-weight:700;font-size:16px}
+.primary:hover{background:var(--teal-2)}
+.primary:disabled{opacity:.6;cursor:wait}
+.empty{text-align:center;color:var(--muted);padding:56px 8px}
+.empty b{display:block;color:var(--text);font:700 19px/1.3 var(--display);margin-bottom:6px}
+.empty .tbtn{margin-top:18px}
+.done-box{text-align:center;padding:36px 4px 8px}
+.done-box .ok{width:60px;height:60px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;background:rgba(74,222,155,.12);color:var(--ok)}
+.done-box .ok svg{width:28px;height:28px}
+.done-box h3{margin:0 0 6px;font:800 26px/1.15 var(--display);letter-spacing:-.02em}
+.done-box p{color:var(--muted);margin:0 auto;max-width:36ch}
+.code{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 10px;padding:14px 14px 14px 18px;border-radius:14px;border:1px dashed var(--teal);background:var(--teal-soft)}
+.code small{display:block;color:var(--muted);font-size:12.5px;text-align:left}
+.code b{font:800 22px/1.2 var(--display);letter-spacing:.02em}
+.code button{height:38px;padding:0 14px;border-radius:10px;background:var(--teal);color:var(--teal-ink);font-weight:700;font-size:14px}
+.done-box .stack{display:grid;gap:10px;margin-top:22px}
+
+/* Takip */
+.tform{display:grid;gap:14px;margin-top:14px}
+.intro{color:var(--muted);margin:14px 0 0;font-size:15px}
+.tres{margin-top:24px}
+.thead{display:flex;justify-content:space-between;gap:12px;align-items:flex-end}
+.thead small{display:block;color:var(--muted);font-size:13px}
+.thead b{font:800 20px/1.2 var(--display);letter-spacing:.01em}
+.live{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:13px}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.tsteps{display:grid;grid-template-columns:repeat(4,1fr);margin:24px 0 6px;position:relative;isolation:isolate}
+.tstep{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;position:relative}
+.tstep:before{content:"";position:absolute;top:15px;right:50%;width:100%;height:2px;background:var(--line-2);z-index:0}
 .tstep:first-child:before{display:none}
-.tstep.done:before,.tstep.now:before{background:var(--ac)}
-.tstep span{position:relative;z-index:1;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:850;font-size:14px;background:#172334;border:2px solid var(--ln);color:var(--mu)}
-.tstep.done span{background:var(--ac);border-color:var(--ac);color:#062229}
-.tstep.now span{border-color:var(--ac);color:var(--ac);box-shadow:0 0 0 5px rgba(112,225,209,.14)}
-.tstep small{font-size:12px;color:var(--mu);font-weight:700}
-.tstep.now small{color:var(--tx)}
-.tnow{margin:16px 0 6px;padding:13px 14px;border-radius:13px;background:rgba(112,225,209,.08);border:1px solid rgba(112,225,209,.22);font-size:14px;line-height:1.55}
-.tbadge{font-size:12px;font-weight:800;padding:6px 11px;border-radius:999px;border:1px solid var(--ln);color:#cfe0ee;white-space:nowrap}
-.tbadge.s1{color:#ffe1a0;border-color:#5b4a23}.tbadge.s2{color:#a8d8ff;border-color:#24507a}.tbadge.s3{color:#9cf0c3;border-color:#22604f}
-.tsum{display:flex;justify-content:space-between;padding:7px 0;color:var(--mu)}.tsum b{color:var(--tx)}
-.codebox{display:inline-flex;align-items:center;gap:10px;margin:6px 0 4px;padding:10px 14px;border:1px dashed var(--ac);border-radius:12px;font-size:19px;font-weight:850;letter-spacing:.04em}
-.codebox button{padding:6px 10px;font-size:12px;background:var(--ac2);color:var(--ac);font-weight:800}
-.tempty{text-align:center;color:var(--mu);padding:22px 8px 6px}
-@media(max-width:650px){.tform{grid-template-columns:1fr}.tform .submit{width:100%}.trackbtn{padding:10px 11px;font-size:12px}.trackbtn .lbl{display:none}.tstep small{font-size:10.5px}.tstep span{width:30px;height:30px}.tstep:before{top:14px}.tcard{padding:14px}.codebox{font-size:16px}}
+.tstep.done:before,.tstep.now:before{background:var(--teal)}
+.tstep span{position:relative;z-index:1;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--surface);border:2px solid var(--line-2);color:var(--faint)}
+.tstep.done span{background:var(--teal);border-color:var(--teal);color:var(--teal-ink)}
+.tstep.now span{border-color:var(--teal);color:var(--teal-2);box-shadow:0 0 0 5px var(--teal-soft)}
+.tstep span svg{width:15px;height:15px}
+.tstep small{font-size:12.5px;color:var(--faint);font-weight:600}
+.tstep.done small,.tstep.now small{color:var(--text)}
+.tnow{margin:18px 0 8px;padding:14px 16px;border-radius:14px;background:var(--teal-soft);border:1px solid rgba(63,208,201,.28)}
+.tnow.flash{animation:flash 1.2s ease}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(63,208,201,.5)}100%{box-shadow:0 0 0 14px rgba(63,208,201,0)}}
+.ti{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.ti b{display:block;font-weight:600}
+.ti small{color:var(--muted);font-size:13px}
+.pill{flex:none;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:999px;border:1px solid var(--line-2);color:var(--muted)}
+.pill.s1{color:#FFD58A;border-color:#5B4A23}.pill.s2{color:#9FD3FF;border-color:#24507A}.pill.s3{color:var(--ok);border-color:#1E5B43}
+.money{display:grid;gap:8px;margin-top:16px}
+.money div{display:flex;justify-content:space-between;color:var(--muted)}
+.money div b{color:var(--text)}
+.money .big{color:var(--text);font-weight:700;font-size:17px}
+.terr{text-align:center;color:var(--muted);padding:26px 8px 4px}
+
+/* Mobil alt sepet çubuğu */
+.mbar{display:none}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,20px);z-index:60;background:var(--text);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1000px){
+ .hero-in{grid-template-columns:1fr}
+ .stage{min-height:300px;order:-1}
+ .hero-copy{padding-top:0}
+ .search input{width:200px}
+}
+@media (max-width:720px){
+ .top .wrap{height:64px;gap:8px}
+ .brand small{display:none}
+ .brand img{width:38px;height:38px}
+ .tbtn .lbl{display:none}
+ .tbtn{padding:0 12px}
+ .hero{margin-top:12px;border-radius:22px}
+ .stage{min-height:210px}
+ .plate{bottom:10%}
+ .hero-product{width:min(48%,200px);margin-bottom:8%}
+ .hero-tag{display:none}
+ .hero-copy{padding:4px 22px 26px}
+ .hero h1{font-size:34px;margin-bottom:12px}
+ .hero p{font-size:15.5px;margin-bottom:20px}
+ .hero-cta .tbtn{height:46px;padding:0 16px;font-size:15px;flex:1}
+ .steps{grid-template-columns:1fr}
+ .steps li+li{border-left:0;border-top:1px solid var(--line)}
+ .steps li{padding:14px 16px}
+ .shop{margin-top:34px}
+ .bar{grid-template-columns:1fr;top:64px;gap:10px}
+ .tools{order:-1}
+ .search{flex:1}.search input{width:100%}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .body{padding:12px}
+ .body h3{font-size:15px}
+ .desc{display:none}
+ .price b{font-size:20px}
+ .rule{font-size:12px}
+ .buy{flex-direction:column;padding-top:12px}
+ .step{justify-content:space-between}
+ .step button{width:44px}
+ .add{flex:none;height:42px;font-size:14px}
+ .line-total{font-size:12px}
+ .drawer{top:auto;left:0;width:100%;max-height:92dvh;border-left:0;border-top:1px solid var(--line);border-radius:22px 22px 0 0;transform:translateY(102%)}
+ .mbar{display:flex;position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:25;align-items:center;justify-content:space-between;gap:12px;height:58px;padding:0 8px 0 18px;border-radius:16px;background:var(--teal);color:var(--teal-ink);font-weight:700;box-shadow:0 14px 34px rgba(0,0,0,.4);transform:translateY(140%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+ .mbar.on{transform:none}
+ .mbar small{display:block;font-weight:600;opacity:.75;font-size:12.5px}
+ .mbar span{display:inline-flex;align-items:center;height:42px;padding:0 16px;border-radius:12px;background:var(--teal-ink);color:var(--teal-2)}
+ body.has-cart footer{padding-bottom:96px}
+ .toast{bottom:calc(84px + env(safe-area-inset-bottom))}
+ body.locked .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top));transform:translate(-50%,-20px)}
+ body.locked .toast.on{transform:translate(-50%,0)}
+}
+@media (prefers-reduced-motion:reduce){
+ *,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
 </style>
 </head>
 <body>
+<header class="top" id="top">
+ <div class="wrap">
+  <a class="brand" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false"><img src="data:image/jpeg;base64,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" alt=""><span><b>Tidex Technology</b><small>3D baskı atölyesi</small></span></a>
+  <button class="tbtn ghost" onclick="openTrack()" aria-label="Sipariş takibi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg><span class="lbl">Sipariş takibi</span></button>
+  <button class="tbtn solid" onclick="openCart()" aria-label="Sepet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg><span class="lbl">Sepet</span><span class="count" id="count">0</span></button>
+ </div>
+</header>
+
 <main class="wrap">
-<div class="top"><div class="brand"><img src='data:image/jpeg;base64,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' alt='Tidex Technology'><div><b>Tidex Technology</b><small>Geleceğin Teknolojileri</small></div></div>
-<div class="topbtns"><button class="trackbtn" onclick="openTrack()" aria-label="Sipariş takibi">📦 <span class="lbl">Sipariş takibi</span></button><button class="cartbtn" onclick="openCart()">🛒 Sepet <span id="count">0</span></button></div></div>
-<section class="hero"><h1>Tidex Technology Ürün Kataloğu</h1><p>Yenilikçi Ürünler, Kolay Sipariş, Güvenilir Hizmet.</p><div class="chips"><span class="chip">✦ Geleceğin Teknolojileri</span><span class="chip">▣ Kolay sipariş süreci</span><span class="chip">✓ Güvenilir iletişim</span></div></section>
-<input class="search" id="search" placeholder="⌕  Ürün adı veya açıklama ara..." oninput="renderProducts()"><div id="categories" class="chips" style="margin:12px 0"></div>
-<div id="msg" class="msg">Ürünler hazırlanıyor…</div><div id="products" class="grid"></div></main>
-<div id="panel" class="panel"><section class="sheet"><div class="sheethead"><h2 style="margin:0">🛒 Sepetiniz</h2><button onclick="closeCart()">✕</button></div><div id="cart"></div><div id="checkout"></div></section></div>
-<div id="trackpanel" class="panel"><section class="sheet"><div class="sheethead"><h2 style="margin:0">📦 Sipariş takibi</h2><button onclick="closeTrack()" aria-label="Kapat">✕</button></div><p class="tintro">Sipariş verdiğinizde size verilen kodu ve siparişte yazdığınız telefon numarasını girin.</p><div class="tform"><div class="field"><label for="tcode">Sipariş kodu</label><input id="tcode" placeholder="CAT-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false"></div><div class="field"><label for="tphone">Telefon</label><input id="tphone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></div><button class="submit" id="tbtn" onclick="trackOrder()">Sorgula</button></div><div id="tresult" aria-live="polite"></div></section></div>
-<div id="toast" class="toast"></div>
+ <section class="hero" aria-labelledby="h1">
+  <div class="hero-in">
+   <div class="hero-copy">
+    <h1 id="h1">Katman katman üretildi, toptan siparişe hazır.</h1>
+    <p>Ürünleri ve adetleri seçin, siparişinizi gönderin. Ürünleriniz atölyemizde basılırken her aşamayı sipariş kodunuzla takip edebilirsiniz.</p>
+    <div class="hero-cta"><a class="tbtn solid" href="#urunler">Ürünleri incele</a><button class="tbtn ghost" onclick="openTrack()">Siparişimi takip et</button></div>
+   </div>
+   <div class="stage" id="stage" aria-hidden="true"><div class="plate"></div><div class="hero-product" id="heroProduct"></div></div>
+  </div>
+ </section>
+
+ <ol class="steps" aria-label="Nasıl sipariş verilir">
+  <li><i class="n">1</i><div><b>Ürün ve adet seçin</b><span>Her ürünün en az sipariş adedi kartında yazar.</span></div></li>
+  <li><i class="n">2</i><div><b>Siparişi gönderin</b><span>Adınız ve telefon numaranız yeterli.</span></div></li>
+  <li><i class="n">3</i><div><b>Kodunuzla takip edin</b><span>Baskıdan teslimata her aşamayı görün.</span></div></li>
+ </ol>
+
+ <section class="shop" id="urunler" aria-labelledby="h2">
+  <div class="shop-head">
+   <h2 id="h2">Ürünler</h2>
+   <div class="sync" id="sync" aria-live="polite"><i class="dot"></i><span id="syncText">Yükleniyor…</span><button id="refreshBtn" onclick="refresh(true)" aria-label="Ürünleri şimdi yenile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg>Yenile</button></div>
+  </div>
+  <div class="bar">
+   <div class="chips" id="cats" role="group" aria-label="Kategoriler"></div>
+   <div class="tools">
+    <label class="search"><span class="sr">Ürün ara</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Ürün ara" autocomplete="off" oninput="renderProducts()"></label>
+    <label><span class="sr">Sıralama</span><select class="sort" id="sort" onchange="renderProducts()"><option value="rec">Önerilen</option><option value="asc">Fiyat: artan</option><option value="desc">Fiyat: azalan</option><option value="az">Ada göre</option></select></label>
+   </div>
+  </div>
+  <div class="grid" id="products"><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+ </section>
+</main>
+
+<footer><div class="wrap"><span>© Tidex Technology</span><span>3D baskı atölyesi</span></div></footer>
+
+<button class="mbar" id="mbar" onclick="openCart()" aria-label="Sepete git"><div><small id="mbarCount">0 ürün</small><b id="mbarTotal">₺0</b></div><span>Sepete git</span></button>
+
+<div class="scrim" id="scrim" onclick="closeDrawers()"></div>
+
+<aside class="drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+ <div class="dh"><h2 id="cartTitle">Sepetiniz</h2><button class="x" onclick="closeDrawers()" aria-label="Kapat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+ <div class="db" id="cartBody"></div>
+ <div class="df" id="cartFoot"></div>
+</aside>
+
+<aside class="drawer" id="trackDrawer" role="dialog" aria-modal="true" aria-labelledby="trackTitle">
+ <div class="dh"><h2 id="trackTitle">Sipariş takibi</h2><button class="x" onclick="closeDrawers()" aria-label="Kapat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+ <div class="db">
+  <p class="intro">Sipariş verdiğinizde gösterilen kodu ve siparişte yazdığınız telefon numarasını girin.</p>
+  <div class="tform">
+   <div class="field"><label for="tcode">Sipariş kodu</label><input id="tcode" placeholder="CAT-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+   <div class="field"><label for="tphone">Telefon</label><input id="tphone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></div>
+   <button class="primary" id="tbtn" onclick="trackOrder()">Siparişi sorgula</button>
+  </div>
+  <div class="tres" id="tresult" aria-live="polite"></div>
+ </div>
+</aside>
+
+<div class="toast" id="toast" role="status"></div>
 
 <script>
 const SUPABASE_URL='https://woogrfdcjonaurwgwoor.supabase.co';
 const SUPABASE_KEY='sb_publishable_PD0uw5raOZWLs8n0W6iPMA_ILeoWdcm';
-let sb=null;
 const wid=(new URLSearchParams(location.search).get('w')||'a5af67d1-a235-421a-9996-5ed7bada68c3');
-let catalog={products:[],categories:[]},cart=loadSavedCart(),activeCategory='Tümü',sending=false;
-function loadSavedCart(){try{const v=JSON.parse(sessionStorage.getItem('tidex-cart')||'[]');return Array.isArray(v)?v.filter(x=>x&&x.product_id&&Number.isFinite(Number(x.qty))&&Number(x.qty)>0):[]}catch(e){return []}}
+const REFRESH_MS=5000;
+let sb=null,catalog=null,catalogSig='',activeCategory='all',sending=false,lastSync=0,refreshing=false,pendingRender=false;
+let cart=loadSavedCart();const draft={};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const money=n=>new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:2}).format(Number(n)||0);
-function toast(m){$('toast').textContent=m;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2500)}
-async function load(){
-  try{
-    if(!window.supabase||!window.supabase.createClient)throw new Error('Supabase bağlantı kütüphanesi yüklenemedi.');
-    sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-    const {data,error}=await sb.rpc('get_public_catalog',{p_workspace_id:wid});
-    if(error||!data)throw error||new Error('Katalog verisi alınamadı.');
-    catalog=typeof data==='string'?JSON.parse(data):data;
-    if(!catalog||!Array.isArray(catalog.products))throw new Error('Katalog verisi beklenen formatta değil.');
-    catalog.products=catalog.products.filter(p=>p.catalogVisible!==false&&p.catalogActive!==false);
-    const cats=[...new Set(catalog.products.map(p=>(p.catalogCategory||'').trim()).filter(Boolean))];
-    renderCategories();
-    $('msg').remove();renderProducts();renderCart();updateCount();
-  }catch(e){console.error(e);$('msg').innerHTML='<div class="err">Katalog yüklenemedi.<br>'+esc(e?.message||e)+'</div><button class="cartbtn" style="margin-top:12px" onclick="retryLoad()">Tekrar dene</button>'}
-}
-function retryLoad(){$('msg').textContent='Katalog yeniden yükleniyor…';load()}
-function normCategory(c){return String(c??'').trim().toLocaleLowerCase('tr-TR')}
-function renderCategories(){
- const cats=[...new Set(catalog.products.map(p=>(p.catalogCategory||'').trim()).filter(Boolean))];
- const values=['Tümü',...cats,'Çok Satanlar'];
- $('categories').innerHTML=values.map(c=>{const on=normCategory(c)===normCategory(activeCategory);const encoded=encodeURIComponent(c);return `<button type="button" class="chip ${on?'on':''}" data-category="${esc(c)}" aria-pressed="${on?'true':'false'}" onclick="setCategory(decodeURIComponent('${encoded}'))">${esc(c)}</button>`}).join('');
-}
-// Delegated click handler is robust even when category buttons are re-rendered.
-document.addEventListener('click',event=>{const button=event.target.closest('button[data-category]');if(!button||!$('categories')||!$('categories').contains(button))return;event.preventDefault();setCategory(button.getAttribute('data-category'));});
-function setCategory(c){activeCategory=String(c||'Tümü').trim()||'Tümü';renderCategories();renderProducts();$('categories').querySelectorAll('[data-category]').forEach(b=>{const selected=normCategory(b.getAttribute('data-category'))===normCategory(activeCategory);b.classList.toggle('on',selected);b.setAttribute('aria-pressed',selected?'true':'false')});}
+const money=n=>new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:2}).format(Number(n)||0).replace(/,00$/,'');
+const lower=s=>String(s||'').toLocaleLowerCase('tr-TR');
+const ICON_CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>';
+let toastT;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600)}
+function client(){if(!sb){if(!window.supabase?.createClient)throw new Error('Bağlantı kütüphanesi yüklenemedi.');sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}return sb}
 
-function renderProducts(){
- const q=($('search').value||'').toLocaleLowerCase('tr').trim();
- const eligible=(catalog.products||[]).filter(p=>{const pc=String(p.catalogCategory||'').trim().toLocaleLowerCase('tr');const selected=String(activeCategory||'Tümü').trim().toLocaleLowerCase('tr');const categoryOK=selected==='tümü'||(selected==='çok satanlar'?!!p.catalogBestSeller:pc===selected);const text=((p.name||p.n||'').toLocaleLowerCase('tr').includes(q))||((p.catalogDescription||p.description||p.desc||'').toLocaleLowerCase('tr').includes(q));return categoryOK&&text});
- const draw=ps=>ps.length?ps.map(p=>{
-  const image=p.catalogImage||p.image||'',video=p.catalogVideo||p.video||'',name=p.name||p.n||'Ürün',desc=p.catalogDescription||p.description||p.desc||'',price=Number(p.price??p.fiyat??0),min=Math.max(1,Math.floor(Number(p.catalogMin)||25)),step=Math.max(1,Math.floor(Number(p.catalogStep)||25));
-  const mediaItems=[];if(image)mediaItems.push(`<div class="media-slide"><img src="${esc(image)}" alt="${esc(name)} ürün fotoğrafı" loading="lazy"></div>`);if(video)mediaItems.push(`<div class="media-slide"><video src="${esc(video)}" controls playsinline webkit-playsinline preload="metadata" aria-label="${esc(name)} ürün videosu" ${image?`poster="${esc(image)}"`:''}></video></div>`);const media=mediaItems.length?`<div class="media-track">${mediaItems.join('')}</div>${mediaItems.length>1?`<div class="media-nav"><button type="button" aria-label="Önceki medya" onclick="moveMedia(this,-1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><button type="button" aria-label="Sonraki medya" onclick="moveMedia(this,1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="media-dots">${mediaItems.map((_,i)=>`<button type="button" aria-label="Medya ${i+1}" class="${i===0?'active':''}" onclick="goMedia(this,${i})"></button>`).join('')}</div>`:''}`:'<div class="placeholder">✦</div>';
-  const inCart=cart.find(x=>x.product_id===p.id),qty=inCart?inCart.qty:min;
-  return `<article class="card"><div class="media">${media}${p.catalogBestSeller?'<span class="tag">Çok satan</span>':''}</div><div class="body"><h3>${esc(name)}</h3><div class="desc">${esc(desc)}</div><div class="price">${money(price)}</div><small>Minimum ${min} adet · ${step}’er adet artar</small><div class="qty" style="margin:10px 0"><button onclick="cardQty('${esc(p.id)}',-1)">−</button><b id="q_${esc(p.id)}">${qty}</b><button onclick="cardQty('${esc(p.id)}',1)">+</button></div><button class="add" onclick="add('${esc(p.id)}')">🛒 Sepete ekle</button></div></article>`
- }).join(''):'<div class="empty">Aradığınız ürün bulunamadı.</div>';
- $('products').innerHTML=draw(eligible);
-}
-function goMedia(button,index){const media=button.closest('.media');const track=media?.querySelector('.media-track');if(!track)return;const slides=track.querySelectorAll('.media-slide');const target=slides[Math.max(0,Math.min(index,slides.length-1))];if(target)track.scrollTo({left:target.offsetLeft,behavior:'smooth'});media.querySelectorAll('.media-dots button').forEach((b,i)=>b.classList.toggle('active',i===index))}
-function moveMedia(button,delta){const media=button.closest('.media');const track=media?.querySelector('.media-track');if(!track)return;const slides=track.querySelectorAll('.media-slide');const index=Math.max(0,Math.min(slides.length-1,Math.round(track.scrollLeft/(track.clientWidth||1))));goMedia(button,index+delta)}
-document.addEventListener('scroll',event=>{const track=event.target;if(!track?.classList?.contains('media-track'))return;const media=track.closest('.media');if(!media)return;const i=Math.round(track.scrollLeft/(track.clientWidth||1));media.querySelectorAll('.media-dots button').forEach((b,n)=>b.classList.toggle('active',n===i))},true);
-async function expandVideo(button){const slide=button.closest('.video-slide');const video=slide?.querySelector('video');if(!video)return;try{if(document.fullscreenElement||document.webkitFullscreenElement){if(document.exitFullscreen)await document.exitFullscreen();else if(document.webkitExitFullscreen)document.webkitExitFullscreen();return}if(slide.requestFullscreen)await slide.requestFullscreen();else if(slide.webkitRequestFullscreen)slide.webkitRequestFullscreen();else if(video.webkitEnterFullscreen)video.webkitEnterFullscreen();else if(video.requestFullscreen)await video.requestFullscreen();else toast('Bu tarayıcı tam ekran videoyu desteklemiyor.')}catch(e){if(video.webkitEnterFullscreen)video.webkitEnterFullscreen();else toast('Tam ekran açılamadı. Videonun kendi büyütme simgesini deneyin.')}}
+/* ---- Sepet ---- */
+function loadSavedCart(){try{const v=JSON.parse(sessionStorage.getItem('tidex-cart')||'[]');return Array.isArray(v)?v.filter(x=>x&&x.product_id&&Number(x.qty)>0):[]}catch(e){return []}}
 function persistCart(){try{sessionStorage.setItem('tidex-cart',JSON.stringify(cart))}catch(e){}}
-function cardQty(id,d){const p=catalog.products.find(x=>x.id===id);if(!p)return;const min=Math.max(1,Math.floor(Number(p.catalogMin)||25)),step=Math.max(1,Math.floor(Number(p.catalogStep)||25)),x=cart.find(x=>x.product_id===id);if(!x&&d<0)return;let q=x?x.qty:min;q=Math.max(min,q+d*step);if(x)x.qty=q;else cart.push({product_id:id,name:p.name||p.n||'Ürün',price:Number(p.price??p.fiyat??0),qty:q,min,step});persistCart();updateCount();renderProducts();renderCart()}
-function add(id){const p=catalog.products.find(x=>x.id===id);if(!p)return;const min=Math.max(1,Math.floor(Number(p.catalogMin)||25)),step=Math.max(1,Math.floor(Number(p.catalogStep)||25)),x=cart.find(x=>x.product_id===id);if(x)x.qty=Math.max(min,x.qty+step);else cart.push({product_id:id,name:p.name||p.n||'Ürün',price:Number(p.price??p.fiyat??0),qty:min,min,step});persistCart();updateCount();renderCart();toast('Ürün sepete eklendi')}
-function updateCount(){$('count').textContent=cart.reduce((a,x)=>a+x.qty,0);persistCart()}
-function change(id,d){const x=cart.find(x=>x.product_id===id);if(!x)return;const min=Math.max(1,x.min||25),step=Math.max(1,x.step||25);if(d<0&&x.qty-step<min)cart=cart.filter(y=>y.product_id!==id);else x.qty=Math.max(min,x.qty+d*step);persistCart();renderCart();updateCount();renderProducts()}
-function openCart(){closeTrack();$('panel').style.display='block';renderCart();$('panel').scrollIntoView({behavior:'smooth',block:'start'})}
-function closeCart(){$('panel').style.display='none';}
+const rules=p=>({min:Math.max(1,Math.floor(Number(p.catalogMin)||25)),step:Math.max(1,Math.floor(Number(p.catalogStep)||25))});
+const product=id=>(catalog?.products||[]).find(p=>p.id===id);
+const inCart=id=>cart.find(x=>x.product_id===id);
+const cartTotal=()=>cart.reduce((a,x)=>a+x.price*x.qty,0);
+function setQty(id,qty){
+ const p=product(id);if(!p)return;const {min}=rules(p),line=inCart(id);
+ if(line){if(qty<min){cart=cart.filter(x=>x!==line);toast(p.name+' sepetten çıkarıldı')}else line.qty=qty}
+ else draft[id]=Math.max(min,qty);
+ afterCartChange(id);
+}
+function bump(id,dir){const p=product(id);if(!p)return;const {min,step}=rules(p),cur=inCart(id)?.qty??draft[id]??min;setQty(id,dir<0?cur-step:Math.max(min,cur+step))}
+function add(id){
+ const p=product(id);if(!p)return;if(inCart(id)){openCart();return}
+ const {min}=rules(p),qty=draft[id]??min;
+ cart.push({product_id:id,name:p.name,price:p.price,qty,image:p.image||''});delete draft[id];
+ afterCartChange(id);toast(p.name+' sepete eklendi');
+}
+function removeLine(id){const p=product(id);cart=cart.filter(x=>x.product_id!==id);afterCartChange(id);if(p)toast(p.name+' sepetten çıkarıldı')}
+function afterCartChange(id){persistCart();updateCartUi();id?updateCard(id):renderProducts();if($('cartDrawer').classList.contains('on')&&!$('cartBody').querySelector('.done-box'))renderCart()}
+function updateCartUi(){
+ const n=cart.reduce((a,x)=>a+x.qty,0);$('count').textContent=n;
+ $('mbarCount').textContent=cart.length+' ürün, '+n+' adet';$('mbarTotal').textContent=money(cartTotal());
+ const show=cart.length>0&&!document.querySelector('.drawer.on');$('mbar').classList.toggle('on',show);document.body.classList.toggle('has-cart',cart.length>0);
+}
+// Katalog yenilenince sepeti güncel fiyat ve kurallara göre düzelt.
+function reconcileCart(){
+ if(!catalog)return;const removed=[];let changed=false;
+ cart=cart.filter(x=>{const p=product(x.product_id);if(!p){removed.push(x.name);return false}
+  const {min,step}=rules(p);let q=Math.max(min,x.qty);if((q-min)%step)q=min+Math.ceil((q-min)/step)*step;
+  if(x.price!==p.price||x.name!==p.name||x.qty!==q||x.image!==(p.image||'')){Object.assign(x,{price:p.price,name:p.name,qty:q,image:p.image||''});changed=true}return true});
+ if(removed.length)toast(removed.join(', ')+' artık satışta değil, sepetten çıkarıldı');
+ if(removed.length||changed){persistCart();updateCartUi();if($('cartDrawer').classList.contains('on')&&!$('cartBody').querySelector('.done-box'))renderCart()}
+}
+
+/* ---- Katalog ve otomatik yenileme ---- */
+// Tamamı büyük harfle girilmiş adları görünümde 'Ahtapot Şemsiye' biçimine çevir (FLX gibi sesli harfsiz kısaltmalar aynen kalır).
+function niceName(n){
+ n=String(n).trim();if(n!==n.toLocaleUpperCase('tr-TR')||!/[A-ZÇĞİÖŞÜ]/.test(n))return n;
+ return n.split(/(\s+|[.\-/()])/).map(w=>!/[A-Za-zÇĞİÖŞÜçğıöşü]/.test(w)||!/[AEIİOÖUÜ]/.test(w)?w:w.charAt(0)+w.slice(1).toLocaleLowerCase('tr-TR')).join('');
+}
+function normalize(data){
+ const c=typeof data==='string'?JSON.parse(data):data;
+ if(!c||!Array.isArray(c.products))throw new Error('Katalog verisi beklenen biçimde değil.');
+ return {products:c.products.filter(p=>p.catalogVisible!==false&&p.catalogActive!==false).map(p=>({id:String(p.id),name:niceName(p.name||p.n||'Ürün'),price:Number(p.price??p.fiyat??0),desc:p.catalogDescription||p.description||p.desc||'',image:p.catalogImage||p.image||'',video:p.catalogVideo||p.video||'',category:String(p.catalogCategory||'').trim(),best:!!p.catalogBestSeller,catalogMin:p.catalogMin,catalogStep:p.catalogStep}))};
+}
+async function refresh(manual){
+ if(refreshing)return;refreshing=true;const btn=$('refreshBtn');if(manual)btn.classList.add('spin');
+ try{
+  const {data,error}=await client().rpc('get_public_catalog',{p_workspace_id:wid});
+  if(error||!data)throw error||new Error('Katalog verisi alınamadı.');
+  const next=normalize(data),sig=JSON.stringify(next);
+  lastSync=Date.now();$('sync').classList.remove('off');
+  if(sig!==catalogSig){
+   const first=!catalog;catalog=next;catalogSig=sig;
+   reconcileCart();renderCategories();renderHero();renderProducts();
+   if(!first&&manual)toast('Ürünler güncellendi');
+  }else if(manual)toast('Ürünler zaten güncel');
+  syncLabel();
+ }catch(e){
+  console.error(e);$('sync').classList.add('off');
+  if(!catalog)$('products').innerHTML=`<div class="state"><b>Ürünler yüklenemedi</b>İnternet bağlantınızı kontrol edip tekrar deneyin.<br><button class="tbtn solid" onclick="refresh(true)">Tekrar dene</button></div>`;
+  $('syncText').textContent='Bağlantı yok, yeniden deneniyor';
+ }finally{refreshing=false;btn.classList.remove('spin')}
+}
+function syncLabel(){if(!lastSync||$('sync').classList.contains('off'))return;const s=Math.round((Date.now()-lastSync)/1000);$('syncText').textContent=s<5?'Güncel':s+' sn önce güncellendi'}
+setInterval(()=>{if(document.visibilityState==='visible')refresh(false);syncLabel()},REFRESH_MS);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){refresh(false);if(trackState.active)trackOrder(true)}});
+
+function renderCategories(){
+ const ps=catalog.products,cats=[...new Set(ps.map(p=>p.category).filter(Boolean))],hasBest=ps.some(p=>p.best);
+ const items=[['all','Tümü',ps.length],...cats.map(c=>['c:'+c,c,ps.filter(p=>p.category===c).length]),...(hasBest?[['best','Çok satanlar',ps.filter(p=>p.best).length]]:[])];
+ if(!items.some(i=>i[0]===activeCategory))activeCategory='all';
+ $('cats').innerHTML=items.length>2||cats.length>1||hasBest?items.map(([k,label,n])=>`<button class="chip" data-k="${esc(k)}" aria-pressed="${k===activeCategory}">${esc(label)}<span class="c">${n}</span></button>`).join(''):'';
+}
+$('cats').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;activeCategory=b.dataset.k;$('cats').querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderProducts()});
+
+function renderHero(){
+ const ps=catalog.products,p=ps.find(x=>x.best&&x.image)||ps.find(x=>x.image);
+ const el=$('heroProduct');const key=p?p.id+p.image+p.price:'';if(el.dataset.k===key)return;el.dataset.k=key;
+ el.innerHTML=p?`<img src="${esc(p.image)}" alt=""><div class="hero-tag"><small>${p.best?'Çok satan':'Öne çıkan'}</small><b>${esc(p.name)}</b><span>${money(p.price)} / adet</span></div>`:`<img src="data:image/jpeg;base64,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" alt="" style="border-radius:28px;width:60%;height:auto">`;
+}
+
+function filtered(){
+ const q=lower($('q').value).trim();let ps=catalog.products.filter(p=>{
+  const okCat=activeCategory==='all'||(activeCategory==='best'?p.best:'c:'+p.category===activeCategory);
+  return okCat&&(!q||lower(p.name).includes(q)||lower(p.desc).includes(q))});
+ const s=$('sort').value,byName=(a,b)=>a.name.localeCompare(b.name,'tr');
+ if(s==='asc')ps.sort((a,b)=>a.price-b.price||byName(a,b));else if(s==='desc')ps.sort((a,b)=>b.price-a.price||byName(a,b));else if(s==='az')ps.sort(byName);else ps.sort((a,b)=>(b.best-a.best)||byName(a,b));
+ return ps;
+}
+function mediaHtml(p){
+ const slides=[];if(p.image)slides.push(`<div class="slide"><img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy"></div>`);
+ if(p.video)slides.push(`<div class="slide"><video src="${esc(p.video)}" controls playsinline preload="metadata" aria-label="${esc(p.name)} videosu"${p.image?` poster="${esc(p.image)}"`:''}></video></div>`);
+ if(!slides.length)return `<div class="slide"><span class="ph">${esc(p.name.slice(0,1))}</span></div>`;
+ const dots=slides.length>1?`<div class="dots"><button aria-pressed="true" onclick="goSlide(this,0)">Fotoğraf</button><button aria-pressed="false" onclick="goSlide(this,1)"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Video</button></div>`:'';
+ return `<div class="track" onscroll="syncDots(this)">${slides.join('')}</div>${dots}`;
+}
+function goSlide(btn,i){const m=btn.closest('.media'),t=m.querySelector('.track');t.scrollTo({left:i*t.clientWidth,behavior:'smooth'});m.querySelectorAll('.dots button').forEach((b,n)=>b.setAttribute('aria-pressed',String(n===i)))}
+function syncDots(t){const i=Math.round(t.scrollLeft/(t.clientWidth||1));t.parentElement.querySelectorAll('.dots button').forEach((b,n)=>b.setAttribute('aria-pressed',String(n===i)))}
+function cardHtml(p){
+ const {min,step}=rules(p),line=inCart(p.id),qty=line?.qty??draft[p.id]??min;
+ return `<article class="card${line?' in':''}" data-id="${esc(p.id)}">
+  <div class="media">${p.best?'<span class="badge">Çok satan</span>':''}${mediaHtml(p)}</div>
+  <div class="body">
+   <h3>${esc(p.name)}</h3>${p.desc?`<p class="desc">${esc(p.desc)}</p>`:''}
+   <div class="price"><b>${money(p.price)}</b><span>/ adet</span></div>
+   <div class="rule">En az ${min} adet${step>1?`, ${step}’er artar`:''}</div>
+   <div class="buy">
+    <div class="step"><button onclick="bump('${esc(p.id)}',-1)" aria-label="${step} adet azalt"${!line&&qty<=min?' disabled':''}>−</button><output aria-live="polite">${qty}</output><button onclick="bump('${esc(p.id)}',1)" aria-label="${step} adet artır">+</button></div>
+    <button class="add${line?' done':''}" onclick="add('${esc(p.id)}')">${line?'Sepette':'Sepete ekle'}</button>
+   </div>
+   <div class="line-total">${qty} adet: <b>${money(qty*p.price)}</b></div>
+  </div></article>`;
+}
+const playingVideo=()=>[...document.querySelectorAll('#products video')].find(v=>!v.paused&&!v.ended);
+function updateCard(id){
+ const c=[...document.querySelectorAll('#products .card')].find(x=>x.dataset.id===id),p=product(id);
+ if(!c||!p)return;if(c.contains(playingVideo()||null)){pendingRender=true;return}
+ c.outerHTML=cardHtml(p);
+}
+function renderProducts(){
+ if(!catalog)return;
+ const ps=filtered(),grid=$('products'),ids=ps.map(p=>p.id).join('|'),playing=playingVideo();
+ // Bir ürün videosu oynarken onu kesme: liste aynıysa diğer kartları güncelle, videonunkini bitince.
+ if(playing){pendingRender=true;if(grid.dataset.ids===ids)ps.forEach(p=>updateCard(p.id));return}
+ pendingRender=false;grid.dataset.ids=ids;
+ grid.innerHTML=ps.length?ps.map(cardHtml).join(''):`<div class="state"><b>${catalog.products.length?'Bu aramaya uygun ürün yok':'Henüz ürün eklenmedi'}</b>${catalog.products.length?'Farklı bir kelime deneyin ya da tüm ürünlere dönün.<br><button class="tbtn ghost" onclick="resetFilters()">Tüm ürünleri göster</button>':'Yeni ürünler eklendiğinde burada görünecek.'}</div>`;
+}
+function resetFilters(){$('q').value='';activeCategory='all';renderCategories();renderProducts()}
+document.addEventListener('pause',e=>{if(e.target.tagName==='VIDEO'&&pendingRender)setTimeout(renderProducts,50)},true);
+document.addEventListener('ended',e=>{if(e.target.tagName==='VIDEO'&&pendingRender)setTimeout(renderProducts,50)},true);
+
+/* ---- Çekmeceler ---- */
+let lastFocus=null;
+function openDrawer(id){
+ closeDrawers(true);lastFocus=document.activeElement;
+ $(id).classList.add('on');$('scrim').classList.add('on');document.body.classList.add('locked');updateCartUi();
+ setTimeout(()=>{const f=$(id).querySelector('input,button.primary,.x');f&&f.focus({preventScroll:true})},60);
+}
+function closeDrawers(silent){
+ document.querySelectorAll('.drawer.on').forEach(d=>d.classList.remove('on'));$('scrim').classList.remove('on');document.body.classList.remove('locked');
+ trackState.active=false;updateCartUi();if(!silent&&lastFocus&&lastFocus.focus)lastFocus.focus({preventScroll:true});
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.drawer.on'))closeDrawers()});
+function openCart(){renderCart();openDrawer('cartDrawer')}
+
 function renderCart(){
- const total=cart.reduce((a,x)=>a+x.price*x.qty,0);
- $('cart').innerHTML=cart.length?cart.map(x=>`<div class="line"><div><b>${esc(x.name)}</b><br><small>${money(x.price)} / adet · minimum ${Math.max(1,x.min||25)} adet</small></div><div class="qty"><button onclick="change('${x.product_id}',-1)">−${Math.max(1,x.step||25)}</button><b>${x.qty} adet</b><button onclick="change('${x.product_id}',1)">+${Math.max(1,x.step||25)}</button></div><b>${money(x.price*x.qty)}</b></div>`).join('')+`<div class="total"><b>Toplam</b><b>${money(total)}</b></div>`:'<div class="empty">Sepetiniz şu an boş.</div>';
- $('checkout').innerHTML=cart.length?`<div class="checkout"><h3>Sipariş bilgileri</h3><div class="field"><label>Ad Soyad <span class="req">Zorunlu</span></label><input id="cn" autocomplete="name" placeholder="Adınız Soyadınız"></div><div class="field"><label>Telefon <span class="req">Zorunlu</span></label><input id="cp" type="tel" inputmode="tel" autocomplete="tel" required placeholder="05xx xxx xx xx"><div class="note">Siparişinizle ilgili size ulaşabilmemiz için telefon numaranız gereklidir.</div></div><div class="field"><label>Sipariş notu <span>İsteğe bağlı</span></label><textarea id="co" rows="3" placeholder="Renk, ölçü veya özel isteğiniz varsa yazabilirsiniz."></textarea></div><button class="submit" onclick="submitOrder()">✓ Siparişi gönder</button></div>`:'';
+ const body=$('cartBody'),foot=$('cartFoot');
+ if(!cart.length){body.innerHTML=`<div class="empty"><b>Sepetiniz boş</b>Ürünleri inceleyip adetlerini seçerek ekleyebilirsiniz.<br><button class="tbtn solid" onclick="closeDrawers();location.hash='urunler'">Ürünlere göz at</button></div>`;foot.innerHTML='';foot.style.display='none';return}
+ foot.style.display='';
+ const v=id=>($(id)?.value)??'';const keep={cn:v('cn'),cp:v('cp'),co:v('co')};
+ body.innerHTML=cart.map(x=>{const p=product(x.product_id),r=p?rules(p):{min:x.min||1,step:x.step||1};return `<div class="ci">
+  <div class="th">${x.image?`<img src="${esc(x.image)}" alt="">`:''}</div>
+  <div><b>${esc(x.name)}</b><small>${money(x.price)} / adet</small>
+   <div class="step"><button onclick="bump('${esc(x.product_id)}',-1)" aria-label="${r.step} adet azalt">−</button><output>${x.qty}</output><button onclick="bump('${esc(x.product_id)}',1)" aria-label="${r.step} adet artır">+</button></div></div>
+  <div><div class="amt">${money(x.price*x.qty)}</div><button class="rm" onclick="removeLine('${esc(x.product_id)}')">Kaldır</button></div></div>`}).join('')+`
+  <div class="form"><h3>Sipariş bilgileri</h3>
+   <div class="field"><label for="cn">Ad soyad</label><input id="cn" autocomplete="name" placeholder="Adınız ve soyadınız"></div>
+   <div class="field"><label for="cp">Telefon</label><input id="cp" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx"><div class="hint">Siparişinizle ilgili size bu numaradan ulaşacağız. Takip için de gerekli.</div></div>
+   <div class="field"><label for="co">Sipariş notu <i>İsteğe bağlı</i></label><textarea id="co" rows="3" placeholder="Renk, ölçü veya teslimat tercihiniz"></textarea></div>
+  </div>`;
+ ['cn','cp','co'].forEach(k=>{if(keep[k])$(k).value=keep[k]});
+ foot.innerHTML=`<div class="sumrow"><span>Toplam (${cart.reduce((a,x)=>a+x.qty,0)} adet)</span><b>${money(cartTotal())}</b></div><button class="primary" id="sendBtn" onclick="submitOrder()">Siparişi gönder</button>`;
 }
 async function submitOrder(){
  if(sending)return;
+ const name=($('cn').value||'').trim(),phone=($('cp').value||'').trim();
+ if(!name){toast('Ad soyad alanını doldurun.');$('cn').focus();return}
+ if(phone.replace(/\D/g,'').length<10){toast('Telefon numarasını 10 haneli olarak yazın.');$('cp').focus();return}
+ if(!cart.length)return;
  try{
-  const name=($('cn').value||'').trim(),phone=($('cp').value||'').trim();
-  if(!name){toast('Lütfen ad soyadınızı yazın.');$('cn').focus();return}
-  if(phone.replace(/\D/g,'').length<10){toast('Lütfen geçerli bir telefon numarası yazın.');$('cp').focus();return}
-  if(!cart.length)return;
-  for(const x of cart){const p=catalog.products.find(p=>p.id===x.product_id);if(!p)throw new Error('Sepette artık bulunmayan bir ürün var. Lütfen sepeti yenileyin.');const min=Math.max(1,Math.floor(Number(p.catalogMin)||25)),step=Math.max(1,Math.floor(Number(p.catalogStep)||25));if(x.qty<min||(x.qty-min)%step!==0)throw new Error(x.name+' için minimum/adet artışı kuralı sağlanmıyor.')}
-  sending=true;const btn=document.querySelector('.submit');if(btn){btn.disabled=true;btn.textContent='Gönderiliyor…'}
-  const {data,error}=await sb.rpc('submit_catalog_order',{p_workspace_id:wid,p_customer_name:name,p_phone:phone,p_note:($('co').value||'').trim(),p_items:cart.map(x=>({product_id:x.product_id,qty:x.qty}))});
+  for(const x of cart){const p=product(x.product_id);if(!p)throw new Error(x.name+' artık satışta değil. Sepetten çıkarıp tekrar deneyin.');const {min,step}=rules(p);if(x.qty<min||(x.qty-min)%step)throw new Error(x.name+' için adet kuralı sağlanmıyor.')}
+  sending=true;const btn=$('sendBtn');btn.disabled=true;btn.textContent='Gönderiliyor…';
+  const {data,error}=await client().rpc('submit_catalog_order',{p_workspace_id:wid,p_customer_name:name,p_phone:phone,p_note:($('co').value||'').trim(),p_items:cart.map(x=>({product_id:x.product_id,qty:x.qty}))});
   if(error)throw error;
-  const no=data?.[0]?.order_group||data?.order_group||'CAT',total=data?.[0]?.total||data?.total||0;
-  rememberOrder(no,phone);cart=[];persistCart();sending=false;updateCount();$('cart').innerHTML=`<div class="empty"><div style="font-size:42px">✓</div><h3>Siparişiniz alındı</h3><p style="margin-bottom:4px">Sipariş kodunuz:</p><div class="codebox"><span>${esc(no)}</span><button type="button" onclick="copyCode('${esc(no)}')">Kopyala</button></div><p class="note">Bu kodu saklayın. Siparişinizin durumunu bu kod ve telefon numaranızla takip edebilirsiniz.</p><p>Toplam: <b>${money(total)}</b></p><p>Siparişiniz kontrol edildikten sonra hazırlanacaktır. Teşekkür ederiz.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="cartbtn" onclick="openTrack()">📦 Siparişimi takip et</button><button class="trackbtn" onclick="closeCart()">Alışverişe devam et</button></div></div>`;$('checkout').innerHTML='';
- }catch(e){sending=false;console.error(e);toast('Sipariş gönderilemedi: '+(e?.message||e));if($('checkout').querySelector('.submit')){$('checkout').querySelector('.submit').disabled=false;$('checkout').querySelector('.submit').textContent='✓ Siparişi gönder'}}
+  const r=Array.isArray(data)?data[0]:data,no=r?.order_group||'',total=r?.total??cartTotal();
+  rememberOrder(no,phone);cart=[];persistCart();sending=false;updateCartUi();renderProducts();
+  $('cartFoot').innerHTML='';$('cartFoot').style.display='none';
+  $('cartBody').innerHTML=`<div class="done-box"><div class="ok">${ICON_CHECK}</div><h3>Siparişiniz alındı</h3><p>Kontrol edildikten sonra üretime başlanacak. Toplam tutar: <b>${money(total)}</b></p>
+   <div class="code"><div><small>Sipariş kodunuz</small><b>${esc(no)}</b></div><button onclick="copyCode('${esc(no)}')">Kopyala</button></div>
+   <p style="font-size:14px">Bu kodu saklayın. Siparişinizi bu kod ve telefon numaranızla takip edebilirsiniz.</p>
+   <div class="stack"><button class="primary" onclick="openTrack('${esc(no)}')">Siparişimi takip et</button><button class="tbtn ghost" style="justify-content:center" onclick="closeDrawers()">Alışverişe devam et</button></div></div>`;
+ }catch(e){
+  sending=false;console.error(e);toast('Sipariş gönderilemedi: '+(e?.message||e));
+  const btn=$('sendBtn');if(btn){btn.disabled=false;btn.textContent='Siparişi gönder'}
+ }
 }
+
 /* ---- Sipariş takibi ---- */
 const TRACK_KEY='tidex-last-order',STAGES=['Sipariş alındı','Baskıda','Hazır','Teslim edildi'];
-const STAGE_MSG=['Siparişiniz alındı. Kontrol edildikten sonra üretime başlanacak.','Ürünleriniz şu anda basılıyor.','Siparişiniz hazır! Teslimat için sizinle iletişime geçeceğiz.','Siparişiniz teslim edildi. Bizi tercih ettiğiniz için teşekkür ederiz!'];
+const STAGE_MSG=['Siparişiniz alındı. Kontrol edildikten sonra üretime başlanacak.','Ürünleriniz şu anda basılıyor.','Siparişiniz hazır. Teslimat için sizinle iletişime geçeceğiz.','Siparişiniz teslim edildi. Bizi tercih ettiğiniz için teşekkür ederiz.'];
+const trackState={active:false,timer:null,lastStage:null,code:''};
 function lastOrder(){try{return JSON.parse(localStorage.getItem(TRACK_KEY)||'null')}catch(e){return null}}
 function rememberOrder(code,phone){try{localStorage.setItem(TRACK_KEY,JSON.stringify({code,phone}))}catch(e){}}
 async function copyCode(code){try{await navigator.clipboard.writeText(code);toast('Sipariş kodu kopyalandı')}catch(e){toast('Sipariş kodunuz: '+code)}}
 function openTrack(code){
- closeCart();const lo=lastOrder();
+ const lo=lastOrder();openDrawer('trackDrawer');
  $('tcode').value=code||$('tcode').value||lo?.code||'';
  if(!$('tphone').value&&lo?.phone&&(!code||code===lo.code))$('tphone').value=lo.phone;
- $('trackpanel').style.display='block';$('trackpanel').scrollIntoView({behavior:'smooth',block:'start'});
- if($('tcode').value&&$('tphone').value)trackOrder();else ($('tcode').value?$('tphone'):$('tcode')).focus();
+ if($('tcode').value&&$('tphone').value)trackOrder();
 }
-function closeTrack(){$('trackpanel').style.display='none'}
 const fmtDate=d=>{const x=new Date(String(d||'')+'T00:00:00');return isNaN(x)?esc(d||''):x.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})};
 let tracking=false;
-async function trackOrder(){
+async function trackOrder(silent){
  if(tracking)return;
  const code=($('tcode').value||'').trim(),phone=($('tphone').value||'').trim();
- if(!code){toast('Lütfen sipariş kodunuzu yazın.');$('tcode').focus();return}
- if(phone.replace(/\D/g,'').length<10){toast('Lütfen siparişte yazdığınız telefon numarasını girin.');$('tphone').focus();return}
- tracking=true;const btn=$('tbtn');btn.disabled=true;btn.textContent='Sorgulanıyor…';
+ if(!silent){
+  if(!code){toast('Sipariş kodunu yazın.');$('tcode').focus();return}
+  if(phone.replace(/\D/g,'').length<10){toast('Siparişte yazdığınız telefon numarasını girin.');$('tphone').focus();return}
+ }
+ tracking=true;const btn=$('tbtn');if(!silent){btn.disabled=true;btn.textContent='Sorgulanıyor…'}
  try{
-  if(!sb){if(!window.supabase?.createClient)throw new Error('Bağlantı kurulamadı.');sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}
-  const {data,error}=await sb.rpc('track_catalog_order',{p_code:code,p_phone:phone});
+  const {data,error}=await client().rpc('track_catalog_order',{p_code:code,p_phone:phone});
   if(error)throw error;
   const o=typeof data==='string'?JSON.parse(data):data;
-  $('tresult').innerHTML=o&&o.code?renderTrack(o):'<div class="tempty">Bu kod ve telefon numarasıyla eşleşen bir sipariş bulunamadı.<br>Kodu ve telefon numarasını kontrol edip tekrar deneyin.</div>';
- }catch(e){console.error(e);$('tresult').innerHTML='<div class="tempty err">Sorgulama şu an yapılamadı. Lütfen biraz sonra tekrar deneyin.</div>'}
- finally{tracking=false;btn.disabled=false;btn.textContent='Sorgula'}
+  if(o&&o.code){
+   const changed=trackState.code===o.code&&trackState.lastStage!==null&&trackState.lastStage!==o.stage;
+   $('tresult').innerHTML=renderTrack(o,changed);
+   trackState.code=o.code;trackState.lastStage=o.stage;trackState.active=$('trackDrawer').classList.contains('on');
+   if(changed)toast('Sipariş durumu güncellendi: '+(STAGES[o.stage]||''));
+  }else if(!silent){trackState.active=false;$('tresult').innerHTML='<div class="terr">Bu kod ve telefon numarasıyla eşleşen bir sipariş bulunamadı. Kodu ve numarayı kontrol edip tekrar deneyin.</div>'}
+ }catch(e){console.error(e);if(!silent)$('tresult').innerHTML='<div class="terr">Sorgulama şu an yapılamadı. Biraz sonra tekrar deneyin.</div>'}
+ finally{tracking=false;if(!silent){btn.disabled=false;btn.textContent='Siparişi sorgula'}}
 }
-function renderTrack(o){
- const stages=Array.isArray(o.stages)&&o.stages.length?o.stages:STAGES,st=Math.max(0,Math.min(stages.length-1,Number(o.stage)||0));
- const steps=stages.map((s,i)=>`<div class="tstep ${i<st?'done':i===st?'now':''}"><span>${i<st||st===stages.length-1&&i===st?'✓':i+1}</span><small>${esc(s)}</small></div>`).join('');
- const items=(o.items||[]).map(it=>{const k=Math.max(0,stages.indexOf(it.status));return `<div class="line"><div><b>${esc(it.name)}</b><br><small>${esc(it.qty)} adet</small></div><span class="tbadge s${k}">${esc(it.status)}</span></div>`}).join('');
- const total=Number(o.total)||0,paid=Number(o.paid)||0,left=Math.max(0,total-paid);
- return `<div class="tcard"><div class="thead"><div><small>Sipariş kodu</small><b>${esc(o.code)}</b></div><div style="text-align:right"><small>Sipariş tarihi</small><b>${fmtDate(o.date)}</b></div></div><div class="tsteps">${steps}</div><div class="tnow">${esc(STAGE_MSG[st]||stages[st])}</div>${items}<div class="total"><b>Toplam</b><b>${money(total)}</b></div>${paid>0?`<div class="tsum"><span>Ödenen</span><b>${money(paid)}</b></div><div class="tsum"><span>Kalan</span><b>${money(left)}</b></div>`:''}</div>`;
+// Takip ekranı açıkken her 5 saniyede bir durumu yenile.
+setInterval(()=>{if(trackState.active&&document.visibilityState==='visible'&&$('trackDrawer').classList.contains('on'))trackOrder(true)},REFRESH_MS);
+function renderTrack(o,changed){
+ const stages=Array.isArray(o.stages)&&o.stages.length?o.stages:STAGES,st=Math.max(0,Math.min(stages.length-1,Number(o.stage)||0)),last=st===stages.length-1;
+ const steps=stages.map((s,i)=>{const cls=i<st||last&&i===st?'done':i===st?'now':'';return `<div class="tstep ${cls}"><span>${cls==='done'?ICON_CHECK:i+1}</span><small>${esc(s)}</small></div>`}).join('');
+ const items=(o.items||[]).map(it=>{const k=Math.max(0,stages.indexOf(it.status));return `<div class="ti"><div><b>${esc(niceName(it.name))}</b><small>${esc(it.qty)} adet</small></div><span class="pill s${k}">${esc(it.status)}</span></div>`}).join('');
+ const total=Number(o.total)||0,paid=Number(o.paid)||0;
+ return `<div class="thead"><div><small>${fmtDate(o.date)}</small><b>${esc(o.code)}</b></div><span class="live"><i></i>Canlı takip</span></div>
+  <div class="tsteps">${steps}</div><div class="tnow${changed?' flash':''}">${esc(STAGE_MSG[st]||stages[st])}</div>${items}
+  <div class="money"><div class="big"><span>Toplam</span><b>${money(total)}</b></div>${paid>0?`<div><span>Ödenen</span><b>${money(paid)}</b></div><div><span>Kalan</span><b>${money(Math.max(0,total-paid))}</b></div>`:''}</div>`;
 }
 ['tcode','tphone'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')trackOrder()}));
-load();
+// Takip formu elle değişirse canlı takibi durdur; yeni sorguyla tekrar başlar.
+['tcode','tphone'].forEach(id=>$(id).addEventListener('input',()=>{trackState.active=false;trackState.code='';trackState.lastStage=null}));
+
+window.addEventListener('scroll',()=>$('top').classList.toggle('scrolled',scrollY>8),{passive:true});
+updateCartUi();refresh(false);
 {const t=new URLSearchParams(location.search).get('takip');if(t)openTrack(t.trim())}
 </script>
-
 </body>
 </html>
