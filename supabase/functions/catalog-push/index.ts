@@ -42,6 +42,21 @@ Deno.serve(async (req) => {
     const pushSecret = Deno.env.get("CATALOG_PUSH_SECRET");
     const suppliedSecret = req.headers.get("x-catalog-push-secret");
 
+    // Uygulamadan gelen istekler (abonelik, açık anahtar) giriş yapmış bir defter
+    // üyesinden gelmeli; kuyruk işleme ise yalnızca gizli anahtarla çalışır.
+    const userFromRequest = async () => {
+      const token = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
+      if (!token) return null;
+      const { data, error } = await db.auth.getUser(token);
+      return error ? null : data.user;
+    };
+
+    if (mode === "publicKey") {
+      const user = await userFromRequest();
+      if (!user) return json({ error: "Unauthorized" }, 401);
+      return json({ publicKey });
+    }
+
     if (
       mode !== "subscribe" &&
       (!pushSecret || suppliedSecret !== pushSecret)
@@ -52,6 +67,16 @@ Deno.serve(async (req) => {
     if (mode === "subscribe") {
       const workspace_id = body.workspace_id ?? body.workspaceId;
       const { subscription } = body;
+
+      const user = await userFromRequest();
+      if (!user) return json({ error: "Giriş yapılmalı" }, 401);
+      const { data: member } = await db
+        .from("workspace_members")
+        .select("user_id")
+        .eq("workspace_id", workspace_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!member) return json({ error: "Bu defterin üyesi değilsiniz" }, 403);
 
       if (
         typeof workspace_id !== "string" ||
