@@ -137,10 +137,28 @@ Deno.serve(async (req) => {
         .select("id, endpoint, p256dh, auth")
         .eq("workspace_id", job.workspace_id);
 
+      // Bildirimde sipariş kodu yerine müşterinin adı, adet ve tutar görünsün.
+      let body = `Yeni sipariş alındı: ${job.order_group}`;
+      const { data: book } = await db
+        .from("books")
+        .select("ord:data->ord")
+        .eq("workspace_id", job.workspace_id)
+        .maybeSingle();
+      const items = (Array.isArray(book?.ord) ? book.ord : [])
+        .filter((o: { orderGroup?: string }) => o?.orderGroup === job.order_group);
+      if (items.length) {
+        const qty = items.reduce((a: number, o: { qty?: number }) => a + (Number(o.qty) || 0), 0);
+        const total = items.reduce((a: number, o: { qty?: number; price?: number }) => a + (Number(o.qty) || 0) * (Number(o.price) || 0), 0);
+        const money = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 2 })
+          .format(total).replace(/,00$/, "");
+        const cust = String(items[0].cust || "Müşteri").slice(0, 60);
+        body = `${cust}: ${items.length > 1 ? items.length + " ürün, " : ""}${qty} adet, ${money}`;
+      }
+
       const payload = JSON.stringify({
         title: "Yeni katalog siparişi",
-        body: `Yeni sipariş alındı: ${job.order_group}`,
-        url: "https://barishnc-creator.github.io/ortak-muhasebe/index.html",
+        body,
+        url: "https://barishnc-creator.github.io/ortak-muhasebe/index.html#ord",
       });
 
       let allOk = !subError && (subs?.length ?? 0) > 0;
