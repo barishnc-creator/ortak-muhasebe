@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0A1520">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Atölye Defteri">
 <title>Tidex Technology · Atölye Defteri</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -36,7 +40,7 @@ a{color:var(--teal-2)}
 svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 /* Giriş ekranı */
-.auth{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:var(--bg)}
+.auth{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px));background:var(--bg)}
 .auth:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(123,230,224,.035) 0 1px,transparent 1px 5px);-webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000,transparent 70%);mask-image:radial-gradient(ellipse at 50% 30%,#000,transparent 70%)}
 .authbox{position:relative;width:min(420px,100%);background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:30px}
 .authbox img{width:52px;height:52px;border-radius:14px}
@@ -47,7 +51,7 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 
 /* Yerleşim */
 .app{display:grid;grid-template-columns:var(--side) minmax(0,1fr);min-height:100vh}
-.side{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;padding:18px 14px;border-right:1px solid var(--line);background:var(--panel);overflow-y:auto}
+.side{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;padding:calc(18px + env(safe-area-inset-top,0px)) 14px 18px calc(14px + env(safe-area-inset-left,0px));border-right:1px solid var(--line);background:var(--panel);overflow-y:auto}
 .brand{display:flex;align-items:center;gap:11px;padding:4px 8px 14px}
 .brand img{width:38px;height:38px;border-radius:11px}
 .brand b{display:block;font:700 16px/1.15 var(--display)}
@@ -225,7 +229,7 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 @media (max-width:1023px){
  .app{grid-template-columns:1fr}
  .side{display:none}
- .mtop{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:40;height:60px;padding:0 14px;background:rgba(10,21,32,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+ .mtop{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:40;height:calc(60px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) calc(14px + env(safe-area-inset-right,0px)) 0 calc(14px + env(safe-area-inset-left,0px));background:rgba(10,21,32,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
  .mtop img{width:34px;height:34px;border-radius:10px}
  .mtop b{font:700 16px/1.1 var(--display);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  .mtop .sync{padding:0}
@@ -253,7 +257,7 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
  .rows>.r{flex-wrap:wrap;gap:10px}
  .r .acts{width:100%;justify-content:flex-end}
  .r.ord .amt{text-align:left}
- .drawer{top:auto;left:0;width:100%;max-height:94dvh;border-left:0;border-top:1px solid var(--line);border-radius:20px 20px 0 0;transform:translateY(102%)}
+ .drawer{top:auto;left:0;width:100%;max-height:calc(100dvh - 12px - env(safe-area-inset-top,0px));border-left:0;border-top:1px solid var(--line);border-radius:20px 20px 0 0;transform:translateY(102%)}
  .chart{gap:6px;height:170px}
  .fig b{font-size:13px}
 }
