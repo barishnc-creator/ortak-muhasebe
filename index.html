@@ -243,8 +243,23 @@ function freshBook(){return {set:{hr:15,fire:10},job:[],debt:[],mat:[],prod:[],o
 // Uzaktan gelen daha yeni sürümü bu cihazdaki kaydedilmemiş değişikliklerle birleştirir.
 function absorbRemote(d,ver){
  if(!isObj(d)||!(Number(ver)>VER))return false;
+ const oldIds=new Set((S.ord||[]).map(o=>String(o.id)));
  S=Object.assign(freshBook(),mergeBook(BASE,S,d));
- BASE=clone(d);VER=Number(ver);return true}
+ BASE=clone(d);VER=Number(ver);
+ notifyCatalogOrders((S.ord||[]).filter(o=>o&&o.source==='catalog'&&!oldIds.has(String(o.id))));
+ return true}
+// Katalogdan yeni gelen siparişler için bildirim (sipariş koduna göre tek bildirim; ortak eklediyse tekrar eklenmez).
+function notifyCatalogOrders(added){
+ if(!added.length)return 0;
+ const groups=new Map();let n=0;
+ added.forEach(o=>{const key=o.orderGroup||o.id;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(o)});
+ groups.forEach((items,key)=>{
+  const nid='cat-'+key;if((S.notifs||[]).some(x=>x.id===nid))return;
+  const first=items[0],qty=items.reduce((a,o)=>a+N(o.qty),0),total=items.reduce((a,o)=>a+N(o.qty)*N(o.price),0);
+  const detail=[first.phone?'Tel: '+first.phone:'',first.note?'Not: '+first.note:''].filter(Boolean).join(' · ');
+  addNotification('Katalogdan yeni sipariş',`${first.cust||'Müşteri'} · ${items.length} ürün kalemi · ${qty} adet · ${TL(total)}${first.orderGroup?' · '+first.orderGroup:''}${detail?' · '+detail:''}`,nid);n++;
+ });
+ return n}
 function refreshView(){document.activeElement&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)?pend=1:render()}
 async function fetchBook(cols){const {data,error}=await sb.from('books').select(cols||'data,version').eq('workspace_id',workspaceId).maybeSingle();if(error&&error.code!=='PGRST116')throw error;return data||null}
 async function load(){
@@ -255,20 +270,8 @@ async function load(){
  ref={workspace_id:workspaceId};
  const applyRemoteData=(d,ver)=>{
   if(!d||!Array.isArray(d.ord))return;
-  const oldIds=new Set((S.ord||[]).map(o=>String(o.id)));
   if(!absorbRemote(d,ver))return;
-  const added=(S.ord||[]).filter(o=>o&&o.source==='catalog'&&!oldIds.has(String(o.id)));
-  if(added.length){
-   const groups=new Map();let notified=false;
-   added.forEach(o=>{const key=o.orderGroup||o.id;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(o)});
-   groups.forEach((items,key)=>{
-    const nid='cat-'+key;if((S.notifs||[]).some(n=>n.id===nid))return; // ortak zaten bildirim eklediyse tekrar ekleme
-    const first=items[0],qty=items.reduce((a,o)=>a+N(o.qty),0),total=items.reduce((a,o)=>a+N(o.qty)*N(o.price),0);
-    const detail=[first.phone?'Tel: '+first.phone:'',first.note?'Not: '+first.note:''].filter(Boolean).join(' · ');
-    addNotification('Katalogdan yeni sipariş',`${first.cust||'Müşteri'} · ${items.length} ürün kalemi · ${qty} adet · ${TL(total)}${first.orderGroup?' · '+first.orderGroup:''}${detail?' · '+detail:''}`,nid);notified=true;
-   });
-   if(notified)save();
-  }
+  if(!same(S,BASE))save(); // yeni bildirim ya da bekleyen yerel değişiklik varsa kaydet
   refreshView();
  };
  const checkRemote=async()=>{

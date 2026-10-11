@@ -90,15 +90,47 @@ html{background:#080d16}body{background:radial-gradient(ellipse at 12% 0%,rgba(4
 @media(hover:none){.media-nav{opacity:1}}
 @media(prefers-reduced-motion:reduce){.media-track{scroll-behavior:auto}.media-nav,.media-nav button,.media-dots button{transition:none}}
 </style>
+<style id="order-tracking">
+.topbtns{display:flex;gap:8px;align-items:center}
+.trackbtn{background:transparent;color:var(--tx);border:1px solid var(--ln);font-weight:800;padding:12px 15px;white-space:nowrap}
+.trackbtn:hover{border-color:var(--ac);color:var(--ac)}
+.tform{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;margin-top:6px}
+.tform .field{margin:0}
+.tform .submit{margin:0;width:auto;padding:13px 22px;white-space:nowrap}
+.tintro{color:var(--mu);font-size:13px;margin:6px 0 4px}
+.tcard{margin-top:22px;border:1px solid var(--ln);border-radius:18px;padding:18px;background:rgba(255,255,255,.02)}
+.thead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.thead small{display:block;color:var(--mu);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.thead b{font-size:17px;letter-spacing:.02em}
+.tsteps{display:grid;grid-template-columns:repeat(4,1fr);margin:22px 0 8px;position:relative;isolation:isolate}
+.tstep{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;position:relative}
+.tstep:before{content:"";position:absolute;top:16px;right:50%;width:100%;height:3px;background:var(--ln);z-index:0}
+.tstep:first-child:before{display:none}
+.tstep.done:before,.tstep.now:before{background:var(--ac)}
+.tstep span{position:relative;z-index:1;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:850;font-size:14px;background:#172334;border:2px solid var(--ln);color:var(--mu)}
+.tstep.done span{background:var(--ac);border-color:var(--ac);color:#062229}
+.tstep.now span{border-color:var(--ac);color:var(--ac);box-shadow:0 0 0 5px rgba(112,225,209,.14)}
+.tstep small{font-size:12px;color:var(--mu);font-weight:700}
+.tstep.now small{color:var(--tx)}
+.tnow{margin:16px 0 6px;padding:13px 14px;border-radius:13px;background:rgba(112,225,209,.08);border:1px solid rgba(112,225,209,.22);font-size:14px;line-height:1.55}
+.tbadge{font-size:12px;font-weight:800;padding:6px 11px;border-radius:999px;border:1px solid var(--ln);color:#cfe0ee;white-space:nowrap}
+.tbadge.s1{color:#ffe1a0;border-color:#5b4a23}.tbadge.s2{color:#a8d8ff;border-color:#24507a}.tbadge.s3{color:#9cf0c3;border-color:#22604f}
+.tsum{display:flex;justify-content:space-between;padding:7px 0;color:var(--mu)}.tsum b{color:var(--tx)}
+.codebox{display:inline-flex;align-items:center;gap:10px;margin:6px 0 4px;padding:10px 14px;border:1px dashed var(--ac);border-radius:12px;font-size:19px;font-weight:850;letter-spacing:.04em}
+.codebox button{padding:6px 10px;font-size:12px;background:var(--ac2);color:var(--ac);font-weight:800}
+.tempty{text-align:center;color:var(--mu);padding:22px 8px 6px}
+@media(max-width:650px){.tform{grid-template-columns:1fr}.tform .submit{width:100%}.trackbtn{padding:10px 11px;font-size:12px}.trackbtn .lbl{display:none}.tstep small{font-size:10.5px}.tstep span{width:30px;height:30px}.tstep:before{top:14px}.tcard{padding:14px}.codebox{font-size:16px}}
+</style>
 </head>
 <body>
 <main class="wrap">
 <div class="top"><div class="brand"><img src='data:image/jpeg;base64,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' alt='Tidex Technology'><div><b>Tidex Technology</b><small>Geleceğin Teknolojileri</small></div></div>
-<button class="cartbtn" onclick="openCart()">🛒 Sepet <span id="count">0</span></button></div>
+<div class="topbtns"><button class="trackbtn" onclick="openTrack()" aria-label="Sipariş takibi">📦 <span class="lbl">Sipariş takibi</span></button><button class="cartbtn" onclick="openCart()">🛒 Sepet <span id="count">0</span></button></div></div>
 <section class="hero"><h1>Tidex Technology Ürün Kataloğu</h1><p>Yenilikçi Ürünler, Kolay Sipariş, Güvenilir Hizmet.</p><div class="chips"><span class="chip">✦ Geleceğin Teknolojileri</span><span class="chip">▣ Kolay sipariş süreci</span><span class="chip">✓ Güvenilir iletişim</span></div></section>
 <input class="search" id="search" placeholder="⌕  Ürün adı veya açıklama ara..." oninput="renderProducts()"><div id="categories" class="chips" style="margin:12px 0"></div>
 <div id="msg" class="msg">Ürünler hazırlanıyor…</div><div id="products" class="grid"></div></main>
 <div id="panel" class="panel"><section class="sheet"><div class="sheethead"><h2 style="margin:0">🛒 Sepetiniz</h2><button onclick="closeCart()">✕</button></div><div id="cart"></div><div id="checkout"></div></section></div>
+<div id="trackpanel" class="panel"><section class="sheet"><div class="sheethead"><h2 style="margin:0">📦 Sipariş takibi</h2><button onclick="closeTrack()" aria-label="Kapat">✕</button></div><p class="tintro">Sipariş verdiğinizde size verilen kodu ve siparişte yazdığınız telefon numarasını girin.</p><div class="tform"><div class="field"><label for="tcode">Sipariş kodu</label><input id="tcode" placeholder="CAT-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false"></div><div class="field"><label for="tphone">Telefon</label><input id="tphone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></div><button class="submit" id="tbtn" onclick="trackOrder()">Sorgula</button></div><div id="tresult" aria-live="polite"></div></section></div>
 <div id="toast" class="toast"></div>
 
 <script>
@@ -157,7 +189,7 @@ function cardQty(id,d){const p=catalog.products.find(x=>x.id===id);if(!p)return;
 function add(id){const p=catalog.products.find(x=>x.id===id);if(!p)return;const min=Math.max(1,Math.floor(Number(p.catalogMin)||25)),step=Math.max(1,Math.floor(Number(p.catalogStep)||25)),x=cart.find(x=>x.product_id===id);if(x)x.qty=Math.max(min,x.qty+step);else cart.push({product_id:id,name:p.name||p.n||'Ürün',price:Number(p.price??p.fiyat??0),qty:min,min,step});persistCart();updateCount();renderCart();toast('Ürün sepete eklendi')}
 function updateCount(){$('count').textContent=cart.reduce((a,x)=>a+x.qty,0);persistCart()}
 function change(id,d){const x=cart.find(x=>x.product_id===id);if(!x)return;const min=Math.max(1,x.min||25),step=Math.max(1,x.step||25);if(d<0&&x.qty-step<min)cart=cart.filter(y=>y.product_id!==id);else x.qty=Math.max(min,x.qty+d*step);persistCart();renderCart();updateCount();renderProducts()}
-function openCart(){$('panel').style.display='block';renderCart();$('panel').scrollIntoView({behavior:'smooth',block:'start'})}
+function openCart(){closeTrack();$('panel').style.display='block';renderCart();$('panel').scrollIntoView({behavior:'smooth',block:'start'})}
 function closeCart(){$('panel').style.display='none';}
 function renderCart(){
  const total=cart.reduce((a,x)=>a+x.price*x.qty,0);
@@ -176,10 +208,50 @@ async function submitOrder(){
   const {data,error}=await sb.rpc('submit_catalog_order',{p_workspace_id:wid,p_customer_name:name,p_phone:phone,p_note:($('co').value||'').trim(),p_items:cart.map(x=>({product_id:x.product_id,qty:x.qty}))});
   if(error)throw error;
   const no=data?.[0]?.order_group||data?.order_group||'CAT',total=data?.[0]?.total||data?.total||0;
-  cart=[];persistCart();sending=false;updateCount();$('cart').innerHTML=`<div class="empty"><div style="font-size:42px">✓</div><h3>Siparişiniz alındı</h3><p>Sipariş numaranız: <b>${esc(no)}</b></p><p>Toplam: <b>${money(total)}</b></p><p>Siparişiniz kontrol edildikten sonra hazırlanacaktır. Teşekkür ederiz.</p><button class="cartbtn" onclick="closeCart()">Alışverişe devam et</button></div>`;$('checkout').innerHTML='';
+  rememberOrder(no,phone);cart=[];persistCart();sending=false;updateCount();$('cart').innerHTML=`<div class="empty"><div style="font-size:42px">✓</div><h3>Siparişiniz alındı</h3><p style="margin-bottom:4px">Sipariş kodunuz:</p><div class="codebox"><span>${esc(no)}</span><button type="button" onclick="copyCode('${esc(no)}')">Kopyala</button></div><p class="note">Bu kodu saklayın. Siparişinizin durumunu bu kod ve telefon numaranızla takip edebilirsiniz.</p><p>Toplam: <b>${money(total)}</b></p><p>Siparişiniz kontrol edildikten sonra hazırlanacaktır. Teşekkür ederiz.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="cartbtn" onclick="openTrack()">📦 Siparişimi takip et</button><button class="trackbtn" onclick="closeCart()">Alışverişe devam et</button></div></div>`;$('checkout').innerHTML='';
  }catch(e){sending=false;console.error(e);toast('Sipariş gönderilemedi: '+(e?.message||e));if($('checkout').querySelector('.submit')){$('checkout').querySelector('.submit').disabled=false;$('checkout').querySelector('.submit').textContent='✓ Siparişi gönder'}}
 }
+/* ---- Sipariş takibi ---- */
+const TRACK_KEY='tidex-last-order',STAGES=['Sipariş alındı','Baskıda','Hazır','Teslim edildi'];
+const STAGE_MSG=['Siparişiniz alındı. Kontrol edildikten sonra üretime başlanacak.','Ürünleriniz şu anda basılıyor.','Siparişiniz hazır! Teslimat için sizinle iletişime geçeceğiz.','Siparişiniz teslim edildi. Bizi tercih ettiğiniz için teşekkür ederiz!'];
+function lastOrder(){try{return JSON.parse(localStorage.getItem(TRACK_KEY)||'null')}catch(e){return null}}
+function rememberOrder(code,phone){try{localStorage.setItem(TRACK_KEY,JSON.stringify({code,phone}))}catch(e){}}
+async function copyCode(code){try{await navigator.clipboard.writeText(code);toast('Sipariş kodu kopyalandı')}catch(e){toast('Sipariş kodunuz: '+code)}}
+function openTrack(code){
+ closeCart();const lo=lastOrder();
+ $('tcode').value=code||$('tcode').value||lo?.code||'';
+ if(!$('tphone').value&&lo?.phone&&(!code||code===lo.code))$('tphone').value=lo.phone;
+ $('trackpanel').style.display='block';$('trackpanel').scrollIntoView({behavior:'smooth',block:'start'});
+ if($('tcode').value&&$('tphone').value)trackOrder();else ($('tcode').value?$('tphone'):$('tcode')).focus();
+}
+function closeTrack(){$('trackpanel').style.display='none'}
+const fmtDate=d=>{const x=new Date(String(d||'')+'T00:00:00');return isNaN(x)?esc(d||''):x.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})};
+let tracking=false;
+async function trackOrder(){
+ if(tracking)return;
+ const code=($('tcode').value||'').trim(),phone=($('tphone').value||'').trim();
+ if(!code){toast('Lütfen sipariş kodunuzu yazın.');$('tcode').focus();return}
+ if(phone.replace(/\D/g,'').length<10){toast('Lütfen siparişte yazdığınız telefon numarasını girin.');$('tphone').focus();return}
+ tracking=true;const btn=$('tbtn');btn.disabled=true;btn.textContent='Sorgulanıyor…';
+ try{
+  if(!sb){if(!window.supabase?.createClient)throw new Error('Bağlantı kurulamadı.');sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}
+  const {data,error}=await sb.rpc('track_catalog_order',{p_code:code,p_phone:phone});
+  if(error)throw error;
+  const o=typeof data==='string'?JSON.parse(data):data;
+  $('tresult').innerHTML=o&&o.code?renderTrack(o):'<div class="tempty">Bu kod ve telefon numarasıyla eşleşen bir sipariş bulunamadı.<br>Kodu ve telefon numarasını kontrol edip tekrar deneyin.</div>';
+ }catch(e){console.error(e);$('tresult').innerHTML='<div class="tempty err">Sorgulama şu an yapılamadı. Lütfen biraz sonra tekrar deneyin.</div>'}
+ finally{tracking=false;btn.disabled=false;btn.textContent='Sorgula'}
+}
+function renderTrack(o){
+ const stages=Array.isArray(o.stages)&&o.stages.length?o.stages:STAGES,st=Math.max(0,Math.min(stages.length-1,Number(o.stage)||0));
+ const steps=stages.map((s,i)=>`<div class="tstep ${i<st?'done':i===st?'now':''}"><span>${i<st||st===stages.length-1&&i===st?'✓':i+1}</span><small>${esc(s)}</small></div>`).join('');
+ const items=(o.items||[]).map(it=>{const k=Math.max(0,stages.indexOf(it.status));return `<div class="line"><div><b>${esc(it.name)}</b><br><small>${esc(it.qty)} adet</small></div><span class="tbadge s${k}">${esc(it.status)}</span></div>`}).join('');
+ const total=Number(o.total)||0,paid=Number(o.paid)||0,left=Math.max(0,total-paid);
+ return `<div class="tcard"><div class="thead"><div><small>Sipariş kodu</small><b>${esc(o.code)}</b></div><div style="text-align:right"><small>Sipariş tarihi</small><b>${fmtDate(o.date)}</b></div></div><div class="tsteps">${steps}</div><div class="tnow">${esc(STAGE_MSG[st]||stages[st])}</div>${items}<div class="total"><b>Toplam</b><b>${money(total)}</b></div>${paid>0?`<div class="tsum"><span>Ödenen</span><b>${money(paid)}</b></div><div class="tsum"><span>Kalan</span><b>${money(left)}</b></div>`:''}</div>`;
+}
+['tcode','tphone'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')trackOrder()}));
 load();
+{const t=new URLSearchParams(location.search).get('takip');if(t)openTrack(t.trim())}
 </script>
 
 </body>
