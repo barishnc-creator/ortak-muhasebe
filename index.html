@@ -201,45 +201,115 @@ function toggleWorkspaceMenu(){const el=$('#ws');el.classList.toggle('ws-collaps
 function showWorkspace(name,code){$('#ws').classList.remove('hidden');$('#ws').classList.add('ws-collapsed');$('#ws').innerHTML=`<button class="g ws-menu-toggle" aria-label="Menüyü aç veya kapat" onclick="toggleWorkspaceMenu()">☰</button><button class="g" onclick="copyInvite()">👥 ${E(name)} · Davet kodu</button><button class="g" onclick="copyCatalogLink()">🛍️ Katalog linki</button><button class="g" onclick="joinWorkspace()">➕ Başka deftere katıl</button><button class="g" onclick="signout()">Çıkış</button>`;window._inviteCode=code}
 async function copyInvite(){try{await navigator.clipboard.writeText(window._inviteCode);toast('Davet kodu kopyalandı: '+window._inviteCode)}catch(e){toast('Davet kodunuz: '+window._inviteCode)}}
 async function signout(){if(realtime)await sb.removeChannel(realtime);await sb.auth.signOut();location.reload()}
+/* ---- Güvenli ortak kayıt ----
+   Defter tek bir veri paketi olarak saklanıyor. Her kayıtta "en son gördüğüm sürüm
+   hâlâ bu mu?" diye kontrol edilir (books.version). Arada katalogdan sipariş gelmiş
+   ya da ortak kayıt yapmışsa, önce güncel veri alınır, bu cihazdaki değişikliklerle
+   birleştirilir, sonra kaydedilir. Böylece kimsenin kaydı ezilmez. */
+let BASE=null,VER=0,savingP=null,saveAgain=false,myUid=null;
+const clone=o=>o===undefined?undefined:JSON.parse(JSON.stringify(o));
+const isObj=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
+// Anahtar sırasından bağımsız karşılaştırma (veritabanı alan sırasını değiştirebiliyor).
+const canon=v=>Array.isArray(v)?'['+v.map(canon).join(',')+']':isObj(v)?'{'+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+canon(v[k])).join(',')+'}':JSON.stringify(v===undefined?null:v)??'null';
+const same=(a,b)=>canon(a)===canon(b);
+const isIdList=a=>Array.isArray(a)&&a.every(x=>isObj(x)&&x.id!=null);
+const isPrimList=a=>Array.isArray(a)&&a.every(x=>x===null||typeof x!=='object');
+// Kimlikli kayıt listeleri (sipariş, kasa, ürün…): 3 yönlü birleştirme.
+function mergeList(base,local,remote){
+ const k=x=>String(x.id),bm=new Map(base.map(x=>[k(x),x])),lm=new Map(local.map(x=>[k(x),x])),out=[],seen=new Set();
+ for(const r of remote){const id=k(r);seen.add(id);const b=bm.get(id),l=lm.get(id);
+  if(l===undefined){if(b!==undefined&&same(b,r))continue;out.push(r);continue}   // bu cihazda silinmiş; uzakta değişmediyse silinmiş kalır
+  out.push(b!==undefined&&same(l,b)?r:l)}                                           // bu cihazda değişmediyse uzaktaki, değiştiyse bu cihazdaki
+ for(const l of local){const id=k(l);if(seen.has(id))continue;const b=bm.get(id);if(b!==undefined&&same(l,b))continue;out.push(l)} // bu cihazda yeni eklenenler
+ return out}
+// Düz değer listeleri (ör. kategori adları): eklenen/silinenleri iki taraftan da uygula.
+function mergePrim(base,local,remote){
+ const ks=x=>JSON.stringify(x),bs=new Set(base.map(ks)),ls=new Set(local.map(ks)),out=remote.filter(x=>!(bs.has(ks(x))&&!ls.has(ks(x)))),os=new Set(out.map(ks));
+ local.forEach(x=>{if(!bs.has(ks(x))&&!os.has(ks(x))){out.push(x);os.add(ks(x))}});return out}
+function mergeBook(base,local,remote){
+ base=isObj(base)?base:{};local=isObj(local)?local:{};remote=isObj(remote)?remote:{};
+ const out={};
+ for(const key of new Set([...Object.keys(remote),...Object.keys(local)])){
+  const b=base[key],l=local[key],r=remote[key];let v;
+  if(same(l,b))v=r;
+  else if(same(r,b))v=l;
+  else if([b,l,r].every(x=>x===undefined||isIdList(x)))v=mergeList(b||[],l||[],r||[]);
+  else if([b,l,r].every(x=>x===undefined||isPrimList(x)))v=mergePrim(b||[],l||[],r||[]);
+  else if(isObj(l)&&isObj(r))v=mergeBook(b,l,r);
+  else v=l;
+  if(v!==undefined)out[key]=v}
+ return out}
+function freshBook(){return {set:{hr:15,fire:10},job:[],debt:[],mat:[],prod:[],ord:[],tx:[],customers:[]}}
+// Uzaktan gelen daha yeni sürümü bu cihazdaki kaydedilmemiş değişikliklerle birleştirir.
+function absorbRemote(d,ver){
+ if(!isObj(d)||!(Number(ver)>VER))return false;
+ S=Object.assign(freshBook(),mergeBook(BASE,S,d));
+ BASE=clone(d);VER=Number(ver);return true}
+function refreshView(){document.activeElement&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)?pend=1:render()}
+async function fetchBook(cols){const {data,error}=await sb.from('books').select(cols||'data,version').eq('workspace_id',workspaceId).maybeSingle();if(error&&error.code!=='PGRST116')throw error;return data||null}
 async function load(){
  if(!workspaceId)throw new Error('Çalışma alanı bulunamadı.');
- const {data,error}=await sb.from('books').select('data').eq('workspace_id',workspaceId).maybeSingle();
- if(error && error.code!=='PGRST116')throw error;
- if(data&&data.data)S=Object.assign(S,data.data);
+ const {data:{session}}=await sb.auth.getSession();myUid=session?.user?.id||null;
+ const row=await fetchBook();
+ if(row&&row.data){S=Object.assign(S,row.data);BASE=clone(row.data);VER=Number(row.version)||0}
  ref={workspace_id:workspaceId};
- const applyRemoteData=(d)=>{
+ const applyRemoteData=(d,ver)=>{
   if(!d||!Array.isArray(d.ord))return;
   const oldIds=new Set((S.ord||[]).map(o=>String(o.id)));
-  const added=d.ord.filter(o=>o&&o.source==='catalog'&&!oldIds.has(String(o.id)));
-  if(JSON.stringify(d)===JSON.stringify(S))return;
-  S=Object.assign(S,d);
+  if(!absorbRemote(d,ver))return;
+  const added=(S.ord||[]).filter(o=>o&&o.source==='catalog'&&!oldIds.has(String(o.id)));
   if(added.length){
-   const groups=new Map();
+   const groups=new Map();let notified=false;
    added.forEach(o=>{const key=o.orderGroup||o.id;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(o)});
-   groups.forEach(items=>{
+   groups.forEach((items,key)=>{
+    const nid='cat-'+key;if((S.notifs||[]).some(n=>n.id===nid))return; // ortak zaten bildirim eklediyse tekrar ekleme
     const first=items[0],qty=items.reduce((a,o)=>a+N(o.qty),0),total=items.reduce((a,o)=>a+N(o.qty)*N(o.price),0);
     const detail=[first.phone?'Tel: '+first.phone:'',first.note?'Not: '+first.note:''].filter(Boolean).join(' · ');
-    addNotification('Katalogdan yeni sipariş',`${first.cust||'Müşteri'} · ${items.length} ürün kalemi · ${qty} adet · ${TL(total)}${first.orderGroup?' · '+first.orderGroup:''}${detail?' · '+detail:''}`);
+    addNotification('Katalogdan yeni sipariş',`${first.cust||'Müşteri'} · ${items.length} ürün kalemi · ${qty} adet · ${TL(total)}${first.orderGroup?' · '+first.orderGroup:''}${detail?' · '+detail:''}`,nid);notified=true;
    });
-   save();
+   if(notified)save();
   }
-  document.activeElement&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)?pend=1:render();
+  refreshView();
  };
- const checkRemoteOrders=async()=>{
+ const checkRemote=async()=>{
   try{
-   const {data,error}=await sb.from('books').select('data').eq('workspace_id',workspaceId).maybeSingle();
-   if(error)throw error;
-   if(data&&data.data)applyRemoteData(data.data);
-  }catch(e){console.warn('Katalog sipariş kontrolü başarısız:',e?.message||e)}
+   const v=await fetchBook('version');
+   if(v&&Number(v.version)>VER){const row=await fetchBook();if(row)applyRemoteData(row.data,row.version)}
+  }catch(e){console.warn('Defter güncelleme kontrolü başarısız:',e?.message||e)}
  };
  realtime=sb.channel('book-'+workspaceId).on('postgres_changes',{event:'*',schema:'public',table:'books',filter:'workspace_id=eq.'+workspaceId},payload=>{
-  const d=payload.new&&payload.new.data;
-  applyRemoteData(d);
+  const n=payload.new||{};
+  if(n.data&&n.version!=null)applyRemoteData(n.data,n.version);else checkRemote();
  }).subscribe();
  if(window._catalogOrderPoll)clearInterval(window._catalogOrderPoll);
- window._catalogOrderPoll=setInterval(checkRemoteOrders,5000);
+ window._catalogOrderPoll=setInterval(checkRemote,5000);
 }
-async function saveNow(){clearTimeout(tm);const userResult=await sb.auth.getUser();if(userResult.error)throw userResult.error;const result=await sb.from('books').upsert({workspace_id:workspaceId,data:S,updated_at:new Date().toISOString(),updated_by:userResult.data.user.id});if(result.error)throw result.error}
+async function pushOnce(){
+ for(let i=0;i<6;i++){
+  if(BASE&&same(S,BASE))return;
+  const snapshot=clone(S);
+  if(!VER){ // defter satırı hiç yoksa oluştur
+   const ex=await fetchBook();
+   if(ex){absorbRemote(ex.data,ex.version);continue}
+   const {data,error}=await sb.from('books').insert({workspace_id:workspaceId,data:snapshot,updated_by:myUid}).select('version').single();
+   if(error)throw error;BASE=snapshot;VER=Number(data.version)||1;return;
+  }
+  const {data,error}=await sb.from('books').update({data:snapshot,updated_at:new Date().toISOString(),updated_by:myUid}).eq('workspace_id',workspaceId).eq('version',VER).select('version').maybeSingle();
+  if(error)throw error;
+  if(data){BASE=snapshot;VER=Number(data.version);return}
+  // Arada defter değişmiş: güncelini al, bu cihazdaki değişikliklerle birleştir, tekrar dene.
+  const row=await fetchBook();
+  if(!row)throw new Error('Defter bulunamadı.');
+  if(absorbRemote(row.data,row.version))refreshView();
+ }
+ throw new Error('Defter başka bir cihazda sürekli değişiyor; birkaç saniye sonra tekrar deneyin.');
+}
+async function saveNow(){
+ clearTimeout(tm);
+ if(savingP){saveAgain=true;return savingP}
+ savingP=(async()=>{try{do{saveAgain=false;await pushOnce()}while(saveAgain)}finally{savingP=null}})();
+ return savingP;
+}
 function save(){clearTimeout(tm);tm=setTimeout(async()=>{try{await saveNow()}catch(e){console.error(e);toast('Ortak kayıt sırasında hata oluştu: '+(e?.message||e))}} ,400)}
 let tt;function toast(m,a,fn){const t=$('#t');t.innerHTML='<span>'+E(m)+'</span>'+(a?'<button class="b" id="ta">'+E(a)+'</button>':'');t.style.display='flex';if(a)$('#ta').onclick=()=>{t.style.display='none';fn()};clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',a?8000:3500)}
 const ds=()=>S.lastBak?Math.floor((Date.now()-S.lastBak)/864e5):null;
@@ -461,7 +531,7 @@ function editTx(id){const x=S.tx.find(x=>x.id===id);if(!x)return;const d=prompt(
 function editMat(id){const m=mat(id);if(!m)return;const n=prompt('Malzeme adı',m.n);if(n===null)return;if(!n.trim())return toast('Ad boş olamaz.');const g=prompt('Stok gramı',m.g);if(g===null)return;const price=prompt('Makara fiyatı (₺)',m.price);if(price===null)return;const spool=prompt('Makara gramı',m.spool||1000);if(spool===null)return;if(Number(g)<0||Number(price)<0||Number(spool)<=0)return toast('Değerleri kontrol edin.');Object.assign(m,{n:n.trim(),g:Number(g),price:Number(price),spool:Number(spool)});upd();}
 function editOrd(id){const o=S.ord.find(x=>x.id===id);if(!o)return;const cust=prompt('Müşteri adı',o.cust);if(cust===null)return;if(!cust.trim())return toast('Müşteri adı boş olamaz.');const qty=prompt('Adet',o.qty);if(qty===null)return;const price=prompt('Birim fiyat (₺)',o.price);if(price===null)return;const paid=prompt('Ödenen toplam (₺)',o.paid);if(paid===null)return;if(Number(qty)<=0||Number(price)<0||Number(paid)<0)return toast('Adet veya tutar geçersiz.');Object.assign(o,{cust:cust.trim(),qty:Number(qty),price:Number(price),paid:Number(paid)});upd();}
 function categoryNames(){return [...new Set([...(Array.isArray(S.catalogCategories)?S.catalogCategories:[]),...(Array.isArray(S.prod)?S.prod:[]).map(p=>String(p.catalogCategory||'').trim()).filter(Boolean)].map(x=>String(x||'').trim()).filter(Boolean))]}
-async function persistCategoryChange(message){render();try{clearTimeout(tm);const userResult=await sb.auth.getUser();if(userResult.error)throw userResult.error;const result=await sb.from('books').upsert({workspace_id:workspaceId,data:S,updated_at:new Date().toISOString(),updated_by:userResult.data.user.id});if(result.error)throw result.error;toast(message)}catch(e){console.error(e);toast('Kategori kaydedilemedi: '+(e?.message||e));}}
+async function persistCategoryChange(message){render();try{await saveNow();toast(message)}catch(e){console.error(e);toast('Kategori kaydedilemedi: '+(e?.message||e));}}
 async function addCategory(){const el=$('#newcat'),n=(el?.value||'').trim();if(!n)return toast('Kategori adı girin.');if(categoryNames().some(x=>x.toLocaleLowerCase('tr-TR')===n.toLocaleLowerCase('tr-TR')))return toast('Bu kategori zaten var.');S.catalogCategories=Array.isArray(S.catalogCategories)?S.catalogCategories:[];S.catalogCategories.push(n);if(el)el.value='';await persistCategoryChange('Kategori eklendi ve kaydedildi.');}
 async function renameCategoryAt(i){const names=categoryNames(),old=names[i],el=$('#cat-edit-'+i),v=(el?.value||'').trim();if(!old)return toast('Kategori bulunamadı; listeyi yenileyip tekrar deneyin.');if(!v)return toast('Kategori adı boş olamaz.');if(v!==old&&names.some(x=>x!==old&&x.toLocaleLowerCase('tr-TR')===v.toLocaleLowerCase('tr-TR')))return toast('Bu isimde başka bir kategori var.');S.catalogCategories=Array.isArray(S.catalogCategories)?S.catalogCategories:[];if(S.catalogCategories.includes(old))S.catalogCategories=S.catalogCategories.map(x=>x===old?v:x);else S.catalogCategories.push(v);S.prod.forEach(p=>{if(String(p.catalogCategory||'').trim()===old)p.catalogCategory=v});S.catalogCategories=[...new Set(S.catalogCategories)];await persistCategoryChange('Kategori adı güncellendi ve kaydedildi.');}
 async function deleteCategoryAt(i){const old=categoryNames()[i];if(!old)return toast('Kategori bulunamadı; listeyi yenileyip tekrar deneyin.');if(!confirm('“'+old+'” kategorisi silinsin mi? Bu kategorideki ürünler silinmez, kategorisiz kalır.'))return;S.catalogCategories=(Array.isArray(S.catalogCategories)?S.catalogCategories:[]).filter(x=>x!==old);S.prod.forEach(p=>{if(String(p.catalogCategory||'').trim()===old)p.catalogCategory=''});await persistCategoryChange('Kategori silindi ve kaydedildi.');}
@@ -471,7 +541,7 @@ async function addProd(){const n=V('pn');if(!n||!V('pm')){toast('Ürün adı ve 
 function toggleNewCustomer(){const on=V('oc')==='__new';const w=$('#newCustomerWrap');if(w)w.style.display=on?'block':'none'}
 function editProdField(id,key,value){const p=prod(id);if(!p)return;p[key]=value;save()}
 async function uploadProductMedia(id,type,file){if(!file)return;const p=prod(id);if(!p)return;const mime=file.type||'';if(type==='image'&&!mime.startsWith('image/')){toast('Lütfen bir fotoğraf seçin.');return}if(type==='video'&&!mime.startsWith('video/')&&!/\.(mp4|webm|mov|m4v|ogv)$/i.test(file.name)){toast('MP4, WebM veya MOV formatında bir video seçin.');return}if(file.size>25*1024*1024){toast("Dosya 25 MB'dan küçük olmalı.");return}if(!sb){toast('Supabase bağlantısı hazır değil; sayfayı yenileyin.');return}try{toast(type==='image'?'Fotoğraf yükleniyor…':'Video yükleniyor…');const ext=(file.name.split('.').pop()||'bin').toLowerCase();const path=`${workspaceId}/${id}/${type}-${Date.now()}.${ext}`;const {error}=await sb.storage.from('catalog-media').upload(path,file,{upsert:false,contentType:mime|| (type==='video'?'video/mp4':'application/octet-stream')});if(error)throw error;const {data}=sb.storage.from('catalog-media').getPublicUrl(path);if(!data?.publicUrl)throw new Error('Dosya bağlantısı oluşturulamadı.');p[type==='image'?'catalogImage':'catalogVideo']=data.publicUrl;await saveNow();render();if(document.getElementById('productEditModal'))editProduct(id);toast(type==='image'?'Fotoğraf yüklendi ve kaydedildi.':'Video yüklendi ve kaydedildi.')}catch(e){console.error(e);toast('Medya yüklenemedi: '+(e?.message||String(e)))}}
-function addNotification(title,message){S.notifs=Array.isArray(S.notifs)?S.notifs:[];S.notifs.push({id:uid(),title,message,date:new Date().toLocaleString('tr-TR'),read:false});if(S.notifs.length>200)S.notifs=S.notifs.slice(-200)}
+function addNotification(title,message,id){S.notifs=Array.isArray(S.notifs)?S.notifs:[];S.notifs.push({id:id||uid(),title,message,date:new Date().toLocaleString('tr-TR'),read:false});if(S.notifs.length>200)S.notifs=S.notifs.slice(-200)}
 function markNotificationRead(id){S.notifs=(S.notifs||[]).map(n=>n.id===id?{...n,read:true}:n);upd()}
 function deleteNotification(id){S.notifs=(S.notifs||[]).filter(n=>n.id!==id);upd();toast('Bildirim silindi.')}
 function markAllNotificationsRead(){S.notifs=(S.notifs||[]).map(n=>({...n,read:true}));upd();toast('Bildirimler okundu olarak işaretlendi.')}
