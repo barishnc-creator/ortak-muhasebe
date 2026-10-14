@@ -229,12 +229,15 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 .qsec{padding:2px 0 18px;margin-bottom:18px;border-bottom:1px solid var(--line)}
 .qsec:last-child{border-bottom:0;margin-bottom:0}
 .qsec>h3{margin:0 0 12px;font:700 16px/1.3 var(--display);display:flex;justify-content:space-between;align-items:center;gap:10px}
-.qhead,.qrow{display:grid;grid-template-columns:minmax(0,1fr) 84px 118px 104px 34px;gap:8px;align-items:start}
+.qhead,.qrow{display:grid;grid-template-columns:minmax(0,1fr) 76px 108px 70px 100px 34px;gap:8px;align-items:start}
+.qtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.qall{display:flex;gap:6px;align-items:center}
+.qall .inp{width:64px;height:34px;padding:0 8px;text-align:right;font-size:14px}
 .qhead{color:var(--faint);font-size:12.5px;font-weight:600;padding:0 0 6px}
 .qhead span:nth-child(n+2):not(:last-child){text-align:right}
 .qrow{padding:10px 0;border-top:1px solid var(--line)}
 .qrow .inp{height:40px}
-.qrow input[data-qf=qty],.qrow input[data-qf=price]{text-align:right}
+.qrow input[data-qf=qty],.qrow input[data-qf=price],.qrow input[data-qf=dp]{text-align:right}
 .qf{display:block;margin:0}.qf span{display:none}
 .qrow .ql{height:40px;display:flex;align-items:center;justify-content:flex-end;font-weight:700;white-space:nowrap}
 .qrow .ib{margin-top:3px}
@@ -252,7 +255,9 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 .stsel.q1{color:#FFD58A;border-color:#5B4A23}.stsel.q2{color:var(--blue);border-color:#24507A}.stsel.q3{color:var(--bad);border-color:#6A2C33}.stsel.q4{color:var(--ok);border-color:#1E5B43}
 @media (max-width:640px){
  .qhead{display:none}
- .qrow{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px;grid-template-areas:"p p d" "q r d" "l l l" "h h h"}
+ .qrow{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,.8fr) 34px;grid-template-areas:"p p p d" "q r i d" "l l l l" "h h h h"}
+ .qrow .qd{grid-area:i}
+ .qsec>h3{flex-wrap:wrap}.qtools{width:100%;justify-content:space-between}
  .qrow .qp{grid-area:p}.qrow .qq{grid-area:q}.qrow .qr{grid-area:r}
  .qf span{display:block;font-size:12px;color:var(--faint);margin-bottom:4px}.qrow .ql{grid-area:l;height:auto;justify-content:flex-start}.qrow .ib{grid-area:d;align-self:start}.qrow .qhint{grid-area:h}
  .qrow .ql:before{content:"Tutar: ";font-weight:500;color:var(--muted);margin-right:4px}
@@ -957,15 +962,19 @@ const qValid=q=>addDays(q.date,q.valid||15);
 const qExpired=q=>(q.status==='Taslak'||q.status==='Gönderildi')&&qValid(q)<td();
 const qOpen=q=>(q.status==='Taslak'||q.status==='Gönderildi')&&!qExpired(q);
 const r2=n=>Math.round(N(n)*100)/100;
+const iDp=i=>Math.min(100,Math.max(0,N(i.dp)));
+const lineNet=i=>N(i.qty)*N(i.price)*(1-iDp(i)/100);
+const pct=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:2}).format(Number(n)||0);
 function qCalc(q){
- const items=(q.items||[]).filter(i=>N(i.qty)>0),sub=items.reduce((a,i)=>a+N(i.qty)*N(i.price),0);
+ const items=(q.items||[]).filter(i=>N(i.qty)>0),gross=items.reduce((a,i)=>a+N(i.qty)*N(i.price),0),sub=items.reduce((a,i)=>a+lineNet(i),0),itemDisc=gross-sub;
  const dp=Math.min(100,Math.max(0,N(q.disc))),disc=sub*dp/100,net=sub-disc,vr=/^\d+$/.test(String(q.vat))?N(q.vat):0,vat=net*vr/100;
  const cost=items.reduce((a,i)=>{const p=i.prod&&prod(i.prod);return a+(p?N(i.qty)*pc(p):0)},0),costKnown=items.every(i=>i.prod&&prod(i.prod));
- return {items,sub,dp,disc,net,vr,vat,total:net+vat,cost,profit:net-cost,costKnown};
+ return {items,gross,itemDisc,sub,dp,disc,net,vr,vat,total:net+vat,cost,profit:net-cost,costKnown};
 }
 const custPrice=(name,pid)=>{const m=(S.custPrices||{})[lower(name)];return m&&pid&&m[pid]!=null?N(m[pid]):null};
+const custDisc=(name,pid)=>{const m=(S.custDisc||{})[lower(name)];return m&&pid&&m[pid]!=null?N(m[pid]):null};
 function nextQuoteNo(){const y=td().slice(0,4),pre='TKL-'+y+'-',n=(S.quotes||[]).map(q=>String(q.no||'')).filter(x=>x.startsWith(pre)).map(x=>parseInt(x.slice(pre.length),10)||0);return pre+String(Math.max(0,...n)+1).padStart(3,'0')}
-const qItemFor=(pid,cust)=>{const p=prod(pid);return {id:uid(),prod:p?p.id:'',name:p?p.n:'',qty:p?Math.max(1,N(p.catalogMin)||1):1,price:p?(custPrice(cust,p.id)??N(p.price)):0,manual:false}};
+const qItemFor=(pid,cust)=>{const p=prod(pid);return {id:uid(),prod:p?p.id:'',name:p?p.n:'',qty:p?Math.max(1,N(p.catalogMin)||1):1,price:p?(custPrice(cust,p.id)??N(p.price)):0,dp:p?(custDisc(cust,p.id)??0):0,manual:false}};
 const qItemsLabel=q=>{const n=(q.items||[]).map(i=>i.name||pname(i.prod));return n.slice(0,2).join(', ')+(n.length>2?' +'+(n.length-2):'')};
 
 function teklifPage(){
@@ -988,19 +997,24 @@ function teklifPage(){
 
 /* Düzenleyici: kalemler bir durum nesnesinde tutulur, satırlar ondan çizilir. */
 let QE=null;
+function qHint(it,cust){
+ const p=it.prod&&prod(it.prod),lp=p?N(p.price):null,cp=custPrice(cust,it.prod),cd=custDisc(cust,it.prod),pr=N(it.price),d=iDp(it),eff=pr*(1-d/100),off=lp&&eff<lp-0.004?Math.round((1-eff/lp)*1000)/10:0;
+ const same=cp!=null&&Math.abs(cp-pr)<0.005&&(cd??0)===d;
+ return [d?'İskontolu birim '+TL(eff):'',lp!=null?'Liste '+TL(lp):'',off?`<span class="ok">listeden %${pct(off)} indirimli</span>`:'',cp!=null?(same?'Bu müşteriye özel fiyat':'Bu müşteriye son: '+TL(cp)+(cd?', %'+pct(cd)+' iskonto':'')):'',p?'Maliyet '+TL(pc(p)):'',p&&eff&&eff<pc(p)?'<span class="bad">Maliyetin altında</span>':''].filter(Boolean).join(' · ');
+}
 function qItemRow(it,i,cust){
- const p=it.prod&&prod(it.prod),lp=p?N(p.price):null,cp=custPrice(cust,it.prod),pr=N(it.price),off=lp&&pr<lp?Math.round((1-pr/lp)*100):0;
- const hint=[lp!=null?'Liste '+TL(lp):'',off?`<span class="ok">%${off} indirimli</span>`:'',cp!=null?(Math.abs(cp-pr)<0.005?'Bu müşteriye özel fiyat':'Bu müşteriye son fiyat '+TL(cp)):'',p?'Maliyet '+TL(pc(p)):'',p&&pr&&pr<pc(p)?'<span class="bad">Maliyetin altında</span>':''].filter(Boolean).join(' · ');
+ const hint=qHint(it,cust);
  return `<div class="qrow" data-qi="${i}"><div class="qp"><select class="inp" data-qf="prod" aria-label="Ürün">${S.prod.map(x=>`<option value="${E(x.id)}"${x.id===it.prod?' selected':''}>${E(x.n)}</option>`).join('')}<option value=""${!it.prod?' selected':''}>Özel kalem…</option></select>${!it.prod?`<input class="inp" data-qf="name" value="${E(it.name||'')}" placeholder="Kalem adı, örn. Özel logo baskısı" style="margin-top:6px">`:''}</div>
  <label class="qf qq"><span>Adet</span><input class="inp" data-qf="qty" type="number" inputmode="decimal" step="any" min="0" value="${E(it.qty)}" aria-label="Adet"></label>
  <label class="qf qr"><span>Birim fiyat (₺)</span><input class="inp" data-qf="price" type="number" inputmode="decimal" step="any" min="0" value="${E(it.price)}" aria-label="Birim fiyat"></label>
- <div class="ql" data-qline>${TL(N(it.qty)*pr)}</div><button type="button" class="ib" data-act="qDel" data-id="${i}" aria-label="Kalemi kaldır">${IC.trash}</button><div class="qhint">${hint}</div></div>`;
+ <label class="qf qd"><span>İsk. %</span><input class="inp" data-qf="dp" type="number" inputmode="decimal" step="any" min="0" max="100" value="${N(it.dp)?E(it.dp):''}" placeholder="0" aria-label="İskonto yüzdesi"></label>
+ <div class="ql" data-qline>${TL(lineNet(it))}</div><button type="button" class="ib" data-act="qDel" data-id="${i}" aria-label="Kalemi kaldır">${IC.trash}</button><div class="qhint">${hint}</div></div>`;
 }
 function qRenderItems(){const q=QE.q;$('#qItems').innerHTML=q.items.map((it,i)=>qItemRow(it,i,q.cust.name)).join('')||'<p class="note" style="margin:6px 0 0">Henüz kalem yok. "Ürün ekle" ile ekleyin.</p>';qTotals()}
 function qReadConds(){const q=QE.q;q.disc=N(V('f_disc'));q.vat=V('f_vat')||'none';q.date=V('f_qdate')||td();q.valid=N(V('f_valid'))||15}
 function qTotals(){
  if(!QE)return;qReadConds();const c=qCalc(QE.q);
- $('#qSum').innerHTML=`<div><span>Ara toplam</span><b>${TL(c.sub)}</b></div>${c.disc?`<div><span>İskonto %${fg(c.dp)}</span><b>−${TL(c.disc)}</b></div>`:''}${c.vr?`<div><span>KDV %${c.vr}</span><b>${TL(c.vat)}</b></div>`:''}<div class="big"><span>Genel toplam</span><b>${TL(c.total)}</b></div>${c.items.length?`<div class="int"><span>Tahmini maliyet${c.costKnown?'':' (özel kalemler hariç)'}</span><b>${TL(c.cost)}</b></div><div class="int"><span>Tahmini kâr (yalnızca siz görürsünüz)</span><b class="${c.profit>=0?'ok':'bad'}">${TL(c.profit)}${c.net?' · %'+Math.round(c.profit/c.net*100):''}</b></div>`:''}`;
+ $('#qSum').innerHTML=`${c.itemDisc>0.004?`<div><span>Liste toplamı</span><b>${TL(c.gross)}</b></div><div><span>Ürün iskontoları</span><b>−${TL(c.itemDisc)}</b></div>`:''}<div><span>Ara toplam</span><b>${TL(c.sub)}</b></div>${c.disc?`<div><span>Genel iskonto %${pct(c.dp)}</span><b>−${TL(c.disc)}</b></div>`:''}${c.vr?`<div><span>KDV %${c.vr}</span><b>${TL(c.vat)}</b></div>`:''}<div class="big"><span>Genel toplam</span><b>${TL(c.total)}</b></div>${c.items.length?`<div class="int"><span>Tahmini maliyet${c.costKnown?'':' (özel kalemler hariç)'}</span><b>${TL(c.cost)}</b></div><div class="int"><span>Tahmini kâr (yalnızca siz görürsünüz)</span><b class="${c.profit>=0?'ok':'bad'}">${TL(c.profit)}${c.net?' · %'+Math.round(c.profit/c.net*100):''}</b></div>`:''}`;
  const t=$('#qTot');if(t)t.textContent=TL(c.total);
  const vd=$('#qValidOut');if(vd)vd.textContent='Son geçerlilik '+fdate(qValid(QE.q));
 }
@@ -1018,8 +1032,8 @@ function formQuote(q0,copy){
    ${fl('cphone','Telefon',{type:'tel',value:q.cust.phone,opt:true})}${fl('cemail','E-posta',{type:'email',value:q.cust.email,opt:true})}
    ${fl('caddr','Adres',{value:q.cust.address,opt:true,wide:true})}${fl('ctax','Vergi dairesi ve numarası',{value:q.cust.tax,opt:true,wide:true,ph:'Örn. Kadıköy VD, 1234567890'})}
    <div class="w">${fchk('saveCus','Müşteri kartına kaydet',true)}</div></div></div>
-  <div class="qsec"><h3>Ürünler ve fiyatlar <button type="button" class="btn s sm" data-act="qAdd">${IC.plus}Ürün ekle</button></h3>
-   <div class="qhead"><span>Ürün</span><span>Adet</span><span>Birim fiyat (₺)</span><span>Tutar</span><span></span></div><div id="qItems"></div></div>
+  <div class="qsec"><h3>Ürünler ve fiyatlar <span class="qtools"><span class="qall"><input class="inp" id="qAllDp" type="number" inputmode="decimal" step="any" min="0" max="100" placeholder="%" aria-label="Tüm ürünlere uygulanacak iskonto yüzdesi"><button type="button" class="btn s sm" data-act="qAllDp">Tümüne uygula</button></span><button type="button" class="btn s sm" data-act="qAdd">${IC.plus}Ürün ekle</button></span></h3>
+   <div class="qhead"><span>Ürün</span><span>Adet</span><span>Birim fiyat (₺)</span><span>İsk. %</span><span>Tutar</span><span></span></div><div id="qItems"></div></div>
   <div class="qsec"><h3>Koşullar</h3><div class="fg">
    ${fl('qdate','Teklif tarihi',{type:'date',value:q.date})}<div class="fl"><label for="f_valid">Geçerlilik süresi</label><select id="f_valid" name="valid">${[7,15,30,60].map(n=>`<option value="${n}"${N(q.valid)===n?' selected':''}>${n} gün</option>`).join('')}</select><div class="hint" id="qValidOut"></div></div>
    ${fl('delivery','Teslim süresi',{value:q.delivery,ph:'Örn. Onaydan sonra 7 iş günü',opt:true})}${fl('payment','Ödeme koşulu',{value:q.payment,ph:'Örn. %50 peşin, kalanı teslimde',opt:true})}
@@ -1029,32 +1043,34 @@ function formQuote(q0,copy){
   <div class="qsec"><div class="qsum" id="qSum"></div>${!co.phone&&!co.email?'<p class="note">Firma telefon ve e-postanız belgede görünsün diye Ayarlar → Firma bilgileri bölümünü doldurun.</p>':''}</div>`,
   onSubmit(f){return saveQuote(f)?undefined:false}});
  QE={q,isNew};qRenderItems();
+ $('#qAllDp').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();ACT.qAllDp()}});
  const body=$('#dBody');
  body.oninput=e=>{if(!QE)return;const k=e.target.dataset.qf;if(k){const row=e.target.closest('[data-qi]'),it=QE.q.items[+row.dataset.qi];if(!it)return;
-   if(k==='qty'){it.qty=e.target.value;it.qtyManual=true}else if(k==='price'){it.price=e.target.value;it.manual=true}else if(k==='name')it.name=e.target.value;
-   row.querySelector('[data-qline]').textContent=TL(N(it.qty)*N(it.price));qTotals();return}
+   if(k==='qty'){it.qty=e.target.value;it.qtyManual=true}else if(k==='price'){it.price=e.target.value;it.manual=true}else if(k==='dp'){it.dp=e.target.value;it.dpManual=true}else if(k==='name')it.name=e.target.value;
+   row.querySelector('[data-qline]').textContent=TL(lineNet(it));const h=row.querySelector('.qhint');if(h)h.innerHTML=qHint(it,QE.q.cust.name);qTotals();return}
   if(['f_disc','f_qdate'].includes(e.target.id))qTotals()};
  body.onchange=e=>{if(!QE)return;const t=e.target;
   if(t.dataset.qf==='prod'){const i=+t.closest('[data-qi]').dataset.qi,it=QE.q.items[i],p=prod(t.value);
-   if(p)Object.assign(it,{prod:p.id,name:p.n,price:custPrice(QE.q.cust.name,p.id)??N(p.price),manual:false,qty:it.qtyManual&&N(it.qty)>0?it.qty:Math.max(1,N(p.catalogMin)||1)});else Object.assign(it,{prod:'',name:'',manual:true});
+   if(p)Object.assign(it,{prod:p.id,name:p.n,price:custPrice(QE.q.cust.name,p.id)??N(p.price),dp:custDisc(QE.q.cust.name,p.id)??(it.dpManual?it.dp:0),manual:false,qty:it.qtyManual&&N(it.qty)>0?it.qty:Math.max(1,N(p.catalogMin)||1)});else Object.assign(it,{prod:'',name:'',manual:true});
    qRenderItems();if(!p)$('#qItems').querySelector(`[data-qi="${i}"] [data-qf=name]`)?.focus();return}
   if(t.id==='f_cname'){const name=t.value.trim();QE.q.cust.name=name;const c=customerRecords().find(x=>lower(x.name)===lower(name)),last=(S.quotes||[]).filter(x=>lower(x.cust?.name)===lower(name)).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
    const fill=(id,v)=>{const el=$('#'+id);if(el&&!el.value&&v)el.value=v};fill('f_cphone',c?.phone||last?.cust?.phone);fill('f_cemail',c?.email||last?.cust?.email);fill('f_caddr',c?.address||last?.cust?.address);fill('f_ctax',last?.cust?.tax);
-   let n=0;QE.q.items.forEach(it=>{const cp=custPrice(name,it.prod);if(!it.manual&&cp!=null&&cp!==N(it.price)){it.price=cp;n++}});qRenderItems();if(n)toast(n+' kalemde bu müşteriye verdiğiniz son fiyat kullanıldı.');return}
+   let n=0;QE.q.items.forEach(it=>{const cp=custPrice(name,it.prod),cd=custDisc(name,it.prod);let ch=false;if(!it.manual&&cp!=null&&cp!==N(it.price)){it.price=cp;ch=true}if(!it.dpManual&&cd!=null&&cd!==N(it.dp)){it.dp=cd;ch=true}if(ch)n++});qRenderItems();if(n)toast(n+' kalemde bu müşteriye verdiğiniz son fiyat ve iskonto kullanıldı.');return}
   if(['f_vat','f_valid','f_qdate','f_disc'].includes(t.id))qTotals()};
 }
 function saveQuote(f){
  const q=QE.q,name=String(f.cname||'').trim();
  if(!need(name,'Müşteri adını yazın.','cname'))return false;
- q.items=q.items.map(i=>({...i,name:i.prod&&prod(i.prod)?prod(i.prod).n:String(i.name||'').trim(),qty:N(i.qty),price:r2(i.price)}));
+ q.items=q.items.map(i=>({...i,name:i.prod&&prod(i.prod)?prod(i.prod).n:String(i.name||'').trim(),qty:N(i.qty),price:r2(i.price),dp:r2(i.dp)}));
  if(q.items.some(i=>!i.prod&&!i.name)){toast('Özel kalemin adını yazın.');return false}
  if(q.items.some(i=>i.qty<=0||i.price<0)){toast('Adet 0\'dan büyük, fiyat eksi olmayan bir sayı olmalı.');return false}
+ if(q.items.some(i=>i.dp<0||i.dp>100)){toast('Ürün iskontosu 0 ile 100 arasında olmalı.');return false}
  if(!q.items.length){toast('En az bir ürün ekleyin.');return false}
  const disc=N(f.disc);if(!need(disc>=0&&disc<100,'İskonto 0 ile 99 arasında olmalı.','disc'))return false;
  Object.assign(q,{cust:{name,phone:String(f.cphone||'').trim(),email:String(f.cemail||'').trim(),address:String(f.caddr||'').trim(),tax:String(f.ctax||'').trim()},date:f.qdate||td(),valid:N(f.valid)||15,delivery:String(f.delivery||'').trim(),payment:String(f.payment||'').trim(),vat:f.vat||'none',disc,note:String(f.note||'').trim(),images:!!f.images,updated:Date.now()});
  S.quotes=Array.isArray(S.quotes)?S.quotes:[];const ix=S.quotes.findIndex(x=>x.id===q.id);if(ix>=0)S.quotes[ix]=q;else S.quotes.push(q);
  // Müşteriye özel fiyat hafızası
- S.custPrices=S.custPrices||{};const key=lower(name);S.custPrices[key]=S.custPrices[key]||{};q.items.forEach(i=>{if(i.prod)S.custPrices[key][i.prod]=i.price});
+ S.custPrices=S.custPrices||{};const key=lower(name);S.custPrices[key]=S.custPrices[key]||{};S.custDisc=S.custDisc||{};S.custDisc[key]=S.custDisc[key]||{};q.items.forEach(i=>{if(i.prod){S.custPrices[key][i.prod]=i.price;S.custDisc[key][i.prod]=i.dp||0}});
  S.set.qVat=q.vat;if(q.delivery)S.set.qDelivery=q.delivery;if(q.payment)S.set.qPayment=q.payment;
  if(f.saveCus){S.customers=Array.isArray(S.customers)?S.customers:[];const c=S.customers.find(x=>lower(x.name)===key);
   if(c){['phone','email','address'].forEach(k=>{if(!c[k]&&q.cust[k])c[k]=q.cust[k]})}else S.customers.push({id:uid(),name,phone:q.cust.phone,email:q.cust.email,address:q.cust.address,notes:'',createdAt:td()})}
@@ -1066,9 +1082,9 @@ async function quoteToOrder(id){
  const q=byId(S.quotes||[],id);if(!q)return;const items=(q.items||[]).filter(i=>i.prod&&prod(i.prod)),skip=(q.items||[]).length-items.length;
  if(!items.length)return toast('Bu teklifte siparişe aktarılabilecek katalog ürünü yok.');
  const c=qCalc(q);
- if(!await confirmBox('Teklif siparişe dönüştürülsün mü?',`${items.length} kalem, teklifteki fiyatlarla${c.dp?' (%'+fg(c.dp)+' iskonto uygulanarak)':''} sipariş olarak eklenir${c.vr?'; KDV siparişe eklenmez':''}${skip?'. '+skip+' özel kalem aktarılmaz':''}.`,'Siparişe dönüştür'))return;
+ if(!await confirmBox('Teklif siparişe dönüştürülsün mü?',`${items.length} kalem, teklifteki fiyatlarla${c.dp||c.itemDisc>0.004?' (iskontolar uygulanarak)':''} sipariş olarak eklenir${c.vr?'; KDV siparişe eklenmez':''}${skip?'. '+skip+' özel kalem aktarılmaz':''}.`,'Siparişe dönüştür'))return;
  const grp='CAT-'+Array.from(crypto.getRandomValues(new Uint8Array(4)),b=>b.toString(16).padStart(2,'0')).join('').toUpperCase(),f=1-c.dp/100;
- items.forEach(i=>S.ord.push({id:uid(),cust:q.cust.name,prod:i.prod,qty:N(i.qty),price:r2(N(i.price)*f),paid:0,st:ST[0],ded:false,date:td(),source:'quote',quoteNo:q.no,orderGroup:grp,phone:q.cust.phone||'',note:'Teklif '+q.no,by:myUid}));
+ items.forEach(i=>S.ord.push({id:uid(),cust:q.cust.name,prod:i.prod,qty:N(i.qty),price:r2(N(i.price)*(1-iDp(i)/100)*f),paid:0,st:ST[0],ded:false,date:td(),source:'quote',quoteNo:q.no,orderGroup:grp,phone:q.cust.phone||'',note:'Teklif '+q.no,by:myUid}));
  q.status='Siparişe dönüştü';q.orderGroup=grp;logAct('Teklifi siparişe dönüştürdü: '+q.no+', '+q.cust.name);upd();
  const link=catalogLink()+'&takip='+grp;
  if(String(q.cust.phone||'').replace(/\D/g,'').length>=10)toast('Sipariş oluşturuldu ('+grp+').','Takip bağlantısını kopyala',()=>copyText(link,'Müşteri takip bağlantısı kopyalandı.'));else toast('Sipariş oluşturuldu ('+grp+'). Müşteri telefonu olmadığı için takip bağlantısı kullanılamaz.');
@@ -1118,24 +1134,26 @@ async function quotePdfBlob(q){
  doc.splitTextToSize(`Sayın ${q.cust.name}, talebiniz doğrultusunda hazırladığımız fiyat teklifimizi bilgilerinize sunarız.`,W-2*M).forEach(s=>{txt(s,M,y,{s:9,c:MU});y+=4.6});y+=2;
  // Kalemler
  const items=c.items,imgs=q.images!==false?await Promise.all(items.map(i=>{const p=i.prod&&prod(i.prod);return p&&p.catalogImage?thumb(p.catalogImage):null})):[],showImg=imgs.some(Boolean);
- const R=s=>({content:s,styles:{halign:'right'}});
+ const R=s=>({content:s,styles:{halign:'right'}}),hasDp=items.some(i=>iDp(i)>0);
+ const cols=['n',...(showImg?['img']:[]),'name','qty','price',...(hasDp?['dp']:[]),'total'],ci=k=>cols.indexOf(k);
+ const CW={n:{cellWidth:9,halign:'center',textColor:MU},img:{cellWidth:17,minCellHeight:17},qty:{cellWidth:hasDp?17:20},price:{cellWidth:hasDp?27:30},dp:{cellWidth:15},total:{cellWidth:hasDp?30:32,fontStyle:'bold'}};
  doc.autoTable({startY:y,margin:{left:M,right:M,bottom:22},
-  head:[['#',...(showImg?['']:[]),'Ürün',R('Adet'),R('Birim fiyat'),R('Tutar')]],
-  body:items.map((i,n)=>[String(n+1),...(showImg?['']:[]),niceName(i.name||pname(i.prod)),R(fg(i.qty)),R(pm(i.price)),R(pm(N(i.qty)*N(i.price)))]),
+  head:[['#',...(showImg?['']:[]),'Ürün',R('Adet'),R('Birim fiyat'),...(hasDp?[R('İsk.')]:[]),R('Tutar')]],
+  body:items.map((i,n)=>[String(n+1),...(showImg?['']:[]),niceName(i.name||pname(i.prod)),R(fg(i.qty)),R(pm(i.price)),...(hasDp?[R(iDp(i)?'%'+pct(iDp(i)):'—')]:[]),R(pm(lineNet(i)))]),
   styles:{font:'IS',fontSize:9,textColor:INK,cellPadding:{top:3.2,bottom:3.2,left:2.6,right:2.6},valign:'middle',lineWidth:0,overflow:'linebreak'},
   headStyles:{font:'IS',fontStyle:'bold',fillColor:DARK,textColor:255,fontSize:8.5},
   alternateRowStyles:{fillColor:SOFT},
-  columnStyles:Object.assign({0:{cellWidth:9,halign:'center',textColor:MU}},showImg?{1:{cellWidth:17,minCellHeight:17}}:{},{[showImg?3:2]:{cellWidth:20},[showImg?4:3]:{cellWidth:30},[showImg?5:4]:{cellWidth:32,fontStyle:'bold'}}),
-  didDrawCell:d=>{if(showImg&&d.section==='body'&&d.column.index===1){const im=imgs[d.row.index];if(im)doc.addImage(im,'JPEG',d.cell.x+1.8,d.cell.y+(d.cell.height-13.4)/2,13.4,13.4)}}});
+  columnStyles:Object.fromEntries(cols.filter(k=>CW[k]).map(k=>[ci(k),CW[k]])),
+  didDrawCell:d=>{if(showImg&&d.section==='body'&&d.column.index===ci('img')){const im=imgs[d.row.index];if(im)doc.addImage(im,'JPEG',d.cell.x+1.8,d.cell.y+(d.cell.height-13.4)/2,13.4,13.4)}}});
  y=doc.lastAutoTable.finalY+7;
  // Toplamlar ve koşullar
  const terms=[q.delivery&&['Teslim süresi',q.delivery],q.payment&&['Ödeme',q.payment],['Geçerlilik',longDate(qValid(q))+' tarihine kadar'],q.vat==='inc'&&['KDV','Fiyatlara KDV dahildir'],c.vr&&['KDV','%'+c.vr+' KDV toplamda gösterilmiştir']].filter(Boolean);
  const noteLines=q.note?doc.splitTextToSize(q.note,W-2*M-92):[];
- const needH=Math.max(10+(c.disc?5.5:0)+(c.vr?5.5:0)+14,8+terms.length*5+(noteLines.length?8+noteLines.length*4.4:0))+(co.iban?12:0)+14;
+ const needH=Math.max(10+(c.itemDisc>0.004?11:0)+(c.disc?5.5:0)+(c.vr?5.5:0)+14,8+terms.length*5+(noteLines.length?8+noteLines.length*4.4:0))+(co.iban?12:0)+14;
  if(y+needH>H-24){doc.addPage();y=22}
  const bx=W-M-82;let ty=y;
  const trow=(l,v)=>{txt(l,bx+3,ty+4,{s:9,c:MU});txt(v,W-M-3,ty+4,{s:9.5,b:1,a:'right'});ty+=5.5};
- trow('Ara toplam',pm(c.sub));if(c.disc)trow('İskonto %'+fg(c.dp),'−'+pm(c.disc));if(c.vr)trow('KDV %'+c.vr,pm(c.vat));
+ if(c.itemDisc>0.004){trow('Liste toplamı',pm(c.gross));trow('Ürün iskontoları','−'+pm(c.itemDisc))}trow('Ara toplam',pm(c.sub));if(c.disc)trow('Genel iskonto %'+pct(c.dp),'−'+pm(c.disc));if(c.vr)trow('KDV %'+c.vr,pm(c.vat));
  ty+=1.5;doc.setFillColor(...AC);doc.roundedRect(bx,ty,82,12,2,2,'F');txt('Genel toplam',bx+4,ty+7.6,{s:9.5,b:1,c:[255,255,255]});txt(pm(c.total),W-M-4,ty+7.8,{f:'BG',b:1,s:13,c:[255,255,255],a:'right'});ty+=12;
  let ly=y;txt('Koşullar',M,ly+4,{s:8.5,b:1,c:AC});ly+=9;
  terms.forEach(([l,v])=>{txt(l,M,ly,{s:8.6,c:MU});doc.splitTextToSize(String(v),W-2*M-92-28).forEach((s,i)=>{txt(s,M+28,ly+i*4.2,{s:8.6});if(i)ly+=4.2});ly+=5});
@@ -1253,6 +1271,7 @@ const ACT={
  qPdf:id=>quotePdf(id),qShare:id=>quotePdf(id,true),qOrder:id=>quoteToOrder(id),qF:k=>{UI.qF=k;render()},editCompany:()=>formCompany(),
  qAdd(){if(!QE)return;QE.q.cust.name=V('f_cname').trim();QE.q.items.push(qItemFor(S.prod[0]?.id,QE.q.cust.name));qRenderItems();const rows=$('#qItems').querySelectorAll('[data-qi]');rows[rows.length-1]?.querySelector('select')?.focus()},
  qDel(i){if(!QE)return;QE.q.items.splice(+i,1);qRenderItems()},
+ qAllDp(){if(!QE)return;const el=$('#qAllDp'),v=N(el.value);if(el.value===''||v<0||v>100)return toast('0 ile 100 arasında bir yüzde yazın.');QE.q.items.forEach(it=>{it.dp=v;it.dpManual=true});qRenderItems();toast(QE.q.items.length+' ürüne %'+pct(v)+' iskonto uygulandı.')},
  async qSavePdf(){if(!QE)return;const f=Object.fromEntries(new FormData($('#dForm')));$('#dForm').querySelectorAll('input[type=checkbox][name]').forEach(c=>f[c.name]=c.checked);const q=saveQuote(f);if(!q)return;closeDrawer();await quotePdf(q.id)},
  newOrd:()=>formOrd(),editOrd:id=>formOrd(byId(S.ord,id)),pay:id=>formPay(byId(S.ord,id)),
  async delOrd(id){const o=byId(S.ord,id);if(!o)return;const paid=N(o.paid);if(!await confirmBox('Sipariş silinsin mi?',o.cust+', '+N(o.qty)+' × '+pname(o.prod)+(paid?'. Kasaya yazılmış '+TL(paid)+' tahsilat silinmez.':'.'),'Sil'))return;S.ord=S.ord.filter(x=>x.id!==id);S.job.forEach(j=>{if(j.ord===id)j.ord=null});logAct(o.cust+' siparişini sildi');upd();toast('Sipariş silindi.')},
