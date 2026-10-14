@@ -1134,12 +1134,14 @@ async function quotePdfBlob(q){
  doc.splitTextToSize(`Sayın ${q.cust.name}, talebiniz doğrultusunda hazırladığımız fiyat teklifimizi bilgilerinize sunarız.`,W-2*M).forEach(s=>{txt(s,M,y,{s:9,c:MU});y+=4.6});y+=2;
  // Kalemler
  const items=c.items,imgs=q.images!==false?await Promise.all(items.map(i=>{const p=i.prod&&prod(i.prod);return p&&p.catalogImage?thumb(p.catalogImage):null})):[],showImg=imgs.some(Boolean);
- const R=s=>({content:s,styles:{halign:'right'}}),hasDp=items.some(i=>iDp(i)>0);
- const cols=['n',...(showImg?['img']:[]),'name','qty','price',...(hasDp?['dp']:[]),'total'],ci=k=>cols.indexOf(k);
- const CW={n:{cellWidth:9,halign:'center',textColor:MU},img:{cellWidth:17,minCellHeight:17},qty:{cellWidth:hasDp?17:20},price:{cellWidth:hasDp?27:30},dp:{cellWidth:15},total:{cellWidth:hasDp?30:32,fontStyle:'bold'}};
+ const R=s=>({content:s,styles:{halign:'right'}});
+ // Müşteri belgesinde iskonto oranları gösterilmez; birim fiyat, müşteri için belirlenen net adet fiyatıdır.
+ const unit=i=>r2(N(i.price)*(1-iDp(i)/100)*(1-c.dp/100));
+ const cols=['n',...(showImg?['img']:[]),'name','qty','price','total'],ci=k=>cols.indexOf(k);
+ const CW={n:{cellWidth:9,halign:'center',textColor:MU},img:{cellWidth:17,minCellHeight:17},qty:{cellWidth:20},price:{cellWidth:30},total:{cellWidth:32,fontStyle:'bold'}};
  doc.autoTable({startY:y,margin:{left:M,right:M,bottom:22},
-  head:[['#',...(showImg?['']:[]),'Ürün',R('Adet'),R('Birim fiyat'),...(hasDp?[R('İsk.')]:[]),R('Tutar')]],
-  body:items.map((i,n)=>[String(n+1),...(showImg?['']:[]),niceName(i.name||pname(i.prod)),R(fg(i.qty)),R(pm(i.price)),...(hasDp?[R(iDp(i)?'%'+pct(iDp(i)):'—')]:[]),R(pm(lineNet(i)))]),
+  head:[['#',...(showImg?['']:[]),'Ürün',R('Adet'),R('Birim fiyat'),R('Tutar')]],
+  body:items.map((i,n)=>[String(n+1),...(showImg?['']:[]),niceName(i.name||pname(i.prod)),R(fg(i.qty)),R(pm(unit(i))),R(pm(N(i.qty)*unit(i)))]),
   styles:{font:'IS',fontSize:9,textColor:INK,cellPadding:{top:3.2,bottom:3.2,left:2.6,right:2.6},valign:'middle',lineWidth:0,overflow:'linebreak'},
   headStyles:{font:'IS',fontStyle:'bold',fillColor:DARK,textColor:255,fontSize:8.5},
   alternateRowStyles:{fillColor:SOFT},
@@ -1147,18 +1149,14 @@ async function quotePdfBlob(q){
   didDrawCell:d=>{if(showImg&&d.section==='body'&&d.column.index===ci('img')){const im=imgs[d.row.index];if(im)doc.addImage(im,'JPEG',d.cell.x+1.8,d.cell.y+(d.cell.height-13.4)/2,13.4,13.4)}}});
  y=doc.lastAutoTable.finalY+7;
  // Toplamlar ve koşullar
- const terms=[q.delivery&&['Teslim süresi',q.delivery],q.payment&&['Ödeme',q.payment],['Geçerlilik',longDate(qValid(q))+' tarihine kadar'],q.vat==='inc'&&['KDV','Fiyatlara KDV dahildir'],c.vr&&['KDV','%'+c.vr+' KDV toplamda gösterilmiştir']].filter(Boolean);
- const noteLines=q.note?doc.splitTextToSize(q.note,W-2*M-92):[];
- const needH=Math.max(10+(c.itemDisc>0.004?11:0)+(c.disc?5.5:0)+(c.vr?5.5:0)+14,8+terms.length*5+(noteLines.length?8+noteLines.length*4.4:0))+(co.iban?12:0)+14;
+ const terms=[q.delivery&&['Teslim süresi',q.delivery],q.payment&&['Ödeme',q.payment],['Geçerlilik',longDate(qValid(q))+' tarihine kadar'],q.vat==='inc'&&['KDV','Fiyatlara KDV dahildir.'],c.vr&&['KDV','Fiyatlara KDV dahil değildir, %'+c.vr+' KDV ayrıca eklenir.']].filter(Boolean);
+ const noteLines=q.note?doc.splitTextToSize(q.note,W-2*M):[];
+ const needH=8+terms.length*5+(noteLines.length?8+noteLines.length*4.4:0)+(co.iban?12:0)+22;
  if(y+needH>H-24){doc.addPage();y=22}
- const bx=W-M-82;let ty=y;
- const trow=(l,v)=>{txt(l,bx+3,ty+4,{s:9,c:MU});txt(v,W-M-3,ty+4,{s:9.5,b:1,a:'right'});ty+=5.5};
- if(c.itemDisc>0.004){trow('Liste toplamı',pm(c.gross));trow('Ürün iskontoları','−'+pm(c.itemDisc))}trow('Ara toplam',pm(c.sub));if(c.disc)trow('Genel iskonto %'+pct(c.dp),'−'+pm(c.disc));if(c.vr)trow('KDV %'+c.vr,pm(c.vat));
- ty+=1.5;doc.setFillColor(...AC);doc.roundedRect(bx,ty,82,12,2,2,'F');txt('Genel toplam',bx+4,ty+7.6,{s:9.5,b:1,c:[255,255,255]});txt(pm(c.total),W-M-4,ty+7.8,{f:'BG',b:1,s:13,c:[255,255,255],a:'right'});ty+=12;
  let ly=y;txt('Koşullar',M,ly+4,{s:8.5,b:1,c:AC});ly+=9;
- terms.forEach(([l,v])=>{txt(l,M,ly,{s:8.6,c:MU});doc.splitTextToSize(String(v),W-2*M-92-28).forEach((s,i)=>{txt(s,M+28,ly+i*4.2,{s:8.6});if(i)ly+=4.2});ly+=5});
+ terms.forEach(([l,v])=>{txt(l,M,ly,{s:8.6,c:MU});doc.splitTextToSize(String(v),W-2*M-28).forEach((s,i)=>{txt(s,M+28,ly+i*4.2,{s:8.6});if(i)ly+=4.2});ly+=5});
  if(noteLines.length){ly+=2;txt('Not',M,ly,{s:8.5,b:1,c:AC});ly+=5;noteLines.forEach(s=>{txt(s,M,ly,{s:8.6});ly+=4.4})}
- y=Math.max(ly,ty)+8;
+ y=ly+8;
  if(co.iban){doc.setFillColor(...SOFT);doc.roundedRect(M,y,W-2*M,11,2,2,'F');txt('Banka hesabı',M+4,y+7,{s:8.5,c:MU});txt(co.iban+(co.name?'  ·  '+co.name:''),M+30,y+7,{s:9,b:1});y+=17}
  txt('Saygılarımızla,',M,y+2,{s:9,c:MU});txt((meName()?meName()+' · ':'')+co.name,M,y+7,{s:9.5,b:1});
  // Alt bilgi, her sayfada
