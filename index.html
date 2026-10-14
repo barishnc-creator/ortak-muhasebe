@@ -704,7 +704,7 @@ tx(){
 prod(){
  const q=lower(UI.prodQ),list=S.prod.filter(p=>!q||lower(p.n+' '+(p.catalogCategory||'')).includes(q));
  return head('Ürünler',S.prod.length+' ürün, '+S.prod.filter(p=>p.catalogVisible!==false&&p.catalogActive!==false&&N(p.price)>0).length+' tanesi katalogda',btn('cats','Kategoriler')+btn('newProd','Ürün ekle',{cls:'p',icon:'plus'}))+
- `<div class="tools"><label class="search">${IC.search}<span class="sr">Ürün ara</span><input data-input="prodQ" value="${E(UI.prodQ)}" placeholder="Ürün ya da kategori ara"></label><a class="btn s" href="${E(catalogLink())}" target="_blank" rel="noopener">Kataloğu aç</a></div>
+ `<div class="tools"><label class="search">${IC.search}<span class="sr">Ürün ara</span><input data-input="prodQ" value="${E(UI.prodQ)}" placeholder="Ürün ya da kategori ara"></label><a class="btn s" href="${E(catalogLink())}" target="_blank" rel="noopener">Kataloğu aç</a><a class="btn s" href="${E(catalogLink()+'&mod=vitrin')}" target="_blank" rel="noopener" title="Fiyatsız, siparişsiz; yalnızca ürün fotoğrafları ve videoları">Fiyatsız katalog</a></div>
  <div class="grid">${list.map(p=>{const c=pc(p),k=N(p.price)-c,mg=N(p.price)?k/N(p.price):0,live=p.catalogVisible!==false&&p.catalogActive!==false&&N(p.price)>0;
   return `<article class="pc"><div class="im">${p.catalogImage?`<img src="${E(p.catalogImage)}" alt="" loading="lazy">`:`<span class="ph0">${E(String(p.n||'?').charAt(0))}</span>`}<div class="tags">${live?'<span class="tag t">Katalogda</span>':'<span class="tag">Katalogda değil</span>'}${p.catalogBestSeller?'<span class="tag a">Çok satan</span>':''}${p.catalogVideo?'<span class="tag">Video</span>':''}</div></div>
   <div class="bd"><div class="nm">${E(p.n)}<small>${E(p.catalogCategory||'Kategorisiz')} · ${E(mat(p.mat)?.n||'Malzeme yok')} · ${fg(p.gram)} g · ${fg(pmin(p))} dk</small></div>
@@ -792,6 +792,7 @@ ayar(){
  <div class="card"><h2>Defter</h2><div class="rows">
   <div class="r"><div class="main"><div class="t">${E(workspaceName)}</div><div class="s">Davet kodu: <b style="color:var(--text);letter-spacing:.04em">${E(workspaceCode||'')}</b></div></div>${btn('copyInvite','Kopyala',{cls:'s sm'})}</div>
   <div class="r"><div class="main"><div class="t">Müşteri katalog bağlantısı</div><div class="s" style="word-break:break-all">${E(catalogLink())}</div></div>${btn('copyCatalog','Kopyala',{cls:'s sm'})}</div>
+  <div class="r"><div class="main"><div class="t">Fiyatsız katalog bağlantısı</div><div class="s">Fiyat ve sipariş yok; yalnızca ürün fotoğrafları ve videoları</div></div>${btn('copyVitrin','Kopyala',{cls:'s sm'})}</div>
   <div class="r"><div class="main"><div class="t">Başka bir deftere katıl</div><div class="s">Ortağınızın verdiği davet koduyla</div></div>${btn('join','Katıl',{cls:'s sm'})}</div>
   ${WS_LIST.length>1?`<div class="r"><div class="main"><div class="t">Defter değiştir</div><div class="s">${WS_LIST.length} deftere erişiminiz var</div></div>${btn('workspaces','Değiştir',{cls:'s sm'})}</div>`:''}
  </div></div>
@@ -956,7 +957,7 @@ function pickWorkspace(){
 /* ---- Teklifler ---- */
 const QST=['Taslak','Gönderildi','Kabul edildi','Reddedildi','Siparişe dönüştü'];
 const QVAT=[['none','KDV belirtilmesin'],['inc','Fiyatlara KDV dahil'],['20','KDV %20 eklensin'],['10','KDV %10 eklensin'],['1','KDV %1 eklensin']];
-const company=()=>Object.assign({name:'Tidex Technology',slogan:'3D baskı atölyesi',phone:'',email:'',web:'',address:'',taxOffice:'',taxNo:'',iban:''},S.company||{});
+const company=()=>Object.assign({name:'Tidex Technology',slogan:'Geleceğin Teknolojileri',phone:'',email:'',web:'',address:'',taxOffice:'',taxNo:'',iban:''},S.company||{});
 const addDays=(d,n)=>{const[y,m,day]=String(d||td()).split('-').map(Number),x=new Date(y,m-1,day+N(n));return x.getFullYear()+'-'+pd2(x.getMonth()+1)+'-'+pd2(x.getDate())};
 const qValid=q=>addDays(q.date,q.valid||15);
 const qExpired=q=>(q.status==='Taslak'||q.status==='Gönderildi')&&qValid(q)<td();
@@ -1263,7 +1264,7 @@ const ACT={
  more(){openDrawer({title:'Bölümler',body:`<div class="nav">${navHtml()}</div>`});$('#dBody').querySelectorAll('a').forEach(a=>a.addEventListener('click',closeDrawer))},
  workspaces:()=>pickWorkspace(),switchWs:id=>switchWorkspace(id),
  join(){openDrawer({title:'Deftere katıl',sub:'Ortağınızın verdiği davet kodunu girin.',submit:'Katıl',body:fl('code','Davet kodu',{req:true,ph:'ABCD1234',attrs:'autocapitalize="characters"'}),async onSubmit(f){if(!need(String(f.code||'').trim(),'Davet kodunu yazın.','code'))return false;return await joinWorkspace(f.code)}})},
- copyInvite:()=>copyText(workspaceCode,'Davet kodu kopyalandı.'),copyCatalog:()=>copyText(catalogLink(),'Katalog bağlantısı kopyalandı.'),
+ copyInvite:()=>copyText(workspaceCode,'Davet kodu kopyalandı.'),copyCatalog:()=>copyText(catalogLink(),'Katalog bağlantısı kopyalandı.'),copyVitrin:()=>copyText(catalogLink()+'&mod=vitrin','Fiyatsız katalog bağlantısı kopyalandı.'),
  newQuote:()=>formQuote(),editQuote:id=>formQuote(byId(S.quotes||[],id)),copyQuote:id=>formQuote(byId(S.quotes||[],id),true),
  async delQuote(id){const q=byId(S.quotes||[],id);if(!q)return;if(!await confirmBox('Teklif silinsin mi?',q.no+', '+(q.cust?.name||'')+'. Teklifle oluşturulan siparişler silinmez.','Sil'))return;S.quotes=S.quotes.filter(x=>x.id!==id);logAct('Teklifi sildi: '+q.no);upd()},
  qPdf:id=>quotePdf(id),qShare:id=>quotePdf(id,true),qOrder:id=>quoteToOrder(id),qF:k=>{UI.qF=k;render()},editCompany:()=>formCompany(),
