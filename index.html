@@ -210,6 +210,26 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 .fig small{display:block;color:var(--faint);font-size:12px}
 .fig b{font-weight:700;font-size:14px}
 .pc .ft{display:flex;gap:6px;margin-top:auto;flex-wrap:wrap}
+.pgrid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.pav{flex:none;width:44px;height:44px;border-radius:12px;background:linear-gradient(140deg,rgba(63,208,201,.22),rgba(63,208,201,.06));color:var(--teal-2);display:grid;place-items:center;font:800 18px/1 var(--display)}
+.ppv{display:grid;gap:0;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.ppv div{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;font-size:13.5px;background:var(--bg)}
+.ppv div+div{border-top:1px solid var(--line)}
+.ppv span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.ppv b{white-space:nowrap}.ppv small{color:var(--faint);font-weight:500;margin-left:6px}
+.ppv .more{color:var(--faint);font-size:12.5px;justify-content:center}
+.pmeta{display:flex;flex-wrap:wrap;gap:6px}
+.pptools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.pptools .inp{height:34px}.pptools .pct{width:74px}.pptools .q{flex:1;min-width:160px}
+.pphead,.pprow{display:grid;grid-template-columns:minmax(0,1fr) 128px 96px;gap:10px;align-items:center}
+.pphead{color:var(--faint);font-size:12.5px;font-weight:600;padding:0 0 6px}.pphead span:nth-child(n+2){text-align:right}
+.pprow{padding:10px 0;border-top:1px solid var(--line)}
+.pprow .nm{font-weight:600;overflow-wrap:anywhere}.pprow .nm small{display:block;color:var(--faint);font-weight:500;font-size:12.5px;margin-top:2px}
+.pprow .inp{height:40px;text-align:right}
+.pprow .pi{grid-column:1/-1;font-size:12.5px;color:var(--faint);margin-top:-4px}.pprow .pi:empty{display:none}
+.pprow.on{background:linear-gradient(90deg,rgba(63,208,201,.06),transparent 70%)}
+@media (max-width:640px){.pphead{display:none}.pprow{grid-template-columns:1fr 1fr}.pprow .nm{grid-column:1/-1}.pprow label span{display:block;font-size:12px;color:var(--faint);margin-bottom:4px}}
+@media (min-width:641px){.pprow label span{display:none}}
 .tg{display:flex;flex-wrap:wrap;gap:6px}
 .tg label{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer}
 .tg input{accent-color:var(--teal)}
@@ -373,6 +393,7 @@ const IC={
  debt:I('<path d="M3 10 12 4l9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/>'),
  notify:I('<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/>'),
  ayar:I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1"/>'),
+ partner:I('<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3M3 4h8"/>'),
  teklif:I('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>'),
  pdf:I('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'),
  share:I('<path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>'),
@@ -387,7 +408,7 @@ const IC={
  check:I('<path d="m5 12 5 5 9-10"/>'),
 };
 /* Sayfalar: [anahtar, ad, açıklama, grup] */
-const TABS=[['ozet','Özet','Bugünün durumu','Günlük'],['ord','Siparişler','Müşteri siparişleri ve tahsilat','Günlük'],['teklif','Teklifler','Müşteriye özel fiyat teklifleri','Günlük'],['job','Üretim','Baskıdaki ve bekleyen işler','Günlük'],['tx','Kasa','Gelir ve gider kayıtları','Günlük'],
+const TABS=[['ozet','Özet','Bugünün durumu','Günlük'],['ord','Siparişler','Müşteri siparişleri ve tahsilat','Günlük'],['teklif','Teklifler','Müşteriye özel fiyat teklifleri','Günlük'],['partner','Partnerler','İş ortaklarına özel fiyat listeleri','Günlük'],['job','Üretim','Baskıdaki ve bekleyen işler','Günlük'],['tx','Kasa','Gelir ve gider kayıtları','Günlük'],
  ['prod','Ürünler','Maliyet kartları ve katalog','Katalog ve stok'],['mat','Malzeme','Filament stoku','Katalog ve stok'],['cus','Müşteriler','İletişim ve bakiyeler','Katalog ve stok'],
  ['rapor','Rapor','Aylık özet ve karşılaştırma','Analiz'],['oneri','Öneriler','Satış fırsatları','Analiz'],
  ['debt','Borçlar','Taksit ve kredi ödemeleri','Diğer'],['notify','Bildirimler','Siparişler ve uyarılar','Diğer'],['ayar','Ayarlar ve yedek','Defter, maliyet ayarları, yedekler','Diğer']];
@@ -398,7 +419,7 @@ const SUPABASE_ANON_KEY='sb_publishable_PD0uw5raOZWLs8n0W6iPMA_ILeoWdcm';
 const sb=window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 let pend=0,workspaceId=null,workspaceCode=null,workspaceName='',WS_LIST=[],realtime=null,ref=null,tm;
 let S={set:{hr:15,fire:10},job:[],debt:[],mat:[],prod:[],ord:[],tx:[],customers:[]},tab='ozet';
-const UI={qF:'all',qQ:'',ordF:'all',ordQ:'',txM:td().slice(0,7),txF:'all',txQ:'',rp:td().slice(0,7),cusQ:'',prodQ:''};
+const UI={qF:'all',qQ:'',ordF:'all',ordQ:'',txM:td().slice(0,7),txF:'all',txQ:'',rp:td().slice(0,7),cusQ:'',prodQ:'',paQ:''};
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
 /* ---- Giriş ve defter seçimi ---- */
@@ -739,11 +760,27 @@ mat(){
   <div class="fig"><div><small>Gram başı</small><b>${TL(gc(m))}</b></div><div><small>Makara</small><b>${TL(m.price)}</b></div><div><small>Değer</small><b>${TL(Math.max(g,0)*gc(m))}</b></div></div>
   <div class="ft">${btn('addSpool','Makara ekle',{cls:'s sm',icon:'plus',id:m.id})}${btn('editMat','Düzenle',{cls:'s sm',icon:'edit',id:m.id})}<span style="flex:1"></span>${ibtn('delMat',m.id,'trash','Sil')}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty('Henüz malzeme yok','"Makara ekle" ile ilk filamentinizi ekleyin.')}</div>`}</div>`;
 },
+partner(){
+ const all=partners().slice().sort((a,b)=>a.name.localeCompare(b.name,'tr')),q=lower(UI.paQ);
+ const st=pa=>{const os=S.ord.filter(o=>lower(o.cust)===lower(pa.name)),t=os.reduce((a,o)=>a+otot(o),0),r=os.reduce((a,o)=>a+Math.max(0,orem(o)),0),last=os.map(o=>o.date||'').sort().pop()||'';return {n:os.length,t,r,last,os}};
+ const list=all.filter(pa=>!q||lower([pa.name,pa.contact,pa.phone,pa.email,pa.city].join(' ')).includes(q));
+ const ym=td().slice(0,7),stats=all.map(st),month=stats.reduce((a,x)=>a+x.os.filter(o=>String(o.date).startsWith(ym)).reduce((b,o)=>b+otot(o),0),0),due=stats.reduce((a,x)=>a+x.r,0),priced=all.reduce((a,pa)=>a+ppOf(pa.id).length,0);
+ return head('Partnerler','Ürünlerimizi satan iş ortakları ve her birine verdiğimiz fiyatlar.',btn('newPartner','Partner ekle',{cls:'p',icon:'plus'}))+
+ `<div class="kpis">${kpi('Partner',all.length,'',priced+' ürün fiyatı kayıtlı')}${kpi('Bu ay partner siparişi',TL(month))}${kpi('Partnerlerden alacak',TL(due),due>0.004?'bad':'')}</div>
+ ${all.length?`<div class="tools"><label class="search">${IC.search}<span class="sr">Partner ara</span><input data-input="paQ" value="${E(UI.paQ)}" placeholder="Partner, yetkili, telefon, şehir ara"></label></div>`:''}
+ <div class="grid pgrid">${list.map(pa=>{const x=st(pa),pp=ppOf(pa.id),upd0=pp.map(r=>r.d||'').sort().pop();
+  return `<article class="pc" data-partner="${E(pa.id)}"><div class="bd"><div style="display:flex;gap:12px;align-items:center"><span class="pav">${E(String(pa.name).charAt(0).toLocaleUpperCase('tr-TR'))}</span><div class="nm" style="min-width:0;flex:1">${E(pa.name)}<small>${[pa.contact,pa.phone,pa.city].filter(Boolean).map(E).join(' · ')||'İletişim bilgisi yok'}</small></div>${ibtn('editPartner',pa.id,'edit','Partner bilgilerini düzenle')}</div>
+  <div class="pmeta"><span class="tag${pp.length?' g':''}">${pp.length?pp.length+' ürün fiyatlı':'Fiyat listesi boş'}</span>${upd0?`<span class="tag">Fiyatlar ${fdate(upd0)}</span>`:''}${pa.lastSent?`<span class="tag">Liste gönderildi ${fdate(pa.lastSent)}</span>`:''}</div>
+  ${pp.length?`<div class="ppv">${pp.slice(0,5).map(r=>{const p=prod(r.prod),off=N(p.price)>0?Math.round((1-N(r.price)/N(p.price))*100):0;return `<div><span>${E(niceName(p.n))}</span><b>${TL(r.price)}${off>0?`<small>−%${off}</small>`:''}</b></div>`}).join('')}${pp.length>5?`<div class="more">+${pp.length-5} ürün daha</div>`:''}</div>`:`<p class="note" style="margin:0">Bu partnere hangi ürünü kaça verdiğinizi "Fiyatlar" ile kaydedin.</p>`}
+  <div class="fig"><div><small>Siparişler</small><b>${TL(x.t)}</b></div><div><small>Kalan</small><b class="${x.r>0.004?'bad':'ok'}">${TL(x.r)}</b></div><div><small>Son sipariş</small><b>${x.last?fdate(x.last):'—'}</b></div></div>
+  ${pa.note?`<div class="s mu" style="font-size:13px">${E(pa.note)}</div>`:''}
+  <div class="ft">${btn('paPrices','Fiyatlar',{cls:'p sm',icon:'edit',id:pa.id})}${btn('paPdf','Fiyat listesi',{cls:'s sm',icon:'pdf',id:pa.id})}${btn('paOrder','Sipariş gir',{cls:'s sm',icon:'plus',id:pa.id})}<span style="flex:1"></span>${navigator.canShare?ibtn('paShare',pa.id,'share','Fiyat listesini paylaş'):''}${ibtn('delPartner',pa.id,'trash','Partneri sil')}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(all.length?'Aramaya uyan partner yok':'Henüz partner yok',all.length?'':'Ürünlerinizi satan iş ortaklarını "Partner ekle" ile kaydedin; her birine özel fiyat listesi tutun.')}</div>`}</div>`;
+},
 cus(){
  const recs=customerRecords(),q=lower(UI.cusQ),list=recs.filter(c=>!q||lower([c.name,c.phone,c.email,c.address].join(' ')).includes(q));
  return head('Müşteriler',recs.length+' müşteri, toplam alacak '+TL(recs.reduce((a,c)=>a+Math.max(0,c.t-c.p),0)),btn('newCus','Müşteri ekle',{cls:'p',icon:'plus'}))+
  `<div class="tools"><label class="search">${IC.search}<span class="sr">Müşteri ara</span><input data-input="cusQ" value="${E(UI.cusQ)}" placeholder="Ad, telefon, e-posta ara"></label></div>
- <div class="grid">${list.map(c=>{const bal=c.t-c.p;return `<article class="pc"><div class="bd"><div style="display:flex;gap:12px;align-items:center"><span style="flex:none;width:42px;height:42px;border-radius:12px;background:var(--teal-soft);color:var(--teal-2);display:grid;place-items:center;font:800 18px/1 var(--display)">${E(String(c.name).charAt(0).toLocaleUpperCase('tr-TR'))}</span><div class="nm" style="min-width:0">${E(c.name)}<small>${c.n} sipariş${c.phone?' · '+E(c.phone):''}</small></div></div>
+ <div class="grid">${list.map(c=>{const bal=c.t-c.p;return `<article class="pc"><div class="bd"><div style="display:flex;gap:12px;align-items:center"><span style="flex:none;width:42px;height:42px;border-radius:12px;background:var(--teal-soft);color:var(--teal-2);display:grid;place-items:center;font:800 18px/1 var(--display)">${E(String(c.name).charAt(0).toLocaleUpperCase('tr-TR'))}</span><div class="nm" style="min-width:0">${E(c.name)}${partnerByName(c.name)?' <span class="tag g" style="vertical-align:2px">Partner</span>':''}<small>${c.n} sipariş${c.phone?' · '+E(c.phone):''}</small></div></div>
   ${c.email||c.address||c.notes?`<div class="s mu" style="font-size:13.5px">${[c.email,c.address,c.notes].filter(Boolean).map(E).join('<br>')}</div>`:''}
   <div class="fig"><div><small>Toplam</small><b>${TL(c.t)}</b></div><div><small>Ödenen</small><b>${TL(c.p)}</b></div><div><small>Kalan</small><b class="${bal>0.004?'bad':'ok'}">${TL(Math.max(0,bal))}</b></div></div>
   <div class="ft">${c.id?btn('editCus','Düzenle',{cls:'s sm',icon:'edit',id:c.id}):btn('cardCus','Kart oluştur',{cls:'s sm',icon:'plus',extra:`data-name="${E(c.name)}"`})}<span style="flex:1"></span>${c.id?ibtn('delCus',c.id,'trash','Kartı sil'):''}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(recs.length?'Aramaya uyan müşteri yok':'Henüz müşteri yok','Sipariş ekledikçe müşteriler burada otomatik görünür.')}</div>`}</div>`;
@@ -840,18 +877,18 @@ function customerRecords(){
 }
 
 /* ---- Formlar ---- */
-const custOptions=()=>{const s=new Map();[...(S.customers||[]).map(c=>c.name),...S.ord.map(o=>o.cust)].forEach(n=>{n=String(n||'').trim();if(n&&!s.has(lower(n)))s.set(lower(n),n)});return [...s.values()].sort((a,b)=>a.localeCompare(b,'tr'))};
-function formOrd(o){
+const custOptions=()=>{const s=new Map();[...partners().map(p=>p.name),...(S.customers||[]).map(c=>c.name),...S.ord.map(o=>o.cust)].forEach(n=>{n=String(n||'').trim();if(n&&!s.has(lower(n)))s.set(lower(n),n)});return [...s.values()].sort((a,b)=>a.localeCompare(b,'tr'))};
+function formOrd(o,pre){
  if(!o&&!S.prod.length)return toast('Önce Ürünler sayfasından bir ürün ekleyin.');
- const edit=!!o,cust0=o?.cust||'';
+ const edit=!!o,cust0=o?.cust||pre?.cust||'';
  // Düzenlemede kayıtlı iskonto varsa iskontosuz birim fiyat (gp) ve oran (dp) geri gelir; yoksa net birim fiyat.
- const items=o?[{id:uid(),prod:o.prod,name:pname(o.prod),qty:N(o.qty),price:N(o.dp)&&o.gp!=null?N(o.gp):N(o.price),dp:N(o.dp)||0,manual:true,qtyManual:true,dpManual:true}]:[qItemFor(S.prod[0].id,'')];
+ const items=o?[{id:uid(),prod:o.prod,name:pname(o.prod),qty:N(o.qty),price:N(o.dp)&&o.gp!=null?N(o.gp):N(o.price),dp:N(o.dp)||0,manual:true,qtyManual:true,dpManual:true}]:[qItemFor(pre?.prod||S.prod[0].id,cust0)];
  const grpLabel=o?.orderGroup?(o.source==='catalog'?'Katalog siparişi ':o.source==='quote'?'Teklif siparişi ':'Sipariş ')+o.orderGroup:'';
  openDrawer({title:edit?'Siparişi düzenle':'Yeni sipariş',sub:grpLabel,wide:true,submit:edit?'Kaydet':'Siparişi ekle',
   extra:`<div class="qtot"><small>Sipariş toplamı</small><b id="qTot">₺0</b></div>`,
   body:`<div class="qsec"><h3>Müşteri</h3><div class="fg">
    <div class="fl w"><label for="f_cname">Müşteri adı</label><input id="f_cname" name="cname" list="custList" value="${E(cust0)}" placeholder="Müşteri adı" autocomplete="off" required><datalist id="custList">${custOptions().map(c=>`<option value="${E(c)}">`).join('')}</datalist><div class="hint">Kayıtlı müşteri seçilirse bu müşteriye verdiğiniz son fiyat ve iskontolar otomatik gelir. Listede yoksa yeni müşteri olarak eklenir.</div></div>
-   ${fl('phone','Telefon',{type:'tel',value:o?.phone||'',opt:true,hint:edit?'':'Yazılırsa müşteriye sipariş takip bağlantısı gönderebilirsiniz.'})}${fl('date','Tarih',{type:'date',value:o?.date||td()})}</div></div>
+   ${fl('phone','Telefon',{type:'tel',value:o?.phone||pre?.phone||'',opt:true,hint:edit?'':'Yazılırsa müşteriye sipariş takip bağlantısı gönderebilirsiniz.'})}${fl('date','Tarih',{type:'date',value:o?.date||td()})}</div></div>
   <div class="qsec"><h3>Ürünler ve fiyatlar ${edit?'':`<span class="qtools"><span class="qall"><input class="inp" id="qAllDp" type="number" inputmode="decimal" step="any" min="0" max="100" placeholder="%" aria-label="Tüm ürünlere uygulanacak iskonto yüzdesi"><button type="button" class="btn s sm" data-act="qAllDp">Tümüne uygula</button></span><button type="button" class="btn s sm" data-act="qAdd">${IC.plus}Ürün ekle</button></span>`}</h3>
    <div class="qhead"><span>Ürün</span><span>Adet</span><span>Birim fiyat (₺)</span><span>İsk. %</span><span>Tutar</span><span></span></div><div id="qItems"></div>
    <p class="note" style="margin:10px 0 0">Birim fiyatı istediğiniz gibi değiştirebilirsiniz; liste fiyatı yalnızca başlangıç değeridir. Kaydedilen fiyat bu müşteri için hatırlanır.</p></div>
@@ -866,7 +903,7 @@ function formOrd(o){
  body.oninput=e=>{if(!QE)return;if(qItemInput(e))return;if(['f_dep','f_paid'].includes(e.target.id))qTotals()};
  body.onchange=e=>{if(!QE)return;const t=e.target;if(qItemProd(t))return;
   if(t.id==='f_cname'){const name=t.value.trim();QE.q.cust.name=name;const c=customerRecords().find(x=>lower(x.name)===lower(name)),last=S.ord.filter(x=>lower(x.cust)===lower(name)&&x.phone).slice(-1)[0];
-   const ph=$('#f_phone');if(ph&&!ph.value&&(c?.phone||last?.phone))ph.value=c?.phone||last.phone;qCustPrices(name)}};
+   const pa=partnerByName(name),ph=$('#f_phone'),pv=c?.phone||pa?.phone||last?.phone;if(ph&&!ph.value&&pv)ph.value=pv;qCustPrices(name)}};
 }
 function ordTotals(){
  const items=QE.q.items.filter(i=>N(i.qty)>0),gross=items.reduce((a,i)=>a+N(i.qty)*N(i.price),0),sub=items.reduce((a,i)=>a+lineNet(i),0),disc=gross-sub;
@@ -1027,8 +1064,15 @@ function qCalc(q){
  const cost=items.reduce((a,i)=>{const p=i.prod&&prod(i.prod);return a+(p?N(i.qty)*pc(p):0)},0),costKnown=items.every(i=>i.prod&&prod(i.prod));
  return {items,gross,itemDisc,sub,dp,disc,net,vr,vat,total:net+vat,cost,profit:net-cost,costKnown};
 }
-const custPrice=(name,pid)=>{const m=(S.custPrices||{})[lower(name)];return m&&pid&&m[pid]!=null?N(m[pid]):null};
-const custDisc=(name,pid)=>{const m=(S.custDisc||{})[lower(name)];return m&&pid&&m[pid]!=null?N(m[pid]):null};
+const partners=()=>Array.isArray(S.partners)?S.partners:(S.partners=[]);
+const pprices=()=>Array.isArray(S.pprices)?S.pprices:(S.pprices=[]);
+const partnerByName=name=>{const k=lower(name);return k?partners().find(p=>lower(p.name)===k):undefined};
+const ppGet=(paId,pid)=>pprices().find(x=>x.partner===paId&&x.prod===pid);
+const ppOf=paId=>pprices().filter(x=>x.partner===paId&&prod(x.prod)).sort((a,b)=>String(pname(a.prod)).localeCompare(pname(b.prod),'tr'));
+const ppFor=(name,pid)=>{const pa=partnerByName(name);return pa&&pid?ppGet(pa.id,pid):undefined};
+// Partner fiyat listesinde fiyat varsa o kullanılır; yoksa bu müşteriye en son verilen fiyat.
+const custPrice=(name,pid)=>{const pp=ppFor(name,pid);if(pp)return N(pp.price);const m=(S.custPrices||{})[lower(name)];return m&&pid&&m[pid]!=null?N(m[pid]):null};
+const custDisc=(name,pid)=>{if(ppFor(name,pid))return 0;const m=(S.custDisc||{})[lower(name)];return m&&pid&&m[pid]!=null?N(m[pid]):null};
 function nextQuoteNo(){const y=td().slice(0,4),pre='TKL-'+y+'-',n=(S.quotes||[]).map(q=>String(q.no||'')).filter(x=>x.startsWith(pre)).map(x=>parseInt(x.slice(pre.length),10)||0);return pre+String(Math.max(0,...n)+1).padStart(3,'0')}
 const qItemFor=(pid,cust)=>{const p=prod(pid);return {id:uid(),prod:p?p.id:'',name:p?p.n:'',qty:p?Math.max(1,N(p.catalogMin)||1):1,price:p?(custPrice(cust,p.id)??N(p.price)):0,dp:p?(custDisc(cust,p.id)??0):0,manual:false}};
 const qItemsLabel=q=>{const n=(q.items||[]).map(i=>i.name||pname(i.prod));return n.slice(0,2).join(', ')+(n.length>2?' +'+(n.length-2):'')};
@@ -1055,8 +1099,8 @@ function teklifPage(){
 let QE=null;
 function qHint(it,cust){
  const p=it.prod&&prod(it.prod),lp=p?N(p.price):null,cp=custPrice(cust,it.prod),cd=custDisc(cust,it.prod),pr=N(it.price),d=iDp(it),eff=pr*(1-d/100),off=lp&&eff<lp-0.004?Math.round((1-eff/lp)*1000)/10:0;
- const same=cp!=null&&Math.abs(cp-pr)<0.005&&(cd??0)===d;
- return [d?'İskontolu birim '+TL(eff):'',lp!=null?'Liste '+TL(lp):'',off?`<span class="ok">listeden %${pct(off)} indirimli</span>`:'',cp!=null?(same?'Bu müşteriye özel fiyat':'Bu müşteriye son: '+TL(cp)+(cd?', %'+pct(cd)+' iskonto':'')):'',p?'Maliyet '+TL(pc(p)):'',p&&eff&&eff<pc(p)?'<span class="bad">Maliyetin altında</span>':''].filter(Boolean).join(' · ');
+ const same=cp!=null&&Math.abs(cp-pr)<0.005&&(cd??0)===d,pp=ppFor(cust,it.prod);
+ return [d?'İskontolu birim '+TL(eff):'',lp!=null?'Liste '+TL(lp):'',off?`<span class="ok">listeden %${pct(off)} indirimli</span>`:'',cp!=null?(pp?(same&&!d?'<span class="ok">Partner fiyat listesindeki fiyat</span>':'Partner fiyatı: '+TL(cp)):same?'Bu müşteriye özel fiyat':'Bu müşteriye son: '+TL(cp)+(cd?', %'+pct(cd)+' iskonto':'')):'',p?'Maliyet '+TL(pc(p)):'',p&&eff&&eff<pc(p)?'<span class="bad">Maliyetin altında</span>':''].filter(Boolean).join(' · ');
 }
 function qItemRow(it,i,cust){
  const hint=qHint(it,cust),ord=QE?.ord,gone=it.prod&&!prod(it.prod);
@@ -1084,7 +1128,7 @@ function formQuote(q0,copy){
  openDrawer({title:isNew?(copy?'Teklif kopyası':'Yeni teklif'):'Teklifi düzenle',sub:q.no,wide:true,submit:'Kaydet',
   extra:`<div class="qtot"><small>Genel toplam</small><b id="qTot">₺0</b></div><button type="button" class="btn s" data-act="qSavePdf">${IC.pdf}Kaydet ve PDF</button>`,
   body:`<div class="qsec"><h3>Müşteri</h3><div class="fg">
-   <div class="fl w"><label for="f_cname">Firma ya da ad soyad</label><input id="f_cname" name="cname" list="qCustList" value="${E(q.cust.name)}" placeholder="Müşteri adı" autocomplete="off" required><datalist id="qCustList">${recs.map(c=>`<option value="${E(c.name)}">`).join('')}</datalist><div class="hint">Kayıtlı müşteri seçilirse iletişim bilgileri ve bu müşteriye verdiğiniz son fiyatlar otomatik gelir.</div></div>
+   <div class="fl w"><label for="f_cname">Firma ya da ad soyad</label><input id="f_cname" name="cname" list="qCustList" value="${E(q.cust.name)}" placeholder="Müşteri adı" autocomplete="off" required><datalist id="qCustList">${custOptions().map(c=>`<option value="${E(c)}">`).join('')}</datalist><div class="hint">Kayıtlı müşteri seçilirse iletişim bilgileri ve bu müşteriye verdiğiniz son fiyatlar otomatik gelir.</div></div>
    ${fl('cphone','Telefon',{type:'tel',value:q.cust.phone,opt:true})}${fl('cemail','E-posta',{type:'email',value:q.cust.email,opt:true})}
    ${fl('caddr','Adres',{value:q.cust.address,opt:true,wide:true})}${fl('ctax','Vergi dairesi ve numarası',{value:q.cust.tax,opt:true,wide:true,ph:'Örn. Kadıköy VD, 1234567890'})}
    <div class="w">${fchk('saveCus','Müşteri kartına kaydet',true)}</div></div></div>
@@ -1106,7 +1150,7 @@ function formQuote(q0,copy){
  body.onchange=e=>{if(!QE)return;const t=e.target;
   if(qItemProd(t))return;
   if(t.id==='f_cname'){const name=t.value.trim();QE.q.cust.name=name;const c=customerRecords().find(x=>lower(x.name)===lower(name)),last=(S.quotes||[]).filter(x=>lower(x.cust?.name)===lower(name)).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
-   const fill=(id,v)=>{const el=$('#'+id);if(el&&!el.value&&v)el.value=v};fill('f_cphone',c?.phone||last?.cust?.phone);fill('f_cemail',c?.email||last?.cust?.email);fill('f_caddr',c?.address||last?.cust?.address);fill('f_ctax',last?.cust?.tax);
+   const pa=partnerByName(name),fill=(id,v)=>{const el=$('#'+id);if(el&&!el.value&&v)el.value=v};fill('f_cphone',c?.phone||pa?.phone||last?.cust?.phone);fill('f_cemail',c?.email||pa?.email||last?.cust?.email);fill('f_caddr',c?.address||pa?.address||last?.cust?.address);fill('f_ctax',last?.cust?.tax||pa?.tax);
    qCustPrices(name);return}
   if(['f_vat','f_valid','f_qdate','f_disc'].includes(t.id))qTotals()};
 }
@@ -1155,6 +1199,127 @@ async function quoteToOrder(id){
  q.status='Siparişe dönüştü';q.orderGroup=grp;logAct('Teklifi siparişe dönüştürdü: '+q.no+', '+q.cust.name);upd();
  const link=catalogLink()+'&takip='+grp;
  if(String(q.cust.phone||'').replace(/\D/g,'').length>=10)toast('Sipariş oluşturuldu ('+grp+').','Takip bağlantısını kopyala',()=>copyText(link,'Müşteri takip bağlantısı kopyalandı.'));else toast('Sipariş oluşturuldu ('+grp+'). Müşteri telefonu olmadığı için takip bağlantısı kullanılamaz.');
+}
+
+/* ---- Partnerler ---- */
+function formPartner(pa){
+ openDrawer({title:pa?'Partner bilgileri':'Yeni partner',sub:pa?pa.name:'Kaydettikten sonra bu partnere özel fiyatları girersiniz.',submit:pa?'Kaydet':'Kaydet ve fiyatları gir',
+  body:`<div class="fg">${fl('pname','Firma ya da ad soyad',{value:pa?.name||'',req:true,wide:true,ph:'Örn. Oyuncak Dünyası'})}
+   ${fl('pcontact','Yetkili kişi',{value:pa?.contact||'',opt:true})}${fl('pphone','Telefon',{type:'tel',value:pa?.phone||'',opt:true})}
+   ${fl('pemail','E-posta',{type:'email',value:pa?.email||'',opt:true})}${fl('pcity','Şehir',{value:pa?.city||'',opt:true})}
+   ${fl('paddr','Adres',{value:pa?.address||'',opt:true,wide:true})}${fl('ptax','Vergi dairesi ve numarası',{value:pa?.tax||'',opt:true,wide:true})}
+   ${fsel('pvat','Fiyat listesinde KDV',QVAT,pa?.vat||S.set.qVat||'none')}${fl('pdisc','Varsayılan indirim (%)',{type:'number',value:pa?.disc??'',opt:true,hint:'Fiyat girerken liste fiyatından bu oranda indirim önerilir.'})}
+   ${fta('plnote','Fiyat listesi notu',pa?.listNote||'',{ph:'Belgede görünür. Örn. En az sipariş 50 adet, kargo alıcıya aittir.'})}
+   ${fta('pnote','İç not',pa?.note||'',{ph:'Yalnızca siz görürsünüz.'})}</div>`,
+  onSubmit(f){
+   const name=String(f.pname||'').trim();if(!need(name,'Partner adını yazın.','pname'))return false;
+   const dup=partnerByName(name);if(!need(!dup||dup===pa,'Bu adla bir partner zaten var.','pname'))return false;
+   const disc=f.pdisc===''?undefined:N(f.pdisc);if(!need(disc===undefined||(disc>=0&&disc<100),'İndirim 0 ile 99 arasında olmalı.','pdisc'))return false;
+   const rec={name,contact:String(f.pcontact||'').trim(),phone:String(f.pphone||'').trim(),email:String(f.pemail||'').trim(),city:String(f.pcity||'').trim(),address:String(f.paddr||'').trim(),tax:String(f.ptax||'').trim(),vat:f.pvat||'none',disc,listNote:String(f.plnote||'').trim(),note:String(f.pnote||'').trim()};
+   if(disc===undefined)delete rec.disc;
+   if(pa){const old=pa.name;Object.assign(pa,rec);if(disc===undefined)delete pa.disc;logAct('Partner bilgilerini düzenledi: '+name);upd();toast('Partner güncellendi.'+(lower(old)!==lower(name)?' Eski adla girilmiş siparişler "'+old+'" adıyla kalır.':''));return}
+   const np={id:uid(),...rec,createdAt:td(),by:myUid};partners().push(np);logAct('Partner ekledi: '+name);
+   tab='partner';if(location.hash!=='#partner')history.replaceState(null,'','#partner');upd();setTimeout(()=>formPrices(np.id),60)}});
+}
+function ppInfo(pid,v,pa){
+ const p=prod(pid);if(!p)return '';const ex=ppGet(pa.id,pid),h=(ex?.hist||[]).slice(-1)[0],price=v===''||v==null?null:N(v),lp=N(p.price),c=pc(p);
+ if(price===null)return ex?'<span class="bad">Kaydedince listeden çıkarılır</span>':'';
+ const off=lp>0?Math.round((1-price/lp)*1000)/10:0,kar=price>0?Math.round((price-c)/price*100):0;
+ return [off>0?`<span class="ok">listeden %${pct(off)} indirimli</span>`:off<0?'listenin %'+pct(-off)+' üstünde':'liste fiyatıyla aynı',price<c?'<span class="bad">maliyetin altında</span>':'kâr %'+kar,ex&&Math.abs(N(ex.price)-price)>0.004?'şu an kayıtlı '+TL(ex.price):'',h?'önceki fiyat '+TL(h.price)+' ('+fdate(h.d)+')':''].filter(Boolean).join(' · ');
+}
+function formPrices(id){
+ const pa=byId(partners(),id);if(!pa)return;if(!S.prod.length)return toast('Önce Ürünler sayfasından ürün ekleyin.');
+ const prods=S.prod.slice().sort((a,b)=>{const x=ppGet(pa.id,a.id)?0:1,y=ppGet(pa.id,b.id)?0:1;return x-y||String(a.n).localeCompare(b.n,'tr')});
+ const qs=(S.quotes||[]).filter(q=>(q.items||[]).some(i=>i.prod&&prod(i.prod))).sort((a,b)=>(lower(b.cust?.name)===lower(pa.name))-(lower(a.cust?.name)===lower(pa.name))||String(b.date).localeCompare(String(a.date)));
+ openDrawer({title:pa.name+' · Fiyatlar',sub:'Bu partnere hangi ürünü kaça verdiğinizi yazın. Boş bırakılan ürün listede yer almaz.',wide:true,submit:'Fiyatları kaydet',
+  extra:`<div class="qtot"><small>Listede</small><b id="ppCount">0 ürün</b></div>`,
+  body:`<div class="pptools"><input class="inp q" id="ppQ" placeholder="Ürün ara" aria-label="Ürün ara"><input class="inp pct" id="ppDisc" type="number" inputmode="decimal" step="any" min="0" max="99" placeholder="%" value="${pa.disc??''}" aria-label="Liste fiyatından indirim yüzdesi"><button type="button" class="btn s sm" data-act="ppFill" data-id="empty">Boşlara uygula</button><button type="button" class="btn s sm" data-act="ppFill" data-id="all">Tümüne uygula</button>${qs.length?`<select class="inp" id="ppQuote" aria-label="Tekliften fiyat al" style="max-width:240px"><option value="">Tekliften fiyat al…</option>${qs.map(q=>`<option value="${E(q.id)}">${E(q.no)} · ${E(q.cust?.name||'')}</option>`).join('')}</select>`:''}</div>
+   <div class="pphead"><span>Ürün</span><span>Partner fiyatı (₺)</span><span>En az adet</span></div>
+   <div id="ppRows">${prods.map(p=>{const ex=ppGet(pa.id,p.id),v=ex?N(ex.price):'';return `<div class="pprow${ex?' on':''}" data-pid="${E(p.id)}" data-n="${E(lower(p.n+' '+(p.catalogCategory||'')))}"><div class="nm">${E(niceName(p.n))}<small>Liste ${TL(p.price)} · Maliyet ${TL(pc(p))}</small></div>
+    <label><span>Partner fiyatı (₺)</span><input class="inp" name="pp_${E(p.id)}" type="number" inputmode="decimal" step="any" min="0" value="${E(v)}" placeholder="Listede yok" aria-label="${E(p.n)} partner fiyatı"></label>
+    <label><span>En az adet</span><input class="inp" name="pm_${E(p.id)}" type="number" inputmode="numeric" step="1" min="0" value="${ex&&N(ex.min)?E(ex.min):''}" placeholder="—" aria-label="${E(p.n)} en az adet"></label>
+    <div class="pi">${ppInfo(p.id,v,pa)}</div></div>`}).join('')}</div>`,
+  onSubmit(f){return savePrices(pa,f)?undefined:false}});
+ const body=$('#dBody'),count=()=>{const n=[...body.querySelectorAll('input[name^="pp_"]')].filter(i=>i.value!=='').length;$('#ppCount').textContent=n+' ürün'};
+ body.oninput=e=>{const t=e.target;if(t.id==='ppQ'){const q=lower(t.value);body.querySelectorAll('.pprow').forEach(r=>r.style.display=!q||r.dataset.n.includes(q)?'':'none');return}
+  const row=t.closest('.pprow');if(row&&t.name?.startsWith('pp_')){row.querySelector('.pi').innerHTML=ppInfo(row.dataset.pid,t.value,pa);row.classList.toggle('on',t.value!=='');count()}};
+ body.onchange=e=>{const t=e.target;if(t.id!=='ppQuote'||!t.value)return;const q=byId(S.quotes||[],t.value);if(!q)return;const c=qCalc(q);let n=0;
+  (q.items||[]).forEach(i=>{const el=body.querySelector(`input[name="pp_${CSS.escape(i.prod||'')}"]`);if(!el)return;el.value=r2(N(i.price)*(1-iDp(i)/100)*(1-c.dp/100));el.dispatchEvent(new Event('input',{bubbles:true}));n++});
+  t.value='';toast(n+' ürünün fiyatı '+q.no+' teklifinden alındı. Kaydetmeyi unutmayın.')};
+ count();setTimeout(()=>{if(document.activeElement?.id==='ppQ')document.activeElement.blur()},140);
+}
+function savePrices(pa,f){
+ let add=0,chg=0,del=0,bad=null;const now=td(),keep=new Set();
+ S.prod.forEach(p=>{const v=f['pp_'+p.id],m=f['pm_'+p.id],ex=ppGet(pa.id,p.id);
+  if(v===undefined){if(ex)keep.add(p.id);return}if(v===''){if(ex)del++;return}
+  const price=r2(v),min=Math.max(0,Math.round(N(m)));if(!(price>=0)){bad=p.n;return}keep.add(p.id);
+  if(ex){let ch=false;if(Math.abs(N(ex.price)-price)>0.004){ex.hist=[...(ex.hist||[]),{d:ex.d||now,price:N(ex.price)}].slice(-20);ex.price=price;ex.d=now;ex.by=myUid;ch=true}
+   if(N(ex.min)!==min){if(min)ex.min=min;else delete ex.min;ch=true}if(ch)chg++}
+  else{const r={id:pa.id+':'+p.id,partner:pa.id,prod:p.id,price,d:now,by:myUid};if(min)r.min=min;pprices().push(r);add++}});
+ if(bad){toast(bad+' için fiyat eksi olamaz.');return false}
+ if(del)S.pprices=pprices().filter(x=>!(x.partner===pa.id&&prod(x.prod)&&!keep.has(x.prod)));
+ if(!add&&!chg&&!del){toast('Değişiklik yok.');return true}
+ logAct(pa.name+' fiyat listesini güncelledi'+[add&&add+' yeni',chg&&chg+' değişen',del&&del+' çıkarılan'].filter(Boolean).map(x=>', '+x).join(''));
+ upd();toast('Fiyatlar kaydedildi: '+[add&&add+' yeni',chg&&chg+' değişen',del&&del+' çıkarılan'].filter(Boolean).join(', ')+'.');return true;
+}
+function partnerOrder(id){
+ const pa=byId(partners(),id);if(!pa)return;const pp=ppOf(pa.id);
+ formOrd(null,{cust:pa.name,phone:pa.phone,prod:pp[0]?.prod});
+ if(!pp.length)toast('Bu partnerin fiyat listesi boş; liste fiyatları kullanılıyor.');
+}
+async function priceListPdfBlob(pa){
+ const k=await pdfKit(),{jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4',compress:true});
+ doc.addFileToVFS('r.ttf',k.reg);doc.addFont('r.ttf','IS','normal');doc.addFileToVFS('s.ttf',k.semi);doc.addFont('s.ttf','IS','bold');doc.addFileToVFS('d.ttf',k.disp);doc.addFont('d.ttf','BG','bold');
+ const W=210,H=297,M=16,co=company(),rows=ppOf(pa.id),date=td();
+ doc.setProperties({title:'Fiyat listesi · '+pa.name,subject:pa.name,author:co.name,creator:'Tidex Atölye Defteri'});
+ const INK=[20,40,45],MU=[100,120,126],AC=[14,127,147],DARK=[11,52,62],LINE=[214,226,230],SOFT=[242,248,249];
+ const txt=(t,x,y,o={})=>{doc.setFont(o.f||'IS',o.b?'bold':'normal');doc.setFontSize(o.s||9);doc.setTextColor(...(o.c||INK));doc.text(String(t),x,y,o.a?{align:o.a}:undefined)};
+ doc.addImage(k.logo,'PNG',M,13,19,19);
+ txt(co.name,M+23,21,{f:'BG',b:1,s:15});txt(co.slogan||'',M+23,26.5,{s:8.5,c:MU});
+ txt('Fiyat Listesi',W-M,20,{f:'BG',b:1,s:20,c:AC,a:'right'});
+ [['Tarih',longDate(date)],['Ürün sayısı',String(rows.length)]].forEach(([l,v],i)=>{txt(l,W-M-62,26.5+i*4.6,{s:8,c:MU});txt(v,W-M,26.5+i*4.6,{s:8.5,b:1,a:'right'})});
+ doc.setDrawColor(...AC);doc.setLineWidth(.7);doc.line(M,42,W-M,42);
+ const colW=(W-2*M)/2-6,block=(x,title,lines)=>{let y=50;txt(title,x,y,{s:8,b:1,c:AC});y+=5.5;lines.filter(l=>l&&l[0]).forEach(([t,o])=>{doc.splitTextToSize(String(t),colW).forEach(s=>{txt(s,x,y,o||{s:8.8,c:INK});y+=4.4});if(o&&o.gap)y+=1});return y};
+ const yL=block(M,'Hazırlanan',[[pa.name,{s:11,b:1,gap:1}],[pa.contact?'Yetkili: '+pa.contact:''],[pa.phone],[pa.email],[[pa.address,pa.city].filter(Boolean).join(', '),{s:8.8,c:MU}],[pa.tax?'Vergi: '+pa.tax:'',{s:8.8,c:MU}]]);
+ const yR=block(W/2+4,'Hazırlayan',[[co.name,{s:11,b:1,gap:1}],[co.phone],[co.email],[co.web],[co.address,{s:8.8,c:MU}]]);
+ let y=Math.max(yL,yR)+3;
+ doc.splitTextToSize(`Sayın ${pa.name}, iş ortaklığımız kapsamında size özel hazırladığımız güncel fiyat listemizi bilgilerinize sunarız.`,W-2*M).forEach(s=>{txt(s,M,y,{s:9,c:MU});y+=4.6});y+=2;
+ const imgs=await Promise.all(rows.map(r=>{const p=prod(r.prod);return p?.catalogImage?thumb(p.catalogImage):null})),showImg=imgs.some(Boolean),hasMin=rows.some(r=>N(r.min)>0),hasCat=rows.some(r=>prod(r.prod)?.catalogCategory);
+ const R=s=>({content:s,styles:{halign:'right'}}),cols=['n',...(showImg?['img']:[]),'name',...(hasCat?['cat']:[]),...(hasMin?['min']:[]),'price'],ci=k=>cols.indexOf(k);
+ const CW={n:{cellWidth:9,halign:'center',textColor:MU},img:{cellWidth:17,minCellHeight:17},cat:{cellWidth:34,textColor:MU},min:{cellWidth:24},price:{cellWidth:32,fontStyle:'bold'}};
+ doc.autoTable({startY:y,margin:{left:M,right:M,bottom:22},
+  head:[['#',...(showImg?['']:[]),'Ürün',...(hasCat?['Kategori']:[]),...(hasMin?[R('En az adet')]:[]),R('Birim fiyat')]],
+  body:rows.map((r,n)=>{const p=prod(r.prod);return [String(n+1),...(showImg?['']:[]),niceName(p.n),...(hasCat?[p.catalogCategory||'']:[]),...(hasMin?[R(N(r.min)?fg(r.min):'—')]:[]),R(pm(r.price))]}),
+  styles:{font:'IS',fontSize:9,textColor:INK,cellPadding:{top:3.2,bottom:3.2,left:2.6,right:2.6},valign:'middle',lineWidth:0,overflow:'linebreak'},
+  headStyles:{font:'IS',fontStyle:'bold',fillColor:DARK,textColor:255,fontSize:8.5},alternateRowStyles:{fillColor:SOFT},
+  columnStyles:Object.fromEntries(cols.filter(k=>CW[k]).map(k=>[ci(k),CW[k]])),
+  didDrawCell:d=>{if(showImg&&d.section==='body'&&d.column.index===ci('img')){const im=imgs[d.row.index];if(im)doc.addImage(im,'JPEG',d.cell.x+1.8,d.cell.y+(d.cell.height-13.4)/2,13.4,13.4)}}});
+ y=doc.lastAutoTable.finalY+7;
+ const vr=/^\d+$/.test(String(pa.vat))?N(pa.vat):0;
+ const terms=[pa.vat==='inc'&&['KDV','Fiyatlara KDV dahildir.'],vr&&['KDV','Fiyatlara KDV dahil değildir, %'+vr+' KDV ayrıca eklenir.'],['Fiyatlar',longDate(date)+' tarihi itibarıyla geçerlidir; değişiklikler ayrıca bildirilir.']].filter(Boolean);
+ const noteLines=pa.listNote?doc.splitTextToSize(pa.listNote,W-2*M):[];
+ const needH=8+terms.length*5+(noteLines.length?8+noteLines.length*4.4:0)+(co.iban?12:0)+22;
+ if(y+needH>H-24){doc.addPage();y=22}
+ let ly=y;txt('Koşullar',M,ly+4,{s:8.5,b:1,c:AC});ly+=9;
+ terms.forEach(([l,v])=>{txt(l,M,ly,{s:8.6,c:MU});doc.splitTextToSize(String(v),W-2*M-28).forEach((s,i)=>{txt(s,M+28,ly+i*4.2,{s:8.6});if(i)ly+=4.2});ly+=5});
+ if(noteLines.length){ly+=2;txt('Not',M,ly,{s:8.5,b:1,c:AC});ly+=5;noteLines.forEach(s=>{txt(s,M,ly,{s:8.6});ly+=4.4})}
+ y=ly+8;
+ if(co.iban){doc.setFillColor(...SOFT);doc.roundedRect(M,y,W-2*M,11,2,2,'F');txt('Banka hesabı',M+4,y+7,{s:8.5,c:MU});txt(co.iban+(co.name?'  ·  '+co.name:''),M+30,y+7,{s:9,b:1});y+=17}
+ txt('Saygılarımızla,',M,y+2,{s:9,c:MU});txt((meName()?meName()+' · ':'')+co.name,M,y+7,{s:9.5,b:1});
+ const pages=doc.getNumberOfPages(),foot=[co.name,co.phone,co.email,co.web].filter(Boolean).join('   ·   ');
+ for(let i=1;i<=pages;i++){doc.setPage(i);doc.setDrawColor(...LINE);doc.setLineWidth(.3);doc.line(M,H-15,W-M,H-15);txt(foot,M,H-10,{s:7.6,c:MU});txt('Fiyat listesi · '+longDate(date)+'   ·   Sayfa '+i+' / '+pages,W-M,H-10,{s:7.6,c:MU,a:'right'})}
+ return doc.output('blob');
+}
+async function partnerPdf(id,share){
+ const pa=byId(partners(),id);if(!pa)return;
+ if(!ppOf(pa.id).length){toast('Önce bu partnerin fiyatlarını girin.');return formPrices(id)}
+ toast('Fiyat listesi hazırlanıyor…');
+ try{const blob=await priceListPdfBlob(pa),name=`Fiyat-Listesi-${fileSafe(pa.name)||'partner'}-${td()}.pdf`,file=new File([blob],name,{type:'application/pdf'});lastPdf=file;
+  const doShare=()=>navigator.share({files:[file],title:'Fiyat listesi',text:`${company().name} fiyat listesi`});
+  if(share&&navigator.canShare?.({files:[file]})){try{await doShare()}catch(e){if(e?.name==='AbortError')return;toast('PDF hazır.','Paylaş',()=>doShare().catch(()=>{}))}}
+  else if(await save2(name,blob,'application/pdf'))toast('Fiyat listesi indirildi: '+name);
+  pa.lastSent=td();upd();
+ }catch(e){console.error(e);toast('PDF oluşturulamadı: '+(e?.message||e))}
 }
 
 /* ---- PDF ---- */
@@ -1360,6 +1525,11 @@ const ACT={
  async catDel(i){const old=categoryNames()[i];if(!old)return;if(!await confirmBox('“'+old+'” silinsin mi?','Bu kategorideki ürünler silinmez, kategorisiz kalır.','Sil'))return;S.catalogCategories=(S.catalogCategories||[]).filter(x=>x!==old);S.prod.forEach(p=>{if(String(p.catalogCategory||'').trim()===old)p.catalogCategory=''});await saveNow();_redrawCats();render();toast('Kategori silindi.')},
  newMat:()=>formMat(),editMat:id=>formMat(byId(S.mat,id)),addSpool:id=>formMat(byId(S.mat,id),true),
  async delMat(id){const m=byId(S.mat,id);if(!m)return;const u=S.prod.filter(p=>p.mat===id).length;if(u)return toast('Bu malzeme '+u+' üründe kullanılıyor; önce o ürünlerin malzemesini değiştirin.');if(!await confirmBox('Malzeme silinsin mi?',m.n+' stoktan kaldırılır.','Sil'))return;S.mat=S.mat.filter(x=>x.id!==id);upd()},
+ newPartner:()=>formPartner(),editPartner:id=>formPartner(byId(partners(),id)),paPrices:id=>formPrices(id),paPdf:id=>partnerPdf(id),paShare:id=>partnerPdf(id,true),paOrder:id=>partnerOrder(id),
+ ppFill(k){const v=N($('#ppDisc')?.value);if($('#ppDisc').value===''||v<0||v>=100)return toast('0 ile 99 arasında bir indirim yüzdesi yazın.');let n=0;
+  $('#dBody').querySelectorAll('.pprow').forEach(r=>{if(r.style.display==='none')return;const i=r.querySelector('input[name^="pp_"]'),p=prod(r.dataset.pid);if(!p||(k==='empty'&&i.value!==''))return;i.value=r2(N(p.price)*(1-v/100));i.dispatchEvent(new Event('input',{bubbles:true}));n++});
+  toast(n?n+' ürüne liste fiyatından %'+pct(v)+' indirimli fiyat yazıldı. Kaydetmeyi unutmayın.':'Uygulanacak ürün yok.')},
+ async delPartner(id){const pa=byId(partners(),id);if(!pa)return;if(!await confirmBox('Partner silinsin mi?','“'+pa.name+'” kartı ve fiyat listesi silinir; siparişleri ve tahsilat geçmişi korunur.','Partneri sil'))return;S.partners=partners().filter(x=>x.id!==id);S.pprices=pprices().filter(x=>x.partner!==id);logAct('Partneri sildi: '+pa.name);upd()},
  newCus:()=>formCus(),editCus:id=>formCus(byId(S.customers||[],id)),cardCus:(id,el)=>formCus(null,el.dataset.name),
  async delCus(id){const c=byId(S.customers||[],id);if(!c)return;if(!await confirmBox('Müşteri kartı silinsin mi?','“'+c.name+'” kartındaki iletişim bilgileri silinir; sipariş ve tahsilat geçmişi korunur.','Kartı sil'))return;S.customers=S.customers.filter(x=>x.id!==id);upd()},
  newDebt:()=>formDebt(),editDebt:id=>formDebt(byId(S.debt,id)),
