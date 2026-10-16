@@ -92,6 +92,10 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 .btn.q{color:var(--muted);height:34px;padding:0 10px}
 .btn.q:hover{color:var(--text);background:rgba(255,255,255,.04)}
 .btn.sm{height:34px;padding:0 12px;font-size:13.5px}
+.shcard{padding:16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg);margin-bottom:12px}
+.shcard .t{font-weight:700;font-size:15.5px}.shcard .s{color:var(--muted);font-size:13px;margin-top:3px}
+.shlink{margin:12px 0;padding:10px 12px;border-radius:10px;background:var(--surface-2,rgba(255,255,255,.04));border:1px solid var(--line);font-size:12.5px;color:var(--muted);word-break:break-all;-webkit-user-select:all;user-select:all}
+.shbtns{display:flex;flex-wrap:wrap;gap:8px}
 .btn:disabled{opacity:.55;cursor:default}
 .ib{width:34px;height:34px;display:inline-grid;place-items:center;border-radius:var(--r-sm);color:var(--muted)}
 .ib:hover{color:var(--text);background:rgba(255,255,255,.05)}
@@ -136,6 +140,7 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 
 /* Araç çubuğu */
 .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.catbtns{display:flex;gap:8px}
 .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--line-2);color:var(--muted);font-weight:600;font-size:13.5px}
@@ -294,6 +299,7 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
  .fg{grid-template-columns:1fr}
  .search,.search input{width:100%}
  .tools{flex-direction:column;align-items:stretch}
+ .catbtns .btn{flex:1 1 0;min-width:0;padding:0 8px}
  .chips{flex:none}
  .rows>.r{flex-wrap:wrap;gap:10px}
  .r .acts{width:100%;justify-content:flex-end}
@@ -439,7 +445,19 @@ async function joinWorkspace(code){
  toast('Deftere katıldınız, açılıyor…');setTimeout(()=>location.reload(),700);return true;
 }
 function catalogLink(){const u=new URL(location.href);u.hash='';u.pathname=u.pathname.replace(/(index\.html?)?$/,'catalog.html');u.search='?w='+encodeURIComponent(workspaceId);return u.toString()}
-async function copyText(t,msg){try{await navigator.clipboard.writeText(t);toast(msg)}catch(e){toast(t)}}
+function copyLegacy(t){try{const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';document.body.appendChild(a);a.focus();a.select();a.setSelectionRange(0,t.length);const ok=document.execCommand('copy');a.remove();return ok}catch(e){return false}}
+async function copyText(t,msg){
+ if(copyLegacy(t))return toast(msg); // dokunma anında, eşzamanlı: iPhone'da da güvenilir
+ try{await navigator.clipboard.writeText(t);toast(msg)}catch(e){toast('Kopyalanamadı. Bağlantıya uzun basıp kopyalayabilirsiniz.')}
+}
+const vitrinLink=()=>catalogLink()+'&mod=vitrin';
+const catShareInfo=k=>{const co=company();return k==='full'?{t:'Fiyatlı katalog',s:'Fiyatlarla birlikte. Müşteri sepete ekleyip sipariş verebilir.',url:catalogLink(),msg:co.name+' ürün kataloğu, buradan sipariş verebilirsiniz:'}:{t:'Fiyatsız katalog',s:'Yalnızca ürün fotoğrafları ve videoları. Fiyat görünmez, sipariş verilemez.',url:vitrinLink(),msg:co.name+' ürün kataloğu:'}};
+function shareCatalog(first){
+ const ks=first==='full'?['full','vitrin']:['vitrin','full'];
+ openDrawer({title:'Kataloğu paylaş',sub:'Bağlantıyı WhatsApp, mesaj ya da e-postayla gönderin.',
+  body:ks.map(k=>{const c=catShareInfo(k);return `<div class="shcard"><div class="t">${E(c.t)}</div><div class="s">${E(c.s)}</div><div class="shlink">${E(c.url)}</div>
+   <div class="shbtns">${navigator.share?btn('shareLink','Paylaş',{cls:'p sm',icon:'share',id:k}):''}<a class="btn ${navigator.share?'s':'p'} sm" href="https://wa.me/?text=${encodeURIComponent(c.msg+' '+c.url)}" target="_blank" rel="noopener">WhatsApp ile gönder</a>${btn('copyLink','Kopyala',{cls:'s sm',icon:'copy',id:k})}<a class="btn s sm" href="${E(c.url)}" target="_blank" rel="noopener">Aç</a></div></div>`}).join('')});
+}
 
 /* ---- Güvenli ortak kayıt ----
    Defter tek bir veri paketi olarak saklanıyor. Her kayıtta "en son gördüğüm sürüm
@@ -704,7 +722,7 @@ tx(){
 prod(){
  const q=lower(UI.prodQ),list=S.prod.filter(p=>!q||lower(p.n+' '+(p.catalogCategory||'')).includes(q));
  return head('Ürünler',S.prod.length+' ürün, '+S.prod.filter(p=>p.catalogVisible!==false&&p.catalogActive!==false&&N(p.price)>0).length+' tanesi katalogda',btn('cats','Kategoriler')+btn('newProd','Ürün ekle',{cls:'p',icon:'plus'}))+
- `<div class="tools"><label class="search">${IC.search}<span class="sr">Ürün ara</span><input data-input="prodQ" value="${E(UI.prodQ)}" placeholder="Ürün ya da kategori ara"></label><a class="btn s" href="${E(catalogLink())}" target="_blank" rel="noopener">Kataloğu aç</a><a class="btn s" href="${E(catalogLink()+'&mod=vitrin')}" target="_blank" rel="noopener" title="Fiyatsız, siparişsiz; yalnızca ürün fotoğrafları ve videoları">Fiyatsız katalog</a></div>
+ `<div class="tools"><label class="search">${IC.search}<span class="sr">Ürün ara</span><input data-input="prodQ" value="${E(UI.prodQ)}" placeholder="Ürün ya da kategori ara"></label><div class="catbtns"><a class="btn s" href="${E(catalogLink())}" target="_blank" rel="noopener">Kataloğu aç</a><a class="btn s" href="${E(catalogLink()+'&mod=vitrin')}" target="_blank" rel="noopener" title="Fiyatsız, siparişsiz; yalnızca ürün fotoğrafları ve videoları">Fiyatsız katalog</a>${btn('shareCat','Paylaş',{cls:'p',icon:'share',id:'vitrin'})}</div></div>
  <div class="grid">${list.map(p=>{const c=pc(p),k=N(p.price)-c,mg=N(p.price)?k/N(p.price):0,live=p.catalogVisible!==false&&p.catalogActive!==false&&N(p.price)>0;
   return `<article class="pc"><div class="im">${p.catalogImage?`<img src="${E(p.catalogImage)}" alt="" loading="lazy">`:`<span class="ph0">${E(String(p.n||'?').charAt(0))}</span>`}<div class="tags">${live?'<span class="tag t">Katalogda</span>':'<span class="tag">Katalogda değil</span>'}${p.catalogBestSeller?'<span class="tag a">Çok satan</span>':''}${p.catalogVideo?'<span class="tag">Video</span>':''}</div></div>
   <div class="bd"><div class="nm">${E(p.n)}<small>${E(p.catalogCategory||'Kategorisiz')} · ${E(mat(p.mat)?.n||'Malzeme yok')} · ${fg(p.gram)} g · ${fg(pmin(p))} dk</small></div>
@@ -791,8 +809,8 @@ ayar(){
  `<div class="cols"><div>
  <div class="card"><h2>Defter</h2><div class="rows">
   <div class="r"><div class="main"><div class="t">${E(workspaceName)}</div><div class="s">Davet kodu: <b style="color:var(--text);letter-spacing:.04em">${E(workspaceCode||'')}</b></div></div>${btn('copyInvite','Kopyala',{cls:'s sm'})}</div>
-  <div class="r"><div class="main"><div class="t">Müşteri katalog bağlantısı</div><div class="s" style="word-break:break-all">${E(catalogLink())}</div></div>${btn('copyCatalog','Kopyala',{cls:'s sm'})}</div>
-  <div class="r"><div class="main"><div class="t">Fiyatsız katalog bağlantısı</div><div class="s">Fiyat ve sipariş yok; yalnızca ürün fotoğrafları ve videoları</div></div>${btn('copyVitrin','Kopyala',{cls:'s sm'})}</div>
+  <div class="r"><div class="main"><div class="t">Müşteri katalog bağlantısı</div><div class="s" style="word-break:break-all">${E(catalogLink())}</div></div>${btn('shareCat','Paylaş',{cls:'s sm',id:'full'})}</div>
+  <div class="r"><div class="main"><div class="t">Fiyatsız katalog bağlantısı</div><div class="s">Fiyat ve sipariş yok; yalnızca ürün fotoğrafları ve videoları</div></div>${btn('shareCat','Paylaş',{cls:'s sm',id:'vitrin'})}</div>
   <div class="r"><div class="main"><div class="t">Başka bir deftere katıl</div><div class="s">Ortağınızın verdiği davet koduyla</div></div>${btn('join','Katıl',{cls:'s sm'})}</div>
   ${WS_LIST.length>1?`<div class="r"><div class="main"><div class="t">Defter değiştir</div><div class="s">${WS_LIST.length} deftere erişiminiz var</div></div>${btn('workspaces','Değiştir',{cls:'s sm'})}</div>`:''}
  </div></div>
@@ -1312,7 +1330,10 @@ const ACT={
  more(){openDrawer({title:'Bölümler',body:`<div class="nav">${navHtml()}</div>`});$('#dBody').querySelectorAll('a').forEach(a=>a.addEventListener('click',closeDrawer))},
  workspaces:()=>pickWorkspace(),switchWs:id=>switchWorkspace(id),
  join(){openDrawer({title:'Deftere katıl',sub:'Ortağınızın verdiği davet kodunu girin.',submit:'Katıl',body:fl('code','Davet kodu',{req:true,ph:'ABCD1234',attrs:'autocapitalize="characters"'}),async onSubmit(f){if(!need(String(f.code||'').trim(),'Davet kodunu yazın.','code'))return false;return await joinWorkspace(f.code)}})},
- copyInvite:()=>copyText(workspaceCode,'Davet kodu kopyalandı.'),copyCatalog:()=>copyText(catalogLink(),'Katalog bağlantısı kopyalandı.'),copyVitrin:()=>copyText(catalogLink()+'&mod=vitrin','Fiyatsız katalog bağlantısı kopyalandı.'),
+ copyInvite:()=>copyText(workspaceCode,'Davet kodu kopyalandı.'),copyCatalog:()=>copyText(catalogLink(),'Katalog bağlantısı kopyalandı.'),copyVitrin:()=>copyText(vitrinLink(),'Fiyatsız katalog bağlantısı kopyalandı.'),
+ shareCat:k=>shareCatalog(k||'vitrin'),
+ copyLink:k=>{const c=catShareInfo(k);copyText(c.url,c.t+' bağlantısı kopyalandı.')},
+ shareLink:k=>{const c=catShareInfo(k);navigator.share({title:c.t,text:c.msg,url:c.url}).catch(e=>{if(e&&e.name!=='AbortError')copyText(c.url,c.t+' bağlantısı kopyalandı.')})},
  newQuote:()=>formQuote(),editQuote:id=>formQuote(byId(S.quotes||[],id)),copyQuote:id=>formQuote(byId(S.quotes||[],id),true),
  async delQuote(id){const q=byId(S.quotes||[],id);if(!q)return;if(!await confirmBox('Teklif silinsin mi?',q.no+', '+(q.cust?.name||'')+'. Teklifle oluşturulan siparişler silinmez.','Sil'))return;S.quotes=S.quotes.filter(x=>x.id!==id);logAct('Teklifi sildi: '+q.no);upd()},
  qPdf:id=>quotePdf(id),qShare:id=>quotePdf(id,true),qOrder:id=>quoteToOrder(id),qF:k=>{UI.qF=k;render()},editCompany:()=>formCompany(),
