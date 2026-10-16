@@ -244,6 +244,20 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 .chart .bars i{width:min(22px,40%);border-radius:5px 5px 2px 2px;min-height:2px}
 .chart .bars i.g{background:var(--ok)}.chart .bars i.r{background:var(--bad)}
 .chart small{color:var(--muted);font-size:12.5px}
+.chart.c12{grid-template-columns:repeat(12,1fr);gap:8px;height:210px;padding-top:24px}
+.chart .bars i.t{background:linear-gradient(180deg,var(--teal-2),var(--teal));width:min(26px,70%)}
+.chart .bars{position:relative}.chart .bars em{position:absolute;left:0;right:0;text-align:center;font:600 11.5px/1 var(--body);font-style:normal;color:var(--muted)}
+.chart .col.cur small{color:var(--teal-2);font-weight:700}
+.mwrap{overflow-x:auto;margin:14px -4px 0;padding:0 4px}
+.mtab{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.mtab th{text-align:right;color:var(--faint);font-weight:600;font-size:12.5px;padding:0 10px 8px;white-space:nowrap}
+.mtab td{text-align:right;padding:10px;border-top:1px solid var(--line);white-space:nowrap}
+.mtab th:first-child,.mtab td:first-child{text-align:left;padding-left:0}
+.mtab tr.cur td{color:var(--teal-2)}.mtab tr.cur td:first-child{font-weight:700}
+.mtab tfoot td{font-weight:700;border-top:2px solid var(--line-2)}
+.mtab .qb{display:flex;align-items:center;gap:10px;justify-content:flex-end}.mtab .qb .bar{width:90px;flex:none}
+.mtab .z{color:var(--faint)}
+.nl .r{display:flex;align-items:center;gap:10px}.nl .r .main{flex:1;min-width:0}
 .legend{display:flex;gap:16px;color:var(--muted);font-size:13px;margin-top:10px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 .rank .r{display:block}
@@ -326,6 +340,9 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
  .r.ord .amt{text-align:left}
  .drawer{top:auto;left:0;width:100%;max-height:calc(100dvh - 12px - env(safe-area-inset-top,0px));border-left:0;border-top:1px solid var(--line);border-radius:20px 20px 0 0;transform:translateY(102%)}
  .chart{gap:6px;height:170px}
+ .chart.c12{gap:3px}.chart.c12 small{font-size:10.5px}.chart.c12 .bars em{font-size:9.5px}
+ .mtab{font-size:13px}.mtab th{white-space:normal;padding:0 5px 8px;font-size:11.5px;line-height:1.25;vertical-align:bottom}.mtab td{padding:9px 5px}
+ .mtab .qb .bar,.mtab .rev{display:none}
  .fig b{font-size:13px}
 }
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
@@ -796,9 +813,32 @@ rapor(){
  const pm=Math.max(...pl.map(x=>Math.abs(x.kar)),0),cm=Math.max(...cl.map(x=>x.rev),0),orev=os.reduce((a,o)=>a+otot(o),0);
  const mk=[];for(let i=5;i>=0;i--){const d0=new Date(new Date().getFullYear(),new Date().getMonth()-i,1),k=d0.getFullYear()+'-'+pd2(d0.getMonth()+1),t=S.tx.filter(x=>String(x.d).startsWith(k));mk.push({k,g:sumT(t,'gelir'),r:sumT(t,'gider')})}
  const mx=Math.max(...mk.map(x=>Math.max(x.g,x.r)),1);
+ // Satılan adetler, yeni müşteriler ve partnerler
+ const all=UI.rp==='all',pset=new Set(partners().map(p=>lower(p.name))),seen=new Map(),put=(n,d)=>{const k=lower(n);if(!k||!d)return;const c=seen.get(k);if(!c||String(d)<c.d)seen.set(k,{n:String(n).trim(),d:String(d)})};
+ S.ord.forEach(o=>put(o.cust,o.date));(S.customers||[]).forEach(c=>put(c.name,c.createdAt));
+ const custs=[...seen.entries()].filter(([k])=>!pset.has(k)).map(([,v])=>v),undatedCus=new Set(S.ord.filter(o=>lower(o.cust)&&!seen.has(lower(o.cust))&&!pset.has(lower(o.cust))).map(o=>lower(o.cust))).size;
+ const qty=a=>a.reduce((x,o)=>x+N(o.qty),0),totQ=qty(S.ord),delQ=qty(S.ord.filter(o=>o.st===ST[3])),perQ=qty(os);
+ const newC=custs.filter(c=>inP(c.d)).sort((a,b)=>b.d.localeCompare(a.d)),newP=partners().filter(x=>x.createdAt&&inP(x.createdAt)).sort((a,b)=>String(b.createdAt).localeCompare(a.createdAt));
+ const mm={},M=k=>mm[k]=mm[k]||{k,q:0,g:new Set(),rev:0,nc:0,np:0};
+ S.ord.forEach(o=>{if(!o.date)return;const m=M(String(o.date).slice(0,7));m.q+=N(o.qty);m.g.add(o.orderGroup||o.id);m.rev+=otot(o)});
+ custs.forEach(c=>M(c.d.slice(0,7)).nc++);partners().forEach(x=>{if(x.createdAt)M(String(x.createdAt).slice(0,7)).np++});
+ const months=Object.values(mm).sort((a,b)=>b.k.localeCompare(a.k)),mq=Math.max(...months.map(x=>x.q),1),activeM=months.filter(x=>x.q>0).length;
+ const m12=[];for(let i=11;i>=0;i--){const d0=new Date(new Date().getFullYear(),new Date().getMonth()-i,1),k=d0.getFullYear()+'-'+pd2(d0.getMonth()+1);m12.push({k,q:mm[k]?.q||0})}
+ const m12x=Math.max(...m12.map(x=>x.q),1);
+ let qcmp='';if(!all){const[y,m]=UI.rp.split('-').map(Number),d0=new Date(y,m-2,1),pk=d0.getFullYear()+'-'+pd2(d0.getMonth()+1),pq=mm[pk]?.q||0,df=perQ-pq;qcmp=`${mlabel(pk)} ayına göre <span style="font-weight:700;color:var(--${df>=0?'ok':'bad'})">${df>=0?'+':''}${fg(df)} adet</span>`}
+ const prodQ=Object.values(pa).filter(x=>x.q>0).sort((a,b)=>b.q-a.q),pqx=Math.max(...prodQ.map(x=>x.q),1);
+ const dayLbl=d=>fdate(d);
  return head('Rapor',cmp||'Tüm kayıtlar',`<select class="inp" style="width:auto" data-change="rp" aria-label="Dönem">${ms.map(k=>`<option value="${k}"${k===UI.rp?' selected':''}>${mlabel(k)}</option>`).join('')}<option value="all"${UI.rp==='all'?' selected':''}>Tüm zamanlar</option></select>`)+
  `<div class="kpis">${kpi('Gelir',TL(gl),'ok','Kasaya girenler')}${kpi('Gider',TL(gd),'bad')}${kpi('Net',TL(net),net>=0?'':'bad')}${kpi('Sipariş cirosu',TL(orev),'',os.length+' sipariş')}</div>
+ <div class="kpis">${kpi('Toplam satılan',fg(totQ)+' adet','','Bugüne kadar · teslim edilen '+fg(delQ)+' adet')}${all?kpi('Aylık ortalama',fg(activeM?Math.round(totQ/activeM):0)+' adet','',activeM+' ayın satışına göre'):kpi(mlabel(UI.rp)+' satılan',fg(perQ)+' adet','',qcmp)}${kpi(all?'Toplam müşteri':'Yeni müşteri',fg(newC.length+(all?undatedCus:0)),'',all?'Partnerler hariç':'Bu ay ilk kez · toplam '+fg(custs.length+undatedCus))}${kpi(all?'Toplam partner':'Yeni partner',fg(all?partners().length:newP.length),'',all?'Kayıtlı iş ortağı':'Toplam '+fg(partners().length)+' partner')}</div>
  <div class="card"><h2>Son 6 ay</h2><div class="chart">${mk.map(x=>`<div class="col" title="${mlabel(x.k)}: gelir ${TL(x.g)}, gider ${TL(x.r)}"><div class="bars"><i class="g" style="height:${x.g/mx*100}%"></i><i class="r" style="height:${x.r/mx*100}%"></i></div><small>${MONTHS[+x.k.slice(5)-1].slice(0,3)}</small></div>`).join('')}</div><div class="legend"><span><i style="background:var(--ok)"></i>Gelir</span><span><i style="background:var(--bad)"></i>Gider</span></div></div>
+ <div class="card"><div class="ch" style="margin:0"><h2 style="margin:0">Aylara göre satış</h2><span class="mu" style="font-size:13px">Bugüne kadar ${fg(totQ)} adet</span></div>
+  <div class="chart c12">${m12.map(x=>`<div class="col${x.k===UI.rp?' cur':''}" title="${mlabel(x.k)}: ${fg(x.q)} adet"><div class="bars"><i class="t" style="height:${x.q/m12x*100}%"></i>${x.q?`<em style="bottom:calc(${x.q/m12x*100}% + 4px)">${fg(x.q)}</em>`:''}</div><small>${MONTHS[+x.k.slice(5)-1].slice(0,3)}</small></div>`).join('')}</div>
+  ${months.length?`<div class="mwrap"><table class="mtab"><thead><tr><th>Ay</th><th>Satılan adet</th><th>Sipariş</th><th class="rev">Ciro</th><th>Yeni müşteri</th><th>Yeni partner</th></tr></thead><tbody>${months.map(x=>`<tr class="${x.k===UI.rp?'cur':''}"><td>${mlabel(x.k)}</td><td><div class="qb">${bar(x.q,mq)}<b>${fg(x.q)}</b></div></td><td class="${x.g.size?'':'z'}">${fg(x.g.size)}</td><td class="rev${x.rev?'':' z'}">${TL(x.rev)}</td><td class="${x.nc?'':'z'}">${x.nc?'+'+x.nc:'0'}</td><td class="${x.np?'':'z'}">${x.np?'+'+x.np:'0'}</td></tr>`).join('')}</tbody>
+  <tfoot><tr><td>Toplam</td><td>${fg(months.reduce((a,x)=>a+x.q,0))}</td><td>${fg(months.reduce((a,x)=>a+x.g.size,0))}</td><td class="rev">${TL(months.reduce((a,x)=>a+x.rev,0))}</td><td>${fg(custs.length)}</td><td>${fg(partners().filter(x=>x.createdAt).length)}</td></tr></tfoot></table></div>`:empty('Henüz satış yok')}
+  ${S.ord.some(o=>!o.date)?`<p class="note">Tarihi olmayan ${S.ord.filter(o=>!o.date).length} sipariş (${fg(qty(S.ord.filter(o=>!o.date)))} adet) aylara dağıtılamadı; toplam satılana dahildir.</p>`:''}<p class="note">Sipariş sayısında katalogdan tek seferde verilen çok ürünlü siparişler bir sipariş sayılır. Müşteri, ilk siparişinin ya da müşteri kartının açıldığı ayda yeni sayılır.</p></div>
+ <div class="cols"><div class="card rank"><h2>Ürünlere göre satılan adet</h2><div class="rows">${prodQ.slice(0,8).map(x=>`<div class="r"><div class="top"><b>${E(x.n)}</b><b>${fg(x.q)} adet</b></div>${bar(x.q,pqx)}<div class="s">Ciro ${TL(x.rev)}${perQ?' · adet payı %'+Math.round(x.q/perQ*100):''}</div></div>`).join('')||empty('Bu dönemde satış yok')}</div>${prodQ.length>8?`<p class="note">${prodQ.length-8} ürün daha satıldı.</p>`:''}</div>
+ <div class="card nl"><h2>${all?'Müşteriler ve partnerler':'Bu dönem katılanlar'}</h2><div class="rows">${[...newP.map(x=>({t:'p',n:x.name,d:x.createdAt})),...newC.map(x=>({t:'c',n:x.n,d:x.d}))].sort((a,b)=>String(b.d).localeCompare(a.d)).slice(0,12).map(x=>`<div class="r"><div class="main"><div class="t">${E(x.n)}</div><div class="s">${x.t==='p'?'Partner olarak eklendi':'İlk kez'}, ${dayLbl(x.d)}</div></div><span class="tag${x.t==='p'?' g':''}">${x.t==='p'?'Yeni partner':'Yeni müşteri'}</span></div>`).join('')||empty('Bu dönemde yeni müşteri ya da partner yok')}</div>${newC.length+newP.length>12?`<p class="note">Toplam ${newC.length} yeni müşteri, ${newP.length} yeni partner.</p>`:''}</div></div>
  <div class="cols"><div class="card rank"><h2>En kârlı ürünler</h2><div class="rows">${pl.map(x=>`<div class="r"><div class="top"><b>${E(x.n)}</b><b class="${x.kar>=0?'ok':'bad'}">${TL(x.kar)}</b></div>${bar(x.kar,pm,x.kar>=0?'ok':'bad')}<div class="s">${fg(x.q)} adet, ciro ${TL(x.rev)}</div></div>`).join('')||empty('Bu dönemde sipariş yok')}</div><p class="note">Kâr, ürünün bugünkü maliyet kartına göre tahminidir.</p></div>
  <div class="card rank"><h2>En çok alan müşteriler</h2><div class="rows">${cl.map(x=>`<div class="r"><div class="top"><b>${E(x.n)}</b><b>${TL(x.rev)}</b></div>${bar(x.rev,cm)}<div class="s">${x.c} sipariş, ${fg(x.q)} adet</div></div>`).join('')||empty('Bu dönemde sipariş yok')}</div></div></div>
  ${und&&UI.rp!=='all'?`<p class="note">${und} siparişin tarihi olmadığı için yalnızca "Tüm zamanlar" görünümünde sayılır.</p>`:''}`;
