@@ -173,6 +173,14 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 .seg input:focus-visible+span{outline:2px solid var(--teal-2)}
 .sumbox{display:flex;justify-content:space-between;align-items:baseline;padding:12px 14px;border-radius:var(--r-sm);background:var(--teal-soft);border:1px solid rgba(63,208,201,.25)}
 .sumbox b{font:800 20px/1 var(--display)}
+.cpsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cpsum div{padding:10px 12px;border-radius:var(--r-sm);background:var(--bg);border:1px solid var(--line)}
+.cpsum small{display:block;color:var(--faint);font-size:12px}.cpsum b{font:700 16px/1.3 var(--display)}
+.cpsum .k{background:rgba(255,138,147,.08);border-color:rgba(255,138,147,.3)}.cpsum .k b{color:var(--danger)}
+.cpo .r{padding:9px 0}.cpo .amt{font-size:14px}.cpo .amt small{font-size:12px}
+.cpo .r.hit .amt small{color:var(--ok)}
+.cpafter{display:flex;justify-content:space-between;align-items:baseline;padding:12px 14px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--bg)}
+.cpafter b{font:800 20px/1 var(--display)}
 
 /* Çekmece ve iletişim kutusu */
 .scrim{position:fixed;inset:0;z-index:60;background:rgba(3,8,14,.62);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .22s}
@@ -791,7 +799,7 @@ partner(){
   ${pp.length?`<div class="ppv">${pp.slice(0,5).map(r=>{const p=prod(r.prod),off=N(p.price)>0?Math.round((1-N(r.price)/N(p.price))*100):0;return `<div><span>${E(niceName(p.n))}</span><b>${TL(r.price)}${off>0?`<small>−%${off}</small>`:''}</b></div>`}).join('')}${pp.length>5?`<div class="more">+${pp.length-5} ürün daha</div>`:''}</div>`:`<p class="note" style="margin:0">Bu partnere hangi ürünü kaça verdiğinizi "Fiyatlar" ile kaydedin.</p>`}
   <div class="fig"><div><small>Siparişler</small><b>${TL(x.t)}</b></div><div><small>Kalan</small><b class="${x.r>0.004?'bad':'ok'}">${TL(x.r)}</b></div><div><small>Son sipariş</small><b>${x.last?fdate(x.last):'—'}</b></div></div>
   ${pa.note?`<div class="s mu" style="font-size:13px">${E(pa.note)}</div>`:''}
-  <div class="ft">${btn('paPrices','Fiyatlar',{cls:'p sm',icon:'edit',id:pa.id})}${btn('paPdf','Fiyat listesi',{cls:'s sm',icon:'pdf',id:pa.id})}${btn('paOrder','Sipariş gir',{cls:'s sm',icon:'plus',id:pa.id})}<span style="flex:1"></span>${navigator.canShare?ibtn('paShare',pa.id,'share','Fiyat listesini paylaş'):''}${ibtn('delPartner',pa.id,'trash','Partneri sil')}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(all.length?'Aramaya uyan partner yok':'Henüz partner yok',all.length?'':'Ürünlerinizi satan iş ortaklarını "Partner ekle" ile kaydedin; her birine özel fiyat listesi tutun.')}</div>`}</div>`;
+  <div class="ft">${btn('paPrices','Fiyatlar',{cls:'p sm',icon:'edit',id:pa.id})}${btn('paPdf','Fiyat listesi',{cls:'s sm',icon:'pdf',id:pa.id})}${btn('paOrder','Sipariş gir',{cls:'s sm',icon:'plus',id:pa.id})}<span style="flex:1"></span>${x.r>0.004?ibtn('cusPay',pa.name,'cash','Ödeme al'):''}${navigator.canShare?ibtn('paShare',pa.id,'share','Fiyat listesini paylaş'):''}${ibtn('delPartner',pa.id,'trash','Partneri sil')}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(all.length?'Aramaya uyan partner yok':'Henüz partner yok',all.length?'':'Ürünlerinizi satan iş ortaklarını "Partner ekle" ile kaydedin; her birine özel fiyat listesi tutun.')}</div>`}</div>`;
 },
 cus(){
  const recs=customerRecords(),q=lower(UI.cusQ),list=recs.filter(c=>!q||lower([c.name,c.phone,c.email,c.address].join(' ')).includes(q));
@@ -800,7 +808,7 @@ cus(){
  <div class="grid">${list.map(c=>{const bal=c.t-c.p;return `<article class="pc"><div class="bd"><div style="display:flex;gap:12px;align-items:center"><span style="flex:none;width:42px;height:42px;border-radius:12px;background:var(--teal-soft);color:var(--teal-2);display:grid;place-items:center;font:800 18px/1 var(--display)">${E(String(c.name).charAt(0).toLocaleUpperCase('tr-TR'))}</span><div class="nm" style="min-width:0">${E(c.name)}${partnerByName(c.name)?' <span class="tag g" style="vertical-align:2px">Partner</span>':''}<small>${c.n} sipariş${c.phone?' · '+E(c.phone):''}</small></div></div>
   ${c.email||c.address||c.notes?`<div class="s mu" style="font-size:13.5px">${[c.email,c.address,c.notes].filter(Boolean).map(E).join('<br>')}</div>`:''}
   <div class="fig"><div><small>Toplam</small><b>${TL(c.t)}</b></div><div><small>Ödenen</small><b>${TL(c.p)}</b></div><div><small>Kalan</small><b class="${bal>0.004?'bad':'ok'}">${TL(Math.max(0,bal))}</b></div></div>
-  <div class="ft">${c.id?btn('editCus','Düzenle',{cls:'s sm',icon:'edit',id:c.id}):btn('cardCus','Kart oluştur',{cls:'s sm',icon:'plus',extra:`data-name="${E(c.name)}"`})}<span style="flex:1"></span>${c.id?ibtn('delCus',c.id,'trash','Kartı sil'):''}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(recs.length?'Aramaya uyan müşteri yok':'Henüz müşteri yok','Sipariş ekledikçe müşteriler burada otomatik görünür.')}</div>`}</div>`;
+  <div class="ft">${bal>0.004?btn('cusPay','Ödeme al',{cls:'p sm',icon:'cash',id:c.name}):''}${c.id?btn('editCus','Düzenle',{cls:'s sm',icon:'edit',id:c.id}):btn('cardCus','Kart oluştur',{cls:'s sm',icon:'plus',extra:`data-name="${E(c.name)}"`})}<span style="flex:1"></span>${c.id?ibtn('delCus',c.id,'trash','Kartı sil'):''}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(recs.length?'Aramaya uyan müşteri yok':'Henüz müşteri yok','Sipariş ekledikçe müşteriler burada otomatik görünür.')}</div>`}</div>`;
 },
 rapor(){
  const cur=td().slice(0,7),ms=[...new Set([cur,...S.tx.map(x=>String(x.d).slice(0,7)),...S.ord.filter(o=>o.date).map(o=>String(o.date).slice(0,7))])].filter(Boolean).sort().reverse();
@@ -1060,6 +1068,37 @@ function formMat(m,spoolOnly){
    if(f.exp)S.tx.push({id:uid(),d:td(),t:'gider',amt:p*q,desc:'Malzeme: '+n+(q>1?' ('+q+' makara)':''),by:myUid});logAct(q+' makara '+n+' ekledi');
    upd();toast(ex?'Stoğa eklendi, gram maliyeti '+TL(gc(ex))+'.':'Malzeme eklendi.');
   }});
+}
+/* Müşteriden toplu ödeme: tutar açık siparişlere en eskiden başlayarak dağıtılır. */
+const PAYM=['Nakit','Havale / EFT','Kredi kartı','Diğer'];
+const custOrders=name=>{const k=lower(name);return S.ord.map((o,i)=>({o,i})).filter(x=>lower(x.o.cust)===k).sort((a,b)=>String(a.o.date||'').localeCompare(String(b.o.date||''))||a.i-b.i).map(x=>x.o)};
+function payPlan(name,amt){let left=r2(amt);return custOrders(name).filter(o=>orem(o)>0.004).map(o=>{const r=r2(orem(o)),a=r2(Math.min(left,r));left=r2(left-a);return {o,r,a}})}
+function formCusPay(name){
+ name=String(name||'').trim();const os=custOrders(name);if(!os.length)return toast('Bu müşterinin siparişi yok.');
+ const tot=os.reduce((a,o)=>a+otot(o),0),paid=os.reduce((a,o)=>a+N(o.paid),0),due=r2(os.reduce((a,o)=>a+Math.max(0,orem(o)),0));
+ if(due<=0.004)return toast(name+' için kalan bakiye yok.');
+ const k=lower(name),hist=S.tx.filter(t=>t.t==='gelir'&&/^(Tahsilat|Kapora): /.test(t.desc||'')&&lower(String(t.desc).replace(/^(Tahsilat|Kapora): /,'').replace(/ \(.*\)$/,''))===k).sort((a,b)=>String(b.d).localeCompare(String(a.d))).slice(0,5);
+ const open=payPlan(name,0);
+ openDrawer({title:'Ödeme al',sub:name,submit:'Ödemeyi kaydet',
+  body:`<div class="fg"><div class="w cpsum"><div><small>Toplam sipariş</small><b>${TL(tot)}</b></div><div><small>Ödenen</small><b>${TL(paid)}</b></div><div class="k" data-due="${due}"><small>Kalan</small><b>${TL(due)}</b></div></div>
+   <div class="fl w"><label for="f_amt">Alınan tutar (₺)</label><div style="display:flex;gap:8px"><input id="f_amt" name="amt" type="number" step="any" inputmode="decimal" min="0" required placeholder="0" style="flex:1"><button type="button" class="btn s" data-act="cpAll">Tamamı</button></div><div class="hint">Tutar, açık siparişlere en eski siparişten başlayarak dağıtılır ve kasaya gelir olarak yazılır.</div></div>
+   ${fl('date','Tarih',{type:'date',value:td()})}${fsel('method','Ödeme şekli',PAYM.map(x=>[x,x]),'Nakit')}
+   ${fl('pnote','Not',{opt:true,wide:true,ph:'Örn. dekont no, kim getirdi'})}
+   <div class="w cpafter"><span class="mu">Ödemeden sonra kalan</span><b id="cpLeft">${TL(due)}</b></div>
+   <div class="w"><div class="lb" style="margin-bottom:6px">Açık siparişler (${open.length})</div><div class="rows cpo" id="cpOrders"></div></div>
+   ${hist.length?`<div class="w"><div class="lb" style="margin-bottom:6px">Son ödemeler</div><div class="rows">${hist.map(t=>`<div class="r"><div class="main"><div class="t">${TL(t.amt)}</div><div class="s">${fdate(t.d)}${/^Kapora/.test(t.desc)?', kapora':''}${(String(t.desc).match(/ \((.*)\)$/)||[])[1]?', '+E(String(t.desc).match(/ \((.*)\)$/)[1]):''}${t.by?', '+E(pname2(t.by)):''}</div></div></div>`).join('')}</div></div>`:''}</div>`,
+  onSubmit(f){
+   const amt=r2(f.amt);if(!need(amt>0,'Alınan tutarı yazın.','amt'))return false;
+   if(!need(amt<=due+0.004,'Kalan bakiye '+TL(due)+'. Daha fazla tutar girilemez.','amt'))return false;
+   const plan=payPlan(name,amt).filter(x=>x.a>0);plan.forEach(x=>{x.o.paid=r2(N(x.o.paid)+x.a)});
+   const extra=[f.method&&f.method!=='Nakit'?f.method:'',String(f.pnote||'').trim()].filter(Boolean).join(', ');
+   S.tx.push({id:uid(),d:f.date||td(),t:'gelir',amt,desc:'Tahsilat: '+name+(extra?' ('+extra+')':''),by:myUid});
+   logAct(name+' müşterisinden '+TL(amt)+' tahsil etti ('+plan.length+' sipariş)');upd();
+   const left=r2(due-amt);toast(TL(amt)+' tahsil edildi. '+(left>0.004?'Kalan: '+TL(left)+'.':'Bakiye kapandı.'))}});
+ const draw=()=>{const v=Math.max(0,N(V('f_amt'))),plan=payPlan(name,v),left=r2(due-v);
+  $('#cpLeft').textContent=left<-0.004?'Fazla: '+TL(-left):TL(Math.max(0,left));$('#cpLeft').className=left<-0.004?'bad':left<=0.004&&v>0?'ok':'';
+  $('#cpOrders').innerHTML=plan.map(x=>`<div class="r${x.a>0?' hit':''}"><div class="main"><div class="t">${N(x.o.qty)} × ${E(pname(x.o.prod))}</div><div class="s">${fdate(x.o.date)||'Tarihsiz'}${x.o.orderGroup?', '+E(x.o.orderGroup):''}, kalan ${TL(x.r)}</div></div><div class="amt">${x.a>0?'+'+TL(x.a):TL(x.r)}<small>${x.a>0?(x.a>=x.r-0.004?'Kapanır':'Kalan '+TL(x.r-x.a)):'Açık'}</small></div></div>`).join('')};
+ $('#dBody').oninput=e=>{if(e.target.id==='f_amt')draw()};draw();
 }
 function formCus(c,presetName){
  openDrawer({title:c?'Müşteri kartını düzenle':'Müşteri ekle',submit:'Kaydet',
@@ -1570,7 +1609,7 @@ const ACT={
   $('#dBody').querySelectorAll('.pprow').forEach(r=>{if(r.style.display==='none')return;const i=r.querySelector('input[name^="pp_"]'),p=prod(r.dataset.pid);if(!p||(k==='empty'&&i.value!==''))return;i.value=r2(N(p.price)*(1-v/100));i.dispatchEvent(new Event('input',{bubbles:true}));n++});
   toast(n?n+' ürüne liste fiyatından %'+pct(v)+' indirimli fiyat yazıldı. Kaydetmeyi unutmayın.':'Uygulanacak ürün yok.')},
  async delPartner(id){const pa=byId(partners(),id);if(!pa)return;if(!await confirmBox('Partner silinsin mi?','“'+pa.name+'” kartı ve fiyat listesi silinir; siparişleri ve tahsilat geçmişi korunur.','Partneri sil'))return;S.partners=partners().filter(x=>x.id!==id);S.pprices=pprices().filter(x=>x.partner!==id);logAct('Partneri sildi: '+pa.name);upd()},
- newCus:()=>formCus(),editCus:id=>formCus(byId(S.customers||[],id)),cardCus:(id,el)=>formCus(null,el.dataset.name),
+ newCus:()=>formCus(),cusPay:name=>formCusPay(name),cpAll(){const el=$('#f_amt'),k=$('.cpsum .k');if(!el||!k)return;el.value=String(r2(k.dataset.due));el.dispatchEvent(new Event('input',{bubbles:true}));el.focus()},editCus:id=>formCus(byId(S.customers||[],id)),cardCus:(id,el)=>formCus(null,el.dataset.name),
  async delCus(id){const c=byId(S.customers||[],id);if(!c)return;if(!await confirmBox('Müşteri kartı silinsin mi?','“'+c.name+'” kartındaki iletişim bilgileri silinir; sipariş ve tahsilat geçmişi korunur.','Kartı sil'))return;S.customers=S.customers.filter(x=>x.id!==id);upd()},
  newDebt:()=>formDebt(),editDebt:id=>formDebt(byId(S.debt,id)),
  payDebt(id){const x=byId(S.debt,id);if(!x||x.left<=0)return;const prev=x.due,tid=uid();S.tx.push({id:tid,d:td(),t:'gider',amt:N(x.amt),desc:'Taksit: '+x.n+(x.bank?' ('+x.bank+')':''),by:myUid});logAct(x.n+' taksitini ödedi');x.left--;x.due=addM(x.due,x.day||Number(x.due.slice(8)));upd();
