@@ -174,6 +174,10 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 .sumbox{display:flex;justify-content:space-between;align-items:baseline;padding:12px 14px;border-radius:var(--r-sm);background:var(--teal-soft);border:1px solid rgba(63,208,201,.25)}
 .sumbox b{font:800 20px/1 var(--display)}
 .cpsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cpsum.k4{grid-template-columns:repeat(4,1fr)}.cpsum .kk{background:rgba(245,181,68,.08);border-color:rgba(245,181,68,.35)}.cpsum .kk b{color:var(--amber,#F5B544)}
+.ktag{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;font:700 11.5px/1 var(--body);letter-spacing:.02em;background:rgba(245,181,68,.14);color:#F5B544;vertical-align:2px;margin-left:6px}
+.kline{display:flex;flex-wrap:wrap;gap:4px 12px}.kline b{color:#F5B544}
+.kq{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .cpsum div{padding:10px 12px;border-radius:var(--r-sm);background:var(--bg);border:1px solid var(--line)}
 .cpsum small{display:block;color:var(--faint);font-size:12px}.cpsum b{font:700 16px/1.3 var(--display)}
 .cpsum .k{background:rgba(255,138,147,.08);border-color:rgba(255,138,147,.3)}.cpsum .k b{color:var(--danger)}
@@ -350,6 +354,7 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
  .drawer{top:auto;left:0;width:100%;max-height:calc(100dvh - 12px - env(safe-area-inset-top,0px));border-left:0;border-top:1px solid var(--line);border-radius:20px 20px 0 0;transform:translateY(102%)}
  .chart{gap:6px;height:170px}
  .netrow{gap:6px;font-size:11.5px}
+ .cpsum.k4{grid-template-columns:repeat(2,1fr)}
  .chart.c12{gap:3px}.chart.c12 small{font-size:10.5px}.chart.c12 .bars em{font-size:9.5px}
  .mtab{font-size:13px}.mtab th{white-space:normal;padding:0 5px 8px;font-size:11.5px;line-height:1.25;vertical-align:bottom}.mtab td{padding:9px 5px}
  .mtab .qb .bar,.mtab .rev{display:none}
@@ -422,6 +427,7 @@ const IC={
  notify:I('<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/>'),
  ayar:I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1"/>'),
  partner:I('<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3M3 4h8"/>'),
+ kons:I('<path d="M4 8h12M4 8l3-3M4 8l3 3M20 16H8M20 16l-3-3M20 16l-3 3"/>'),
  teklif:I('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>'),
  pdf:I('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'),
  share:I('<path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>'),
@@ -653,7 +659,9 @@ const mat=i=>S.mat.find(m=>m.id===i),prod=i=>S.prod.find(p=>p.id===i);
 const pmin=p=>p.mins!=null?N(p.mins):Math.round(N(p.hours)*60);
 const gc=m=>m&&N(m.spool)?N(m.price)/N(m.spool):0;
 const pc=p=>{const m=mat(p.mat);return(N(p.gram)*gc(m)+(pmin(p)/60)*N(S.set.hr)+N(p.extra))*(1+N(S.set.fire)/100)};
-const otot=o=>N(o.qty)*N(o.price),orem=o=>otot(o)-N(o.paid);
+const kSold=o=>N(o.sold),kRet=o=>N(o.ret),kAt=o=>o.kons?Math.max(0,N(o.qty)-kSold(o)-kRet(o)):0;
+const oq=o=>o.kons?kSold(o):N(o.qty); // satılmış sayılan adet: konsinyede yalnızca satılanlar
+const otot=o=>oq(o)*N(o.price),orem=o=>otot(o)-N(o.paid);
 const jobs=o=>S.job.filter(j=>j.ord===o.id),rem=o=>Math.max(0,N(o.qty)-jobs(o).reduce((x,j)=>x+N(j.qty),0));
 const sumT=(a,t)=>a.filter(x=>x.t===t).reduce((q,x)=>q+N(x.amt),0);
 const pname=id=>prod(id)?.n||'Silinmiş ürün';
@@ -707,12 +715,12 @@ const stSel=o=>`<select class="stsel s${Math.max(0,ST.indexOf(o.st))}" data-chan
 const bar=(v,mx,cls='')=>`<div class="bar ${cls}"><i style="width:${mx>0?Math.max(2,Math.min(100,Math.abs(v)/mx*100)):0}%"></i></div>`;
 
 function orderRow(o,compact){
- const p=prod(o.prod),tot=otot(o),r=orem(o),kar=p?tot-N(o.qty)*pc(p):null;
+ const p=prod(o.prod),tot=otot(o),r=orem(o),kar=p?tot-oq(o)*pc(p):null,ka=kAt(o);
  const meta=[fdate(o.date),o.source==='catalog'?'Katalog'+(o.orderGroup?' '+E(o.orderGroup):''):(o.by?E(pname2(o.by))+' ekledi':'')+(o.source!=='catalog'&&o.orderGroup?' · '+E(o.orderGroup):''),o.phone?E(o.phone):''].filter(Boolean).join(', ');
  const prodLine=jobs(o).length?(()=>{const a=jobs(o),d=a.filter(j=>j.st==='Tamamlandı').reduce((x,j)=>x+N(j.qty),0),b=a.filter(j=>j.st==='Baskıda').reduce((x,j)=>x+N(j.qty),0);return `<div class="s">Üretim: ${d}/${N(o.qty)} tamamlandı${b?`, ${b} baskıda`:''}</div>`})():'';
- return `<div class="r ord"><div class="main"><div class="t">${E(o.cust)} <span class="mu" style="font-weight:500">· ${N(o.qty)} × ${E(pname(o.prod))}</span></div><div class="s">${meta}</div>${o.note?`<div class="s">Not: ${E(o.note)}</div>`:''}${prodLine}${!compact?`<div class="s">Birim ${TL(o.price)}${N(o.dp)?' ('+TL(o.gp)+' üzerinden %'+pct(o.dp)+' iskontolu)':''}${kar!==null?', tahmini kâr '+TL(kar):''}</div>`:''}</div>
- <div class="amt">${TL(tot)}<small class="${r>0.004?'bad':'ok'}">${r>0.004?'Kalan '+TL(r):r<-0.004?'Fazla ödeme '+TL(-r):'Ödendi'}</small></div>
- <div class="acts">${stSel(o)}${compact?'':ibtn('jobFor',o.id,'job','Baskıya ver')+ibtn('editOrd',o.id,'edit','Düzenle')+ibtn('delOrd',o.id,'trash','Sil')}</div></div>`;
+ return `<div class="r ord"><div class="main"><div class="t">${E(o.cust)} <span class="mu" style="font-weight:500">· ${N(o.qty)} × ${E(pname(o.prod))}</span>${o.kons?'<span class="ktag">Konsinye</span>':''}</div><div class="s">${meta}</div>${o.kons?`<div class="s kline"><span>Gönderilen ${fg(o.qty)}</span><span>Satılan ${fg(kSold(o))}</span><span>İade ${fg(kRet(o))}</span>${ka?`<b>Müşteride ${fg(ka)}</b>`:'<span class="ok">Konsinye kapandı</span>'}</div>`:''}${o.note?`<div class="s">Not: ${E(o.note)}</div>`:''}${prodLine}${!compact?`<div class="s">Birim ${TL(o.price)}${N(o.dp)?' ('+TL(o.gp)+' üzerinden %'+pct(o.dp)+' iskontolu)':''}${kar!==null?', tahmini kâr '+TL(kar):''}</div>`:''}</div>
+ <div class="amt">${TL(tot)}<small class="${r>0.004?'bad':o.kons&&ka&&!tot?'mu':'ok'}">${r>0.004?'Kalan '+TL(r):r<-0.004?'Fazla ödeme '+TL(-r):o.kons&&ka&&!tot?'Henüz satış yok':'Ödendi'}</small></div>
+ <div class="acts">${stSel(o)}${o.kons&&(ka||(o.kh||[]).length)?ibtn('kons',o.id,'kons','Konsinye hesap'):''}${compact?'':ibtn('jobFor',o.id,'job','Baskıya ver')+ibtn('editOrd',o.id,'edit','Düzenle')+ibtn('delOrd',o.id,'trash','Sil')}</div></div>`;
 }
 
 const V_={
@@ -729,6 +737,7 @@ ozet(){
  low.forEach(m=>todo.push(`<div class="r"><div class="main"><div class="t">${E(m.n)} azaldı</div><div class="s">Stokta ${fg(m.g)} g kaldı</div></div><a class="btn s sm" href="#mat">Malzeme</a></div>`));
  debts.forEach(x=>todo.push(`<div class="r"><div class="main"><div class="t">${E(x.n)} taksiti</div><div class="s">${TL(x.amt)} · ${fdate(x.due)}</div></div>${dchip(dleft(x.due))}</div>`));
  (S.quotes||[]).filter(q=>q.status==='Gönderildi'&&!qExpired(q)&&q.sentAt&&Date.now()-q.sentAt>3*864e5).forEach(q=>todo.push(`<div class="r"><div class="main"><div class="t">${E(q.cust?.name||'')} teklifine dönüş yok</div><div class="s">${E(q.no)}, ${Math.floor((Date.now()-q.sentAt)/864e5)} gün önce gönderildi, ${TL(qCalc(q).total)}</div></div>${btn('qOrder','Siparişe dönüştür',{cls:'s sm',id:q.id})}</div>`));
+ S.ord.filter(o=>kAt(o)>0&&o.date&&(Date.now()-new Date(o.date+'T12:00').getTime())/864e5>=30).forEach(o=>todo.push(`<div class="r"><div class="main"><div class="t">${E(o.cust)}: konsinye hesabı</div><div class="s">${fg(kAt(o))} × ${E(pname(o.prod))} müşteride, ${Math.floor((Date.now()-new Date(o.date+'T12:00').getTime())/864e5)} gündür</div></div>${btn('kons','Hesap',{cls:'s sm',id:o.id})}</div>`));
  ready.forEach(o=>todo.push(`<div class="r"><div class="main"><div class="t">${E(o.cust)} siparişi hazır</div><div class="s">${N(o.qty)} × ${E(pname(o.prod))}${orem(o)>0.004?', kalan '+TL(orem(o)):''}</div></div>${btn('deliver','Teslim edildi',{cls:'s sm',id:o.id})}</div>`));
  return head(hi,new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'}),btn('newOrd','Yeni sipariş',{cls:'p',icon:'plus'})+btn('newTx','Gelir / gider',{icon:'plus'}))+
  `<div class="kpis">${kpi('Bu ay gelir',TL(gl),'ok')}${kpi('Bu ay gider',TL(gd),'bad')}${kpi('Bu ay net',TL(gl-gd),gl-gd>=0?'':'bad','Gelir − gider')}${kpi('Tahsil edilecek',TL(al),al>0?'warn':'',S.ord.filter(o=>orem(o)>0.004).length+' siparişte')}${kpi('Açık sipariş',open.length,'',fresh.length?fresh.length+' yeni':'')}</div>
@@ -745,8 +754,9 @@ teklif(){return teklifPage()},
 ord(){
  const q=lower(UI.ordQ),cnt=k=>S.ord.filter(o=>fOrd(o,k)).length;
  const list=S.ord.filter(o=>fOrd(o,UI.ordF)&&(!q||lower(o.cust+' '+pname(o.prod)+' '+(o.orderGroup||'')+' '+(o.phone||'')).includes(q))).slice().reverse();
- const F=[['all','Tümü'],['open','Açık'],...ST.map((s,i)=>['s'+i,s]),['due','Bakiyesi olan']];
- return head('Siparişler',S.ord.length+' sipariş, tahsil edilecek '+TL(S.ord.reduce((a,o)=>a+Math.max(0,orem(o)),0)),btn('newOrd','Yeni sipariş',{cls:'p',icon:'plus'}))+
+ const F=[['all','Tümü'],['open','Açık'],...ST.map((s,i)=>['s'+i,s]),['due','Bakiyesi olan'],['kons','Konsinyede']];
+ const kOpen=S.ord.filter(o=>kAt(o)>0);
+ return head('Siparişler',S.ord.length+' sipariş, tahsil edilecek '+TL(S.ord.reduce((a,o)=>a+Math.max(0,orem(o)),0))+(kOpen.length?', konsinyede '+fg(kOpen.reduce((a,o)=>a+kAt(o),0))+' adet ('+TL(kOpen.reduce((a,o)=>a+kAt(o)*N(o.price),0))+')':''),btn('newOrd','Yeni sipariş',{cls:'p',icon:'plus'}))+
  `<div class="tools"><div class="chips">${F.map(([k,l])=>`<button class="chip" data-act="ordF" data-id="${k}" aria-pressed="${UI.ordF===k}">${l}<span class="c">${cnt(k)}</span></button>`).join('')}</div><label class="search">${IC.search}<span class="sr">Siparişlerde ara</span><input data-input="ordQ" value="${E(UI.ordQ)}" placeholder="Müşteri, ürün, kod ara"></label></div>
  <div class="card"><div class="rows" id="ordList">${list.map(o=>orderRow(o)).join('')||empty(S.ord.length?'Bu filtreye uyan sipariş yok':'Henüz sipariş yok',S.ord.length?'':'İlk siparişi "Yeni sipariş" ile ekleyin.')}</div></div>`;
 },
@@ -808,9 +818,10 @@ cus(){
  const recs=customerRecords(),q=lower(UI.cusQ),list=recs.filter(c=>!q||lower([c.name,c.phone,c.email,c.address].join(' ')).includes(q));
  return head('Müşteriler',recs.length+' müşteri, toplam alacak '+TL(recs.reduce((a,c)=>a+Math.max(0,c.t-c.p),0)),btn('newCus','Müşteri ekle',{cls:'p',icon:'plus'}))+
  `<div class="tools"><label class="search">${IC.search}<span class="sr">Müşteri ara</span><input data-input="cusQ" value="${E(UI.cusQ)}" placeholder="Ad, telefon, e-posta ara"></label></div>
- <div class="grid">${list.map(c=>{const bal=c.t-c.p;return `<article class="pc"><div class="bd"><div style="display:flex;gap:12px;align-items:center"><span style="flex:none;width:42px;height:42px;border-radius:12px;background:var(--teal-soft);color:var(--teal-2);display:grid;place-items:center;font:800 18px/1 var(--display)">${E(String(c.name).charAt(0).toLocaleUpperCase('tr-TR'))}</span><div class="nm" style="min-width:0">${E(c.name)}${partnerByName(c.name)?' <span class="tag g" style="vertical-align:2px">Partner</span>':''}<small>${c.n} sipariş${c.phone?' · '+E(c.phone):''}</small></div></div>
+ <div class="grid">${list.map(c=>{const bal=c.t-c.p,ko=S.ord.filter(o=>kAt(o)>0&&lower(o.cust)===lower(c.name)),kq=ko.reduce((a,o)=>a+kAt(o),0),kv=ko.reduce((a,o)=>a+kAt(o)*N(o.price),0);return `<article class="pc"><div class="bd"><div style="display:flex;gap:12px;align-items:center"><span style="flex:none;width:42px;height:42px;border-radius:12px;background:var(--teal-soft);color:var(--teal-2);display:grid;place-items:center;font:800 18px/1 var(--display)">${E(String(c.name).charAt(0).toLocaleUpperCase('tr-TR'))}</span><div class="nm" style="min-width:0">${E(c.name)}${partnerByName(c.name)?' <span class="tag g" style="vertical-align:2px">Partner</span>':''}<small>${c.n} sipariş${c.phone?' · '+E(c.phone):''}</small></div></div>
   ${c.email||c.address||c.notes?`<div class="s mu" style="font-size:13.5px">${[c.email,c.address,c.notes].filter(Boolean).map(E).join('<br>')}</div>`:''}
   <div class="fig"><div><small>Toplam</small><b>${TL(c.t)}</b></div><div><small>Ödenen</small><b>${TL(c.p)}</b></div><div><small>Kalan</small><b class="${bal>0.004?'bad':'ok'}">${TL(Math.max(0,bal))}</b></div></div>
+  ${kq?`<div class="s kline" style="font-size:13px"><span class="ktag" style="margin:0">Konsinye</span><span>Müşteride <b>${fg(kq)} adet</b> · ${TL(kv)} değerinde</span></div>`:''}
   <div class="ft">${bal>0.004?btn('cusPay','Ödeme al',{cls:'p sm',icon:'cash',id:c.name}):''}${c.id?btn('editCus','Düzenle',{cls:'s sm',icon:'edit',id:c.id}):btn('cardCus','Kart oluştur',{cls:'s sm',icon:'plus',extra:`data-name="${E(c.name)}"`})}<span style="flex:1"></span>${c.id?ibtn('delCus',c.id,'trash','Kartı sil'):''}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(recs.length?'Aramaya uyan müşteri yok':'Henüz müşteri yok','Sipariş ekledikçe müşteriler burada otomatik görünür.')}</div>`}</div>`;
 },
 rapor(){
@@ -819,7 +830,7 @@ rapor(){
  const inP=d=>UI.rp==='all'||(d&&String(d).startsWith(UI.rp)),tx=S.tx.filter(x=>inP(x.d)),gl=sumT(tx,'gelir'),gd=sumT(tx,'gider'),net=gl-gd;
  let cmp='';if(UI.rp!=='all'){const[y,m]=UI.rp.split('-').map(Number),d0=new Date(y,m-2,1),pk=d0.getFullYear()+'-'+pd2(d0.getMonth()+1),pt=S.tx.filter(x=>String(x.d).startsWith(pk)),pn=sumT(pt,'gelir')-sumT(pt,'gider'),df=net-pn;cmp=`${mlabel(pk)} ayına göre <b class="${df>=0?'ok':'bad'}">${df>=0?'+':''}${TL(df)}</b>`}
  const os=S.ord.filter(o=>UI.rp==='all'||inP(o.date)),und=S.ord.filter(o=>!o.date).length,pa={},ca={};
- os.forEach(o=>{const p=prod(o.prod),rev=otot(o),kar=p?rev-N(o.qty)*pc(p):null,a=pa[o.prod]=pa[o.prod]||{n:pname(o.prod),q:0,rev:0,kar:0,unk:!p};a.q+=N(o.qty);a.rev+=rev;a.kar+=kar??0;const c=ca[lower(o.cust)]=ca[lower(o.cust)]||{n:o.cust,rev:0,c:0,q:0};c.rev+=rev;c.c++;c.q+=N(o.qty)});
+ os.forEach(o=>{const p=prod(o.prod),rev=otot(o),kar=p?rev-oq(o)*pc(p):null,a=pa[o.prod]=pa[o.prod]||{n:pname(o.prod),q:0,rev:0,kar:0,unk:!p};a.q+=oq(o);a.rev+=rev;a.kar+=kar??0;const c=ca[lower(o.cust)]=ca[lower(o.cust)]||{n:o.cust,rev:0,c:0,q:0};c.rev+=rev;c.c++;c.q+=oq(o)});
  const pl=Object.values(pa).filter(x=>!x.unk).sort((a,b)=>b.kar-a.kar).slice(0,5),cl=Object.values(ca).sort((a,b)=>b.rev-a.rev).slice(0,5);
  const pm=Math.max(...pl.map(x=>Math.abs(x.kar)),0),cm=Math.max(...cl.map(x=>x.rev),0),orev=os.reduce((a,o)=>a+otot(o),0);
  const mk=[];for(let i=5;i>=0;i--){const d0=new Date(new Date().getFullYear(),new Date().getMonth()-i,1),k=d0.getFullYear()+'-'+pd2(d0.getMonth()+1),t=S.tx.filter(x=>String(x.d).startsWith(k));mk.push({k,g:sumT(t,'gelir'),r:sumT(t,'gider')})}
@@ -828,10 +839,10 @@ rapor(){
  const all=UI.rp==='all',pset=new Set(partners().map(p=>lower(p.name))),seen=new Map(),put=(n,d)=>{const k=lower(n);if(!k||!d)return;const c=seen.get(k);if(!c||String(d)<c.d)seen.set(k,{n:String(n).trim(),d:String(d)})};
  S.ord.forEach(o=>put(o.cust,o.date));(S.customers||[]).forEach(c=>put(c.name,c.createdAt));
  const custs=[...seen.entries()].filter(([k])=>!pset.has(k)).map(([,v])=>v),undatedCus=new Set(S.ord.filter(o=>lower(o.cust)&&!seen.has(lower(o.cust))&&!pset.has(lower(o.cust))).map(o=>lower(o.cust))).size;
- const qty=a=>a.reduce((x,o)=>x+N(o.qty),0),totQ=qty(S.ord),delQ=qty(S.ord.filter(o=>o.st===ST[3])),perQ=qty(os);
+ const qty=a=>a.reduce((x,o)=>x+oq(o),0),totQ=qty(S.ord),delQ=qty(S.ord.filter(o=>o.st===ST[3])),perQ=qty(os);
  const newC=custs.filter(c=>inP(c.d)).sort((a,b)=>b.d.localeCompare(a.d)),newP=partners().filter(x=>x.createdAt&&inP(x.createdAt)).sort((a,b)=>String(b.createdAt).localeCompare(a.createdAt));
  const mm={},M=k=>mm[k]=mm[k]||{k,q:0,g:new Set(),rev:0,nc:0,np:0};
- S.ord.forEach(o=>{if(!o.date)return;const m=M(String(o.date).slice(0,7));m.q+=N(o.qty);m.g.add(o.orderGroup||o.id);m.rev+=otot(o)});
+ S.ord.forEach(o=>{if(!o.date)return;const m=M(String(o.date).slice(0,7));m.q+=oq(o);m.g.add(o.orderGroup||o.id);m.rev+=otot(o)});
  custs.forEach(c=>M(c.d.slice(0,7)).nc++);partners().forEach(x=>{if(x.createdAt)M(String(x.createdAt).slice(0,7)).np++});
  const months=Object.values(mm).sort((a,b)=>b.k.localeCompare(a.k)),mq=Math.max(...months.map(x=>x.q),1),activeM=months.filter(x=>x.q>0).length;
  const m12=[];for(let i=11;i>=0;i--){const d0=new Date(new Date().getFullYear(),new Date().getMonth()-i,1),k=d0.getFullYear()+'-'+pd2(d0.getMonth()+1);m12.push({k,q:mm[k]?.q||0})}
@@ -848,7 +859,7 @@ rapor(){
   <div class="chart c12">${m12.map(x=>`<div class="col${x.k===UI.rp?' cur':''}" title="${mlabel(x.k)}: ${fg(x.q)} adet"><div class="bars"><i class="t" style="height:${x.q/m12x*100}%"></i>${x.q?`<em style="bottom:calc(${x.q/m12x*100}% + 4px)">${fg(x.q)}</em>`:''}</div><small>${MONTHS[+x.k.slice(5)-1].slice(0,3)}</small></div>`).join('')}</div>
   ${months.length?`<div class="mwrap"><table class="mtab"><thead><tr><th>Ay</th><th>Satılan adet</th><th>Sipariş</th><th class="rev">Ciro</th><th>Yeni müşteri</th><th>Yeni partner</th></tr></thead><tbody>${months.map(x=>`<tr class="${x.k===UI.rp?'cur':''}"><td>${mlabel(x.k)}</td><td><div class="qb">${bar(x.q,mq)}<b>${fg(x.q)}</b></div></td><td class="${x.g.size?'':'z'}">${fg(x.g.size)}</td><td class="rev${x.rev?'':' z'}">${TL(x.rev)}</td><td class="${x.nc?'':'z'}">${x.nc?'+'+x.nc:'0'}</td><td class="${x.np?'':'z'}">${x.np?'+'+x.np:'0'}</td></tr>`).join('')}</tbody>
   <tfoot><tr><td>Toplam</td><td>${fg(months.reduce((a,x)=>a+x.q,0))}</td><td>${fg(months.reduce((a,x)=>a+x.g.size,0))}</td><td class="rev">${TL(months.reduce((a,x)=>a+x.rev,0))}</td><td>${fg(custs.length)}</td><td>${fg(partners().filter(x=>x.createdAt).length)}</td></tr></tfoot></table></div>`:empty('Henüz satış yok')}
-  ${S.ord.some(o=>!o.date)?`<p class="note">Tarihi olmayan ${S.ord.filter(o=>!o.date).length} sipariş (${fg(qty(S.ord.filter(o=>!o.date)))} adet) aylara dağıtılamadı; toplam satılana dahildir.</p>`:''}<p class="note">Sipariş sayısında katalogdan tek seferde verilen çok ürünlü siparişler bir sipariş sayılır. Müşteri, ilk siparişinin ya da müşteri kartının açıldığı ayda yeni sayılır.</p></div>
+  ${S.ord.some(o=>!o.date)?`<p class="note">Tarihi olmayan ${S.ord.filter(o=>!o.date).length} sipariş (${fg(qty(S.ord.filter(o=>!o.date)))} adet) aylara dağıtılamadı; toplam satılana dahildir.</p>`:''}<p class="note">Konsinye siparişlerde yalnızca satıldığı bildirilen adet sayılır. Sipariş sayısında katalogdan tek seferde verilen çok ürünlü siparişler bir sipariş sayılır. Müşteri, ilk siparişinin ya da müşteri kartının açıldığı ayda yeni sayılır.</p></div>
  <div class="cols"><div class="card rank"><h2>Ürünlere göre satılan adet</h2><div class="rows">${prodQ.slice(0,8).map(x=>`<div class="r"><div class="top"><b>${E(x.n)}</b><b>${fg(x.q)} adet</b></div>${bar(x.q,pqx)}<div class="s">Ciro ${TL(x.rev)}${perQ?' · adet payı %'+Math.round(x.q/perQ*100):''}</div></div>`).join('')||empty('Bu dönemde satış yok')}</div>${prodQ.length>8?`<p class="note">${prodQ.length-8} ürün daha satıldı.</p>`:''}</div>
  <div class="card nl"><h2>${all?'Müşteriler ve partnerler':'Bu dönem katılanlar'}</h2><div class="rows">${[...newP.map(x=>({t:'p',n:x.name,d:x.createdAt})),...newC.map(x=>({t:'c',n:x.n,d:x.d}))].sort((a,b)=>String(b.d).localeCompare(a.d)).slice(0,12).map(x=>`<div class="r"><div class="main"><div class="t">${E(x.n)}</div><div class="s">${x.t==='p'?'Partner olarak eklendi':'İlk kez'}, ${dayLbl(x.d)}</div></div><span class="tag${x.t==='p'?' g':''}">${x.t==='p'?'Yeni partner':'Yeni müşteri'}</span></div>`).join('')||empty('Bu dönemde yeni müşteri ya da partner yok')}</div>${newC.length+newP.length>12?`<p class="note">Toplam ${newC.length} yeni müşteri, ${newP.length} yeni partner.</p>`:''}</div></div>
  <div class="cols"><div class="card rank"><h2>En kârlı ürünler</h2><div class="rows">${pl.map(x=>`<div class="r"><div class="top"><b>${E(x.n)}</b><b class="${x.kar>=0?'ok':'bad'}">${TL(x.kar)}</b></div>${bar(x.kar,pm,x.kar>=0?'ok':'bad')}<div class="s">${fg(x.q)} adet, ciro ${TL(x.rev)}</div></div>`).join('')||empty('Bu dönemde sipariş yok')}</div><p class="note">Kâr, ürünün bugünkü maliyet kartına göre tahminidir.</p></div>
@@ -918,7 +929,7 @@ ayar(){
  </div></div>`;
 },
 };
-const fOrd=(o,k)=>k==='all'||(k==='open'?o.st!==ST[3]:k==='due'?orem(o)>0.004:o.st===ST[+k.slice(1)]);
+const fOrd=(o,k)=>k==='all'||(k==='open'?o.st!==ST[3]:k==='due'?orem(o)>0.004:k==='kons'?!!o.kons&&kAt(o)>0:o.st===ST[+k.slice(1)]);
 const filamentLine=o=>{const p=prod(o.prod);if(!p)return '';const need=N(p.gram)*rem(o)*(1+N(S.set.fire)/100),m=mat(p.mat);if(!m)return '';const short=need>N(m.g);return `<div class="s">${fg(need)} g ${E(m.n)} gerekiyor${short?` <span class="bad">· stokta ${fg(need-N(m.g))} g eksik</span>`:''}</div>`};
 const jobRow=j=>{const o=S.ord.find(x=>x.id===j.ord);return `<div class="r"><div class="main"><div class="t">${N(j.qty)} × ${E(pname(j.prod))}</div><div class="s">${o?E(o.cust)+' siparişi':'Stok için'}, ${fdate(j.d)}${j.g?', '+fg(j.g)+' g':''}</div></div>${j.st==='Baskıda'?btn('doneJob','Tamamlandı',{cls:'s sm',icon:'check',id:j.id}):'<span class="tag g">Tamamlandı</span>'}<div class="acts">${ibtn('delJob',j.id,'trash','Sil')}</div></div>`};
 function customerRecords(){
@@ -944,21 +955,28 @@ function formOrd(o,pre){
   <div class="qsec"><h3>Ürünler ve fiyatlar ${edit?'':`<span class="qtools"><span class="qall"><input class="inp" id="qAllDp" type="number" inputmode="decimal" step="any" min="0" max="100" placeholder="%" aria-label="Tüm ürünlere uygulanacak iskonto yüzdesi"><button type="button" class="btn s sm" data-act="qAllDp">Tümüne uygula</button></span><button type="button" class="btn s sm" data-act="qAdd">${IC.plus}Ürün ekle</button></span>`}</h3>
    <div class="qhead"><span>Ürün</span><span>Adet</span><span>Birim fiyat (₺)</span><span>İsk. %</span><span>Tutar</span><span></span></div><div id="qItems"></div>
    <p class="note" style="margin:10px 0 0">Birim fiyatı istediğiniz gibi değiştirebilirsiniz; liste fiyatı yalnızca başlangıç değeridir. Kaydedilen fiyat bu müşteri için hatırlanır.</p></div>
-  <div class="qsec"><h3>Ödeme ve not</h3><div class="fg">
+  <div class="qsec"><h3>${edit&&o.kons?'Konsinye, ödeme ve not':'Satış şekli, ödeme ve not'}</h3><div class="fg">
+   ${edit?(o.kons?`<div class="w cpafter" style="border-color:rgba(245,181,68,.35)"><div><span class="mu">Konsinye</span><div class="hint" style="margin-top:4px">Gönderilen ${fg(o.qty)} · satılan ${fg(kSold(o))} · iade ${fg(kRet(o))} · müşteride ${fg(kAt(o))}</div></div><button type="button" class="btn s sm" data-act="ordToKons" data-id="${E(o.id)}">Konsinye hesap</button></div>`:''):`<div class="fl w"><div class="lb">Satış şekli</div><div class="seg"><label><input type="radio" name="kind" value="sale" checked><span>Satış</span></label><label><input type="radio" name="kind" value="kons"><span>Konsinye</span></label></div><div class="hint" id="kindHint">Ürünler satılmış sayılır, tutarın tamamı müşterinin borcuna yazılır.</div></div>`}
    ${edit?`<div class="w cpafter"><div><span class="mu">Bu siparişte ödenen</span><div class="hint" style="margin-top:4px">Ödemeler yalnızca müşteri kartındaki "Ödeme al" ile girilir.</div></div><div style="display:flex;align-items:center;gap:10px"><b>${TL(o.paid)}</b>${orem(o)>0.004?`<button type="button" class="btn s sm" data-act="ordToPay" data-id="${E(o.cust)}">Ödeme al</button>`:''}</div></div>`:fl('dep','Kapora (₺)',{type:'number',value:0,opt:true,hint:'Girilirse kasaya gelir olarak yazılır.'})}
    ${fta('note','Not',o?.note||'')}</div></div>
   <div class="qsec"><div class="qsum" id="qSum"></div></div>`,
   onSubmit(f){return saveOrd(f,o)}});
- QE={ord:true,edit,paid:o?N(o.paid):0,q:{cust:{name:cust0},items}};qRenderItems();
+ QE={ord:true,edit,paid:o?N(o.paid):0,kons:!!o?.kons,sold:o?kSold(o):0,ret:o?kRet(o):0,q:{cust:{name:cust0},items}};qRenderItems();
  $('#qAllDp')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();ACT.qAllDp()}});
  const body=$('#dBody');
  body.oninput=e=>{if(!QE)return;if(qItemInput(e))return;if(e.target.id==='f_dep')qTotals()};
  body.onchange=e=>{if(!QE)return;const t=e.target;if(qItemProd(t))return;
+  if(t.name==='kind'){QE.kons=t.value==='kons';const dep=$('#f_dep');if(dep){dep.closest('.fl').style.display=QE.kons?'none':'';if(QE.kons)dep.value=0}
+   $('#kindHint').textContent=QE.kons?'Ürünler müşteriye konsinye bırakılır. Borç yalnızca satıldığı bildirilen adet kadar yazılır; satılmayanlar iade alınır.':'Ürünler satılmış sayılır, tutarın tamamı müşterinin borcuna yazılır.';qTotals();return}
   if(t.id==='f_cname'){const name=t.value.trim();QE.q.cust.name=name;const c=customerRecords().find(x=>lower(x.name)===lower(name)),last=S.ord.filter(x=>lower(x.cust)===lower(name)&&x.phone).slice(-1)[0];
    const pa=partnerByName(name),ph=$('#f_phone'),pv=c?.phone||pa?.phone||last?.phone;if(ph&&!ph.value&&pv)ph.value=pv;qCustPrices(name)}};
 }
 function ordTotals(){
  const items=QE.q.items.filter(i=>N(i.qty)>0),gross=items.reduce((a,i)=>a+N(i.qty)*N(i.price),0),sub=items.reduce((a,i)=>a+lineNet(i),0),disc=gross-sub;
+ if(QE.kons){const it=items[0],unit=it?lineNet(it)/N(it.qty):0,soldAmt=QE.edit?QE.sold*unit:0,paid=QE.edit?N(QE.paid):0;
+  $('#qSum').innerHTML=`${disc>0.004?`<div><span>Liste toplamı</span><b>${TL(gross)}</b></div><div><span>İskonto</span><b>−${TL(disc)}</b></div>`:''}<div class="big"><span>Konsinye değeri</span><b>${TL(sub)}</b></div>${QE.edit?`<div><span>Satılan (borca yazılan)</span><b>${TL(soldAmt)}</b></div><div><span>Ödenen</span><b>${TL(paid)}</b></div><div><span>Kalan</span><b class="${soldAmt-paid<-0.004?'bad':''}">${TL(soldAmt-paid)}</b></div>`:`<div class="int"><span>Borç</span><b>Satıldıkça yazılır</b></div>`}`;
+  const t=$('#qTot');if(t)t.textContent=TL(sub);const lb=$('#qTot')?.previousElementSibling;if(lb)lb.textContent='Konsinye değeri';return}
+ {const lb=$('#qTot')?.previousElementSibling;if(lb)lb.textContent='Sipariş toplamı'}
  const cost=items.reduce((a,i)=>{const p=prod(i.prod);return a+(p?N(i.qty)*pc(p):0)},0),profit=sub-cost,paid=QE.edit?N(QE.paid):N(V('f_dep'));
  $('#qSum').innerHTML=`${disc>0.004?`<div><span>Liste toplamı</span><b>${TL(gross)}</b></div><div><span>İskonto</span><b>−${TL(disc)}</b></div>`:''}<div class="big"><span>Sipariş toplamı</span><b>${TL(sub)}</b></div>${paid?`<div><span>${QE.edit?'Ödenen':'Kapora'}</span><b>${TL(paid)}</b></div><div><span>Kalan</span><b class="${sub-paid<-0.004?'bad':''}">${TL(sub-paid)}</b></div>`:''}${items.length?`<div class="int"><span>Tahmini maliyet</span><b>${TL(cost)}</b></div><div class="int"><span>Tahmini kâr</span><b class="${profit>=0?'ok':'bad'}">${TL(profit)}${sub?' · %'+Math.round(profit/sub*100):''}</b></div>`:''}`;
  const t=$('#qTot');if(t)t.textContent=TL(sub);
@@ -979,22 +997,47 @@ function saveOrd(f,o){
  rememberCustPrices(cust,its);
  if(o){
   const i=its[0]; // ödenen tutar burada değişmez; ödemeler müşteri kartından alınır
+  if(o.kons&&i.qty<kSold(o)+kRet(o)){toast('Gönderilen adet, satılan ve iade edilenlerin toplamından ('+fg(kSold(o)+kRet(o))+') az olamaz.');return false}
   const old=N(o.price);Object.assign(o,{cust,prod:i.prod,qty:i.qty,...pf(i),date:f.date||o.date,phone:phone||o.phone,note});if(!o.dp){delete o.dp;delete o.gp}
   logAct(cust+' siparişini düzenledi'+(Math.abs(old-N(o.price))>0.004?', birim fiyat '+TL(old)+' → '+TL(o.price):''));
   upd();toast('Sipariş güncellendi.');return;
  }
- const total=its.reduce((a,i)=>a+i.qty*net(i),0),dep=N(f.dep);
+ const kons=f.kind==='kons',total=its.reduce((a,i)=>a+i.qty*net(i),0),dep=kons?0:N(f.dep);
  if(!need(dep>=0,'Kapora eksi olamaz.','dep')||!need(dep<=total+0.004,'Kapora sipariş toplamından ('+TL(total)+') fazla olamaz.','dep'))return false;
  const date=f.date||td(),grp=its.length>1||phone.replace(/\D/g,'').length>=10?'CAT-'+Array.from(crypto.getRandomValues(new Uint8Array(4)),b=>b.toString(16).padStart(2,'0')).join('').toUpperCase():undefined;
  let left=dep;
  its.forEach(i=>{const t=i.qty*net(i),pay=r2(Math.min(left,t));left=r2(left-pay);
-  const no={id:uid(),cust,prod:i.prod,qty:i.qty,...pf(i),paid:pay,st:ST[0],ded:false,date,phone,orderGroup:grp,note,by:myUid};Object.keys(no).forEach(k=>{if(no[k]===undefined||no[k]==='')delete no[k]});if(!('note' in no))no.note='';S.ord.push(no)});
+  const no={id:uid(),cust,prod:i.prod,qty:i.qty,...pf(i),paid:pay,st:ST[0],ded:false,date,phone,orderGroup:grp,note,by:myUid,...(kons?{kons:true,sold:0,ret:0}:{})};Object.keys(no).forEach(k=>{if(no[k]===undefined||no[k]==='')delete no[k]});if(!('note' in no))no.note='';S.ord.push(no)});
  if(dep)S.tx.push({id:uid(),d:date,t:'gelir',amt:dep,desc:'Kapora: '+cust,by:myUid});
- const label=its.length>1?its.length+' kalem, '+TL(total):its[0].qty+' × '+pname(its[0].prod);
- logAct(cust+' için sipariş ekledi: '+label);addNotification('Yeni sipariş',cust+' için '+label);
+ const label=(kons?'konsinye ':'')+(its.length>1?its.length+' kalem, '+TL(total):its[0].qty+' × '+pname(its[0].prod));
+ logAct(cust+' için sipariş ekledi: '+label);addNotification(kons?'Yeni konsinye':'Yeni sipariş',cust+' için '+label);
  tab='ord';if(location.hash!=='#ord')history.replaceState(null,'','#ord');upd();
- if(grp&&phone.replace(/\D/g,'').length>=10)toast('Sipariş eklendi ('+grp+').','Takip bağlantısını kopyala',()=>copyText(catalogLink()+'&takip='+grp,'Müşteri takip bağlantısı kopyalandı.'));else toast('Sipariş eklendi.');
+ if(grp&&phone.replace(/\D/g,'').length>=10)toast('Sipariş eklendi ('+grp+').','Takip bağlantısını kopyala',()=>copyText(catalogLink()+'&takip='+grp,'Müşteri takip bağlantısı kopyalandı.'));else toast(kons?'Konsinye sipariş eklendi. Satış ve iadeleri "Konsinye hesap" ile işleyin.':'Sipariş eklendi.');
 }
+/* Konsinye hesap: müşterinin bildirdiği satış ve iadeler işlenir. Yalnızca satılan adet borca yazılır. */
+function formKons(o){
+ if(!o||!o.kons)return;const at=kAt(o),unit=N(o.price),h=(o.kh||[]).slice().reverse();
+ openDrawer({title:'Konsinye hesap',sub:o.cust+' · '+niceName(pname(o.prod))+' · birim '+TL(unit),submit:at>0?'Hesabı kaydet':'Kapat',
+  body:`<div class="fg"><div class="w cpsum k4"><div><small>Gönderilen</small><b>${fg(o.qty)}</b></div><div><small>Satılan</small><b>${fg(kSold(o))}</b></div><div><small>İade edilen</small><b>${fg(kRet(o))}</b></div><div class="kk" data-at="${at}"><small>Müşteride</small><b>${fg(at)}</b></div></div>
+   ${at>0?`${fl('ksold','Satılan adet',{type:'number',value:'',ph:'0',hint:'Müşterinin bu hesapta sattığını bildirdiği adet. Borca yazılır.'})}${fl('kret','İade gelen adet',{type:'number',value:'',ph:'0',hint:'Size geri getirilen, satılmayan adet.'})}
+   <div class="w kq"><button type="button" class="btn s sm" data-act="kFill" data-id="sold">Kalanların hepsi satıldı</button><button type="button" class="btn s sm" data-act="kFill" data-id="ret">Kalanların hepsi iade</button></div>
+   ${fl('kdate','Tarih',{type:'date',value:td()})}${fl('knote','Not',{opt:true,ph:'Örn. sayım yapıldı'})}
+   <div class="w cpafter"><span class="mu" id="kAfterL">Hesaptan sonra müşteride</span><b id="kAfter">${fg(at)} adet</b></div>`:`<p class="note w" style="margin:0">Bu konsinye kapandı: müşteride ürün kalmadı.</p>`}
+   <div class="w"><div class="lb" style="margin-bottom:6px">Hesap geçmişi</div><div class="rows">${h.map((x,i)=>`<div class="r"><div class="main"><div class="t">${[x.sold?fg(x.sold)+' satıldı':'',x.ret?fg(x.ret)+' iade':''].filter(Boolean).join(', ')}</div><div class="s">${fdate(x.d)}${x.by?', '+E(pname2(x.by)):''}${x.note?', '+E(x.note):''}${x.sold?', borca +'+TL(x.sold*unit):''}</div></div>${i===0?`<button type="button" class="btn q sm" data-act="kUndo" data-id="${E(o.id)}">Geri al</button>`:''}</div>`).join('')||'<p class="note" style="margin:0">Henüz satış ya da iade işlenmedi.</p>'}</div></div></div>`,
+  onSubmit(f){
+   if(at<=0)return;
+   const sd=N(f.ksold),rt=N(f.kret);
+   if(!need(Number.isInteger(sd)&&sd>=0,'Satılan adet 0 ya da pozitif tam sayı olmalı.','ksold')||!need(Number.isInteger(rt)&&rt>=0,'İade adedi 0 ya da pozitif tam sayı olmalı.','kret'))return false;
+   if(!need(sd+rt>0,'Satılan ya da iade gelen adedi yazın.','ksold'))return false;
+   if(!need(sd+rt<=at,'Müşteride '+fg(at)+' adet var; satılan ve iade toplamı bunu geçemez.','ksold'))return false;
+   o.sold=kSold(o)+sd;o.ret=kRet(o)+rt;o.kh=[...(o.kh||[]),{id:uid(),d:f.kdate||td(),sold:sd,ret:rt,note:String(f.knote||'').trim(),by:myUid}];
+   const left=kAt(o);logAct(o.cust+' konsinye hesabı: '+[sd&&sd+' satıldı',rt&&rt+' iade'].filter(Boolean).join(', ')+' ('+pname(o.prod)+')');upd();
+   toast([sd?fg(sd)+' adet satıldı, borca '+TL(sd*unit)+' eklendi':'',rt?fg(rt)+' adet iade alındı':''].filter(Boolean).join('; ')+'. '+(left?'Müşteride '+fg(left)+' adet kaldı.':'Konsinye kapandı.'))}});
+ const draw=()=>{const sd=Math.max(0,N(V('f_ksold'))),rt=Math.max(0,N(V('f_kret'))),left=at-sd-rt,el=$('#kAfter');if(!el)return;
+  el.textContent=left<0?'Fazla: '+fg(-left)+' adet':fg(left)+' adet'+(sd?' · borca +'+TL(sd*unit):'');el.className=left<0?'bad':left===0?'ok':''};
+ $('#dBody').oninput=e=>{if(e.target.id==='f_ksold'||e.target.id==='f_kret')draw()};
+}
+
 function formTx(x){
  openDrawer({title:x?'Kaydı düzenle':'Gelir / gider ekle',submit:x?'Kaydet':'Ekle',
   body:`<div class="fg"><div class="fl w"><div class="lb">Tür</div><div class="seg"><label><input type="radio" name="t" value="gelir"${x?.t!=='gider'?' checked':''}><span>Gelir</span></label><label><input type="radio" name="t" value="gider"${x?.t==='gider'?' checked':''}><span>Gider</span></label></div></div>
@@ -1519,7 +1562,7 @@ async function save2(name,data,type='application/octet-stream'){try{const a=docu
 async function backup(){if(await save2('atolye-defteri-yedek-'+td()+'.json',JSON.stringify(S,null,1),'application/json')){S.lastBak=Date.now();upd();toast('Yedek indirildi.')}}
 const cell=v=>{v=typeof v==='number'?String(v).replace('.',','):String(v??'');if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'};
 async function csv(k){let h,rows;
- if(k==='ord'){h=['Tarih','Müşteri','Telefon','Ürün','Adet','Birim fiyat','Toplam','Ödenen','Kalan','Durum','Kaynak','Sipariş kodu'];rows=S.ord.map(o=>[o.date||'',o.cust,o.phone||'',pname(o.prod),N(o.qty),N(o.price),otot(o),N(o.paid),orem(o),o.st,o.source==='catalog'?'Katalog':'Defter',o.orderGroup||''])}
+ if(k==='ord'){h=['Tarih','Müşteri','Telefon','Ürün','Adet','Birim fiyat','Toplam','Ödenen','Kalan','Durum','Kaynak','Sipariş kodu','Konsinye','Satılan','İade','Müşteride'];rows=S.ord.map(o=>[o.date||'',o.cust,o.phone||'',pname(o.prod),N(o.qty),N(o.price),otot(o),N(o.paid),orem(o),o.st,o.source==='catalog'?'Katalog':'Defter',o.orderGroup||'',o.kons?'Evet':'',o.kons?kSold(o):'',o.kons?kRet(o):'',o.kons?kAt(o):''])}
  else{h=['Tarih','Tür','Tutar','Açıklama'];rows=S.tx.slice().sort((a,b)=>String(a.d).localeCompare(String(b.d))).map(x=>[x.d,x.t,N(x.amt),x.desc])}
  if(!rows.length)return toast('Aktarılacak kayıt yok.');
  if(await save2(k==='ord'?'siparisler.csv':'gelir-gider.csv','﻿'+[h,...rows].map(r=>r.map(cell).join(';')).join('\r\n'),'text/csv'))toast('Dosya indirildi.');
@@ -1582,6 +1625,10 @@ const ACT={
  async qSavePdf(){if(!QE)return;const f=Object.fromEntries(new FormData($('#dForm')));$('#dForm').querySelectorAll('input[type=checkbox][name]').forEach(c=>f[c.name]=c.checked);const q=saveQuote(f);if(!q)return;closeDrawer();await quotePdf(q.id)},
  newOrd:()=>formOrd(),editOrd:id=>formOrd(byId(S.ord,id)),pay:id=>{const o=byId(S.ord,id);if(o)formCusPay(o.cust)},ordToPay:name=>{closeDrawer();formCusPay(name)},
  async delOrd(id){const o=byId(S.ord,id);if(!o)return;const paid=N(o.paid);if(!await confirmBox('Sipariş silinsin mi?',o.cust+', '+N(o.qty)+' × '+pname(o.prod)+(paid?'. Kasaya yazılmış '+TL(paid)+' tahsilat silinmez.':'.'),'Sil'))return;S.ord=S.ord.filter(x=>x.id!==id);S.job.forEach(j=>{if(j.ord===id)j.ord=null});logAct(o.cust+' siparişini sildi');upd();toast('Sipariş silindi.')},
+ kons:id=>formKons(byId(S.ord,id)),ordToKons:id=>{closeDrawer();formKons(byId(S.ord,id))},
+ kFill(k){const at=N($('.cpsum .kk')?.dataset.at),a=$('#f_ksold'),b=$('#f_kret');if(!a||!b)return;const other=N((k==='sold'?b:a).value);(k==='sold'?a:b).value=Math.max(0,at-other);a.dispatchEvent(new Event('input',{bubbles:true}))},
+ async kUndo(id){const o=byId(S.ord,id),x=o&&(o.kh||[]).slice(-1)[0];if(!x)return;if(!await confirmBox('Son konsinye kaydı geri alınsın mı?',[x.sold&&x.sold+' satıldı',x.ret&&x.ret+' iade'].filter(Boolean).join(', ')+' ('+fdate(x.d)+') kaydı silinir.','Geri al'))return;
+  o.sold=Math.max(0,kSold(o)-N(x.sold));o.ret=Math.max(0,kRet(o)-N(x.ret));o.kh=o.kh.slice(0,-1);logAct(o.cust+' konsinye kaydını geri aldı');upd();formKons(o)},
  deliver:id=>{const o=byId(S.ord,id);if(o)setStatus(o,ST[3])},
  ordF:k=>{UI.ordF=k;render()},txF:k=>{UI.txF=k;render()},
  newJob:()=>formJob(),jobFor:id=>formJob(byId(S.ord,id)),
