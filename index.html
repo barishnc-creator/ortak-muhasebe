@@ -1403,7 +1403,7 @@ function formPartnerCatalog(id){
  const url=partnerLink(pa),os=S.ord.filter(o=>o.source==='partner'&&o.partner===pa.id),grp=new Set(os.map(o=>o.orderGroup)).size,tot=os.reduce((a,o)=>a+otot(o),0);
  const noSale=S.prod.filter(p=>!hasV(ppGet(pa.id,p.id)?.sale)).length,msg=pa.name+' ürün kataloğu, buradan sipariş verebilirsiniz:';
  openDrawer({title:pa.name+' · Katalog',sub:'Partnerin müşterileri bu bağlantıdan sipariş verir; siparişler size "'+pa.name+'" siparişi olarak gelir.',
-  body:`<div class="shcard"><div class="t">Partner katalog bağlantısı</div><div class="s">Katalogda ${E(pa.name)} adı ve partnerin satış fiyatları görünür. Partnere verdiğiniz fiyat hiçbir yerde görünmez.</div>
+  body:`<div class="shcard"><div class="t">Partner katalog bağlantısı</div><div class="s">Katalog Tidex Technology adıyla açılır, partnerin satış fiyatları görünür. Gelen siparişler ${E(pa.name)} adına yazılır; partnere verdiğiniz fiyat katalogda görünmez.</div>
    ${pa.catOff?'<p class="note bad" style="margin:12px 0 0">Katalog kapalı: bağlantı açılınca "kullanılamıyor" mesajı görünür.</p>':''}
    <div class="shlink">${E(url)}</div>
    <div class="shbtns">${navigator.share?`<button type="button" class="btn p sm" data-act="paCatShare" data-id="${E(pa.id)}">${IC.share}Paylaş</button>`:''}<a class="btn ${navigator.share?'s':'p'} sm" href="https://wa.me/?text=${encodeURIComponent(msg+' '+url)}" target="_blank" rel="noopener">WhatsApp ile gönder</a><button type="button" class="btn s sm" data-act="paCatCopy" data-id="${E(pa.id)}">${IC.copy}Kopyala</button><a class="btn s sm" href="${E(url)}" target="_blank" rel="noopener">Aç</a></div></div>

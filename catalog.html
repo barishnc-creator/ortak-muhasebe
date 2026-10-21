@@ -536,10 +536,8 @@ const WA_ICON='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><
 function waLink(text){const d=String(COMPANY?.phone||'').replace(/\D/g,'');if(d.length<10)return '';const n=d.startsWith('90')?d:d.startsWith('0')?'9'+d:d.length===10?'90'+d:d;return 'https://wa.me/'+n+'?text='+encodeURIComponent(text)}
 function setPartner(d){
  const pn=String(d?.partner?.name||'').trim(),co=String(d?.company?.name||'Tidex Technology');if(!pn||PARTNER_INFO===pn)return;PARTNER_INFO=pn;
- const b=document.querySelector('.brand');const img=b.querySelector('img');if(img){const m=document.createElement('span');m.className='pmark';m.setAttribute('aria-hidden','true');m.textContent=pn.charAt(0).toLocaleUpperCase('tr-TR');img.replaceWith(m)}
- b.querySelector('b').textContent=pn;$('slogan').textContent=co+' ürünleri';$('slogan2').textContent=co+' ürünleri';$('footName').textContent='© '+pn;
+ // Üst kısım ve alt bilgi Tidex olarak kalır; sipariş arka planda partnere bağlanır.
  $('heroP').textContent='Ürünleri ve adetleri seçin, siparişinizi gönderin. Siparişinizin her aşamasını sipariş kodunuzla takip edebilirsiniz.';
- document.title='Ürün Kataloğu · '+pn;
 }
 function partnerMissing(){
  catalog=null;$('sync').classList.add('off');$('syncText').textContent='Katalog kapalı';
