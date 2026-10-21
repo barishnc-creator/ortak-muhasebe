@@ -233,14 +233,14 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 .pmeta{display:flex;flex-wrap:wrap;gap:6px}
 .pptools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
 .pptools .inp{height:34px}.pptools .pct{width:74px}.pptools .q{flex:1;min-width:160px}
-.pphead,.pprow{display:grid;grid-template-columns:minmax(0,1fr) 128px 96px;gap:10px;align-items:center}
+.pphead,.pprow{display:grid;grid-template-columns:minmax(0,1fr) 120px 120px 90px;gap:10px;align-items:center}
 .pphead{color:var(--faint);font-size:12.5px;font-weight:600;padding:0 0 6px}.pphead span:nth-child(n+2){text-align:right}
 .pprow{padding:10px 0;border-top:1px solid var(--line)}
 .pprow .nm{font-weight:600;overflow-wrap:anywhere}.pprow .nm small{display:block;color:var(--faint);font-weight:500;font-size:12.5px;margin-top:2px}
 .pprow .inp{height:40px;text-align:right}
 .pprow .pi{grid-column:1/-1;font-size:12.5px;color:var(--faint);margin-top:-4px}.pprow .pi:empty{display:none}
 .pprow.on{background:linear-gradient(90deg,rgba(63,208,201,.06),transparent 70%)}
-@media (max-width:640px){.pphead{display:none}.pprow{grid-template-columns:1fr 1fr}.pprow .nm{grid-column:1/-1}.pprow label span{display:block;font-size:12px;color:var(--faint);margin-bottom:4px}}
+@media (max-width:640px){.pphead{display:none}.pprow{grid-template-columns:1fr 1fr 1fr;gap:8px}.pprow .nm{grid-column:1/-1}.pprow label span{display:block;font-size:12px;color:var(--faint);margin-bottom:4px}}
 @media (min-width:641px){.pprow label span{display:none}}
 .tg{display:flex;flex-wrap:wrap;gap:6px}
 .tg label{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer}
@@ -559,7 +559,7 @@ function absorbRemote(d,ver){
  const oldIds=new Set((S.ord||[]).map(o=>String(o.id)));
  S=Object.assign(freshBook(),mergeBook(BASE,S,d));
  BASE=clone(d);VER=Number(ver);
- notifyCatalogOrders((S.ord||[]).filter(o=>o&&o.source==='catalog'&&!oldIds.has(String(o.id))));
+ notifyCatalogOrders((S.ord||[]).filter(o=>o&&(o.source==='catalog'||o.source==='partner')&&!oldIds.has(String(o.id))));
  return true}
 // Katalogdan yeni gelen siparişler için bildirim (sipariş koduna göre tek bildirim; ortak eklediyse tekrar eklenmez).
 function notifyCatalogOrders(added){
@@ -569,8 +569,8 @@ function notifyCatalogOrders(added){
  groups.forEach((items,key)=>{
   const nid='cat-'+key;if((S.notifs||[]).some(x=>x.id===nid))return;
   const first=items[0],qty=items.reduce((a,o)=>a+N(o.qty),0),total=items.reduce((a,o)=>a+N(o.qty)*N(o.price),0);
-  const detail=[first.phone?'Tel: '+first.phone:'',first.note?'Not: '+first.note:''].filter(Boolean).join(' · ');
-  addNotification('Katalogdan yeni sipariş',`${first.cust||'Müşteri'} · ${items.length} ürün kalemi · ${qty} adet · ${TL(total)}${first.orderGroup?' · '+first.orderGroup:''}${detail?' · '+detail:''}`,nid);n++;
+  const pt=first.source==='partner',detail=[pt?'Son müşteri: '+(first.endCust||'')+(first.endPhone?', '+first.endPhone:''):first.phone?'Tel: '+first.phone:'',first.note?'Not: '+first.note:''].filter(Boolean).join(' · ');
+  addNotification(pt?(first.cust||'Partner')+' kataloğundan sipariş':'Katalogdan yeni sipariş',`${first.cust||'Müşteri'} · ${items.length} ürün kalemi · ${qty} adet · ${TL(total)}${first.orderGroup?' · '+first.orderGroup:''}${detail?' · '+detail:''}`,nid);n++;
  });
  return n}
 function refreshView(){document.activeElement&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)?pend=1:render()}
@@ -716,9 +716,10 @@ const bar=(v,mx,cls='')=>`<div class="bar ${cls}"><i style="width:${mx>0?Math.ma
 
 function orderRow(o,compact){
  const p=prod(o.prod),tot=otot(o),r=orem(o),kar=p?tot-oq(o)*pc(p):null,ka=kAt(o);
- const meta=[fdate(o.date),o.source==='catalog'?'Katalog'+(o.orderGroup?' '+E(o.orderGroup):''):(o.by?E(pname2(o.by))+' ekledi':'')+(o.source!=='catalog'&&o.orderGroup?' · '+E(o.orderGroup):''),o.phone?E(o.phone):''].filter(Boolean).join(', ');
+ const meta=[fdate(o.date),o.source==='catalog'?'Katalog'+(o.orderGroup?' '+E(o.orderGroup):''):o.source==='partner'?'Partner kataloğu'+(o.orderGroup?' '+E(o.orderGroup):''):(o.by?E(pname2(o.by))+' ekledi':'')+(o.orderGroup?' · '+E(o.orderGroup):''),o.phone?E(o.phone):''].filter(Boolean).join(', ');
+ const endLine=o.source==='partner'?`<div class="s">Son müşteri: <b style="color:var(--text)">${E(o.endCust||'')}</b>${o.endPhone?', '+E(o.endPhone):''}${hasV(o.sp)?', katalog fiyatı '+TL(o.sp):''}</div>`:'';
  const prodLine=jobs(o).length?(()=>{const a=jobs(o),d=a.filter(j=>j.st==='Tamamlandı').reduce((x,j)=>x+N(j.qty),0),b=a.filter(j=>j.st==='Baskıda').reduce((x,j)=>x+N(j.qty),0);return `<div class="s">Üretim: ${d}/${N(o.qty)} tamamlandı${b?`, ${b} baskıda`:''}</div>`})():'';
- return `<div class="r ord"><div class="main"><div class="t">${E(o.cust)} <span class="mu" style="font-weight:500">· ${N(o.qty)} × ${E(pname(o.prod))}</span>${o.kons?'<span class="ktag">Konsinye</span>':''}</div><div class="s">${meta}</div>${o.kons?`<div class="s kline"><span>Gönderilen ${fg(o.qty)}</span><span>Satılan ${fg(kSold(o))}</span><span>İade ${fg(kRet(o))}</span>${ka?`<b>Müşteride ${fg(ka)}</b>`:'<span class="ok">Konsinye kapandı</span>'}</div>`:''}${o.note?`<div class="s">Not: ${E(o.note)}</div>`:''}${prodLine}${!compact?`<div class="s">Birim ${TL(o.price)}${N(o.dp)?' ('+TL(o.gp)+' üzerinden %'+pct(o.dp)+' iskontolu)':''}${kar!==null?', tahmini kâr '+TL(kar):''}</div>`:''}</div>
+ return `<div class="r ord"><div class="main"><div class="t">${E(o.cust)} <span class="mu" style="font-weight:500">· ${N(o.qty)} × ${E(pname(o.prod))}</span>${o.kons?'<span class="ktag">Konsinye</span>':''}${o.source==='partner'?'<span class="ktag" style="background:var(--teal-soft);color:var(--teal-2)">Partner kataloğu</span>':''}</div><div class="s">${meta}</div>${endLine}${o.kons?`<div class="s kline"><span>Gönderilen ${fg(o.qty)}</span><span>Satılan ${fg(kSold(o))}</span><span>İade ${fg(kRet(o))}</span>${ka?`<b>Müşteride ${fg(ka)}</b>`:'<span class="ok">Konsinye kapandı</span>'}</div>`:''}${o.note?`<div class="s">Not: ${E(o.note)}</div>`:''}${prodLine}${!compact?`<div class="s">Birim ${TL(o.price)}${N(o.dp)?' ('+TL(o.gp)+' üzerinden %'+pct(o.dp)+' iskontolu)':''}${kar!==null?', tahmini kâr '+TL(kar):''}</div>`:''}</div>
  <div class="amt">${TL(tot)}<small class="${r>0.004?'bad':o.kons&&ka&&!tot?'mu':'ok'}">${r>0.004?'Kalan '+TL(r):r<-0.004?'Fazla ödeme '+TL(-r):o.kons&&ka&&!tot?'Henüz satış yok':'Ödendi'}</small></div>
  <div class="acts">${stSel(o)}${o.kons&&(ka||(o.kh||[]).length)?ibtn('kons',o.id,'kons','Konsinye hesap'):''}${compact?'':ibtn('jobFor',o.id,'job','Baskıya ver')+ibtn('editOrd',o.id,'edit','Düzenle')+ibtn('delOrd',o.id,'trash','Sil')}</div></div>`;
 }
@@ -753,7 +754,7 @@ ozet(){
 teklif(){return teklifPage()},
 ord(){
  const q=lower(UI.ordQ),cnt=k=>S.ord.filter(o=>fOrd(o,k)).length;
- const list=S.ord.filter(o=>fOrd(o,UI.ordF)&&(!q||lower(o.cust+' '+pname(o.prod)+' '+(o.orderGroup||'')+' '+(o.phone||'')).includes(q))).slice().reverse();
+ const list=S.ord.filter(o=>fOrd(o,UI.ordF)&&(!q||lower(o.cust+' '+pname(o.prod)+' '+(o.orderGroup||'')+' '+(o.phone||'')+' '+(o.endCust||'')+' '+(o.endPhone||'')).includes(q))).slice().reverse();
  const F=[['all','Tümü'],['open','Açık'],...ST.map((s,i)=>['s'+i,s]),['due','Bakiyesi olan'],['kons','Konsinyede']];
  const kOpen=S.ord.filter(o=>kAt(o)>0);
  return head('Siparişler',S.ord.length+' sipariş, tahsil edilecek '+TL(S.ord.reduce((a,o)=>a+Math.max(0,orem(o)),0))+(kOpen.length?', konsinyede '+fg(kOpen.reduce((a,o)=>a+kAt(o),0))+' adet ('+TL(kOpen.reduce((a,o)=>a+kAt(o)*N(o.price),0))+')':''),btn('newOrd','Yeni sipariş',{cls:'p',icon:'plus'}))+
@@ -808,11 +809,11 @@ partner(){
  ${all.length?`<div class="tools"><label class="search">${IC.search}<span class="sr">Partner ara</span><input data-input="paQ" value="${E(UI.paQ)}" placeholder="Partner, yetkili, telefon, şehir ara"></label></div>`:''}
  <div class="grid pgrid">${list.map(pa=>{const x=st(pa),pp=ppOf(pa.id),upd0=pp.map(r=>r.d||'').sort().pop();
   return `<article class="pc" data-partner="${E(pa.id)}"><div class="bd"><div style="display:flex;gap:12px;align-items:center"><span class="pav">${E(String(pa.name).charAt(0).toLocaleUpperCase('tr-TR'))}</span><div class="nm" style="min-width:0;flex:1">${E(pa.name)}<small>${[pa.contact,pa.phone,pa.city].filter(Boolean).map(E).join(' · ')||'İletişim bilgisi yok'}</small></div>${ibtn('editPartner',pa.id,'edit','Partner bilgilerini düzenle')}</div>
-  <div class="pmeta"><span class="tag${pp.length?' g':''}">${pp.length?pp.length+' ürün fiyatlı':'Fiyat listesi boş'}</span>${upd0?`<span class="tag">Fiyatlar ${fdate(upd0)}</span>`:''}${pa.lastSent?`<span class="tag">Liste gönderildi ${fdate(pa.lastSent)}</span>`:''}</div>
+  <div class="pmeta"><span class="tag${pp.length?' g':''}">${pp.length?pp.length+' ürün fiyatlı':'Fiyat listesi boş'}</span>${upd0?`<span class="tag">Fiyatlar ${fdate(upd0)}</span>`:''}${pa.lastSent?`<span class="tag">Liste gönderildi ${fdate(pa.lastSent)}</span>`:''}${pa.catKey&&!pa.catOff?'<span class="tag t">Katalog açık</span>':''}</div>
   ${pp.length?`<div class="ppv">${pp.slice(0,5).map(r=>{const p=prod(r.prod),off=N(p.price)>0?Math.round((1-N(r.price)/N(p.price))*100):0;return `<div><span>${E(niceName(p.n))}</span><b>${TL(r.price)}${off>0?`<small>−%${off}</small>`:''}</b></div>`}).join('')}${pp.length>5?`<div class="more">+${pp.length-5} ürün daha</div>`:''}</div>`:`<p class="note" style="margin:0">Bu partnere hangi ürünü kaça verdiğinizi "Fiyatlar" ile kaydedin.</p>`}
   <div class="fig"><div><small>Siparişler</small><b>${TL(x.t)}</b></div><div><small>Kalan</small><b class="${x.r>0.004?'bad':'ok'}">${TL(x.r)}</b></div><div><small>Son sipariş</small><b>${x.last?fdate(x.last):'—'}</b></div></div>
   ${pa.note?`<div class="s mu" style="font-size:13px">${E(pa.note)}</div>`:''}
-  <div class="ft">${btn('paPrices','Fiyatlar',{cls:'p sm',icon:'edit',id:pa.id})}${btn('paPdf','Fiyat listesi',{cls:'s sm',icon:'pdf',id:pa.id})}${btn('paOrder','Sipariş gir',{cls:'s sm',icon:'plus',id:pa.id})}<span style="flex:1"></span>${x.r>0.004?ibtn('cusPay',pa.name,'cash','Ödeme al'):''}${navigator.canShare?ibtn('paShare',pa.id,'share','Fiyat listesini paylaş'):''}${ibtn('delPartner',pa.id,'trash','Partneri sil')}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(all.length?'Aramaya uyan partner yok':'Henüz partner yok',all.length?'':'Ürünlerinizi satan iş ortaklarını "Partner ekle" ile kaydedin; her birine özel fiyat listesi tutun.')}</div>`}</div>`;
+  <div class="ft">${btn('paPrices','Fiyatlar',{cls:'p sm',icon:'edit',id:pa.id})}${btn('paPdf','Fiyat listesi',{cls:'s sm',icon:'pdf',id:pa.id})}${btn('paOrder','Sipariş gir',{cls:'s sm',icon:'plus',id:pa.id})}${btn('paCat','Katalog',{cls:'s sm',icon:'share',id:pa.id})}<span style="flex:1"></span>${x.r>0.004?ibtn('cusPay',pa.name,'cash','Ödeme al'):''}${navigator.canShare?ibtn('paShare',pa.id,'share','Fiyat listesini paylaş'):''}${ibtn('delPartner',pa.id,'trash','Partneri sil')}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(all.length?'Aramaya uyan partner yok':'Henüz partner yok',all.length?'':'Ürünlerinizi satan iş ortaklarını "Partner ekle" ile kaydedin; her birine özel fiyat listesi tutun.')}</div>`}</div>`;
 },
 cus(){
  const recs=customerRecords(),q=lower(UI.cusQ),list=recs.filter(c=>!q||lower([c.name,c.phone,c.email,c.address].join(' ')).includes(q));
@@ -946,7 +947,7 @@ function formOrd(o,pre){
  const edit=!!o,cust0=o?.cust||pre?.cust||'';
  // Düzenlemede kayıtlı iskonto varsa iskontosuz birim fiyat (gp) ve oran (dp) geri gelir; yoksa net birim fiyat.
  const items=o?[{id:uid(),prod:o.prod,name:pname(o.prod),qty:N(o.qty),price:N(o.dp)&&o.gp!=null?N(o.gp):N(o.price),dp:N(o.dp)||0,manual:true,qtyManual:true,dpManual:true}]:[qItemFor(pre?.prod||S.prod[0].id,cust0)];
- const grpLabel=o?.orderGroup?(o.source==='catalog'?'Katalog siparişi ':o.source==='quote'?'Teklif siparişi ':'Sipariş ')+o.orderGroup:'';
+ const grpLabel=o?.orderGroup?(o.source==='catalog'?'Katalog siparişi ':o.source==='partner'?'Partner kataloğu siparişi ':o.source==='quote'?'Teklif siparişi ':'Sipariş ')+o.orderGroup+(o.endCust?' · son müşteri '+o.endCust:''):'';
  openDrawer({title:edit?'Siparişi düzenle':'Yeni sipariş',sub:grpLabel,wide:true,submit:edit?'Kaydet':'Siparişi ekle',
   extra:`<div class="qtot"><small>Sipariş toplamı</small><b id="qTot">₺0</b></div>`,
   body:`<div class="qsec"><h3>Müşteri</h3><div class="fg">
@@ -1185,8 +1186,11 @@ const partners=()=>Array.isArray(S.partners)?S.partners:(S.partners=[]);
 const pprices=()=>Array.isArray(S.pprices)?S.pprices:(S.pprices=[]);
 const partnerByName=name=>{const k=lower(name);return k?partners().find(p=>lower(p.name)===k):undefined};
 const ppGet=(paId,pid)=>pprices().find(x=>x.partner===paId&&x.prod===pid);
-const ppOf=paId=>pprices().filter(x=>x.partner===paId&&prod(x.prod)).sort((a,b)=>String(pname(a.prod)).localeCompare(pname(b.prod),'tr'));
-const ppFor=(name,pid)=>{const pa=partnerByName(name);return pa&&pid?ppGet(pa.id,pid):undefined};
+const hasV=v=>v!=null&&v!=='';
+const ppOf=paId=>pprices().filter(x=>x.partner===paId&&prod(x.prod)&&hasV(x.price)).sort((a,b)=>String(pname(a.prod)).localeCompare(pname(b.prod),'tr'));
+const ppFor=(name,pid)=>{const pa=partnerByName(name),r=pa&&pid?ppGet(pa.id,pid):undefined;return r&&hasV(r.price)?r:undefined};
+const partnerLink=pa=>pa?.catKey?catalogLink()+'&p='+encodeURIComponent(pa.catKey):'';
+const newCatKey=()=>Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>b.toString(16).padStart(2,'0')).join('');
 // Partner fiyat listesinde fiyat varsa o kullanılır; yoksa bu müşteriye en son verilen fiyat.
 const custPrice=(name,pid)=>{const pp=ppFor(name,pid);if(pp)return N(pp.price);const m=(S.custPrices||{})[lower(name)];return m&&pid&&m[pid]!=null?N(m[pid]):null};
 const custDisc=(name,pid)=>{if(ppFor(name,pid))return 0;const m=(S.custDisc||{})[lower(name)];return m&&pid&&m[pid]!=null?N(m[pid]):null};
@@ -1338,28 +1342,36 @@ function formPartner(pa){
    const np={id:uid(),...rec,createdAt:td(),by:myUid};partners().push(np);logAct('Partner ekledi: '+name);
    tab='partner';if(location.hash!=='#partner')history.replaceState(null,'','#partner');upd();setTimeout(()=>formPrices(np.id),60)}});
 }
-function ppInfo(pid,v,pa){
- const p=prod(pid);if(!p)return '';const ex=ppGet(pa.id,pid),h=(ex?.hist||[]).slice(-1)[0],price=v===''||v==null?null:N(v),lp=N(p.price),c=pc(p);
- if(price===null)return ex?'<span class="bad">Kaydedince listeden çıkarılır</span>':'';
- const off=lp>0?Math.round((1-price/lp)*1000)/10:0,kar=price>0?Math.round((price-c)/price*100):0;
- return [off>0?`<span class="ok">listeden %${pct(off)} indirimli</span>`:off<0?'listenin %'+pct(-off)+' üstünde':'liste fiyatıyla aynı',price<c?'<span class="bad">maliyetin altında</span>':'kâr %'+kar,ex&&Math.abs(N(ex.price)-price)>0.004?'şu an kayıtlı '+TL(ex.price):'',h?'önceki fiyat '+TL(h.price)+' ('+fdate(h.d)+')':''].filter(Boolean).join(' · ');
+function ppInfo(pid,v,pa,sv){
+ const p=prod(pid);if(!p)return '';const ex=ppGet(pa.id,pid),h=(ex?.hist||[]).slice(-1)[0],price=hasV(v)?N(v):null,sale=hasV(sv)?N(sv):null,lp=N(p.price),c=pc(p);
+ if(price===null&&sale===null)return ex?'<span class="bad">Kaydedince listeden çıkarılır</span>':'';
+ const parts=[];
+ if(price!==null){const off=lp>0?Math.round((1-price/lp)*1000)/10:0,kar=price>0?Math.round((price-c)/price*100):0;
+  parts.push(off>0?`<span class="ok">listeden %${pct(off)} indirimli</span>`:off<0?'listenin %'+pct(-off)+' üstünde':'liste fiyatıyla aynı',price<c?'<span class="bad">maliyetin altında</span>':'kâr %'+kar)}
+ else parts.push('partnere liste fiyatından'+(N(pa.disc)?' %'+pct(pa.disc)+' indirimle':'')+' yazılır');
+ if(sale!==null){const base=price!==null?price:lp*(1-N(pa.disc)/100),m=sale-base;parts.push(m>=0?'partnerin kazancı '+TL(m)+' / adet':'<span class="bad">satış fiyatı partner fiyatının altında</span>')}
+ if(ex&&hasV(ex.price)&&price!==null&&Math.abs(N(ex.price)-price)>0.004)parts.push('şu an kayıtlı '+TL(ex.price));
+ if(h)parts.push('önceki fiyat '+TL(h.price)+' ('+fdate(h.d)+')');
+ return parts.join(' · ');
 }
 function formPrices(id){
  const pa=byId(partners(),id);if(!pa)return;if(!S.prod.length)return toast('Önce Ürünler sayfasından ürün ekleyin.');
  const prods=S.prod.slice().sort((a,b)=>{const x=ppGet(pa.id,a.id)?0:1,y=ppGet(pa.id,b.id)?0:1;return x-y||String(a.n).localeCompare(b.n,'tr')});
  const qs=(S.quotes||[]).filter(q=>(q.items||[]).some(i=>i.prod&&prod(i.prod))).sort((a,b)=>(lower(b.cust?.name)===lower(pa.name))-(lower(a.cust?.name)===lower(pa.name))||String(b.date).localeCompare(String(a.date)));
- openDrawer({title:pa.name+' · Fiyatlar',sub:'Bu partnere hangi ürünü kaça verdiğinizi yazın. Boş bırakılan ürün listede yer almaz.',wide:true,submit:'Fiyatları kaydet',
+ openDrawer({title:pa.name+' · Fiyatlar',sub:'Partnere fiyat: bu partnere kaça verdiğiniz. Satış fiyatı: partnerin kataloğunda son müşterinin gördüğü fiyat.',wide:true,submit:'Fiyatları kaydet',
   extra:`<div class="qtot"><small>Listede</small><b id="ppCount">0 ürün</b></div>`,
   body:`<div class="pptools"><input class="inp q" id="ppQ" placeholder="Ürün ara" aria-label="Ürün ara"><input class="inp pct" id="ppDisc" type="number" inputmode="decimal" step="any" min="0" max="99" placeholder="%" value="${pa.disc??''}" aria-label="Liste fiyatından indirim yüzdesi"><button type="button" class="btn s sm" data-act="ppFill" data-id="empty">Boşlara uygula</button><button type="button" class="btn s sm" data-act="ppFill" data-id="all">Tümüne uygula</button>${qs.length?`<select class="inp" id="ppQuote" aria-label="Tekliften fiyat al" style="max-width:240px"><option value="">Tekliften fiyat al…</option>${qs.map(q=>`<option value="${E(q.id)}">${E(q.no)} · ${E(q.cust?.name||'')}</option>`).join('')}</select>`:''}</div>
-   <div class="pphead"><span>Ürün</span><span>Partner fiyatı (₺)</span><span>En az adet</span></div>
-   <div id="ppRows">${prods.map(p=>{const ex=ppGet(pa.id,p.id),v=ex?N(ex.price):'';return `<div class="pprow${ex?' on':''}" data-pid="${E(p.id)}" data-n="${E(lower(p.n+' '+(p.catalogCategory||'')))}"><div class="nm">${E(niceName(p.n))}<small>Liste ${TL(p.price)} · Maliyet ${TL(pc(p))}</small></div>
-    <label><span>Partner fiyatı (₺)</span><input class="inp" name="pp_${E(p.id)}" type="number" inputmode="decimal" step="any" min="0" value="${E(v)}" placeholder="Listede yok" aria-label="${E(p.n)} partner fiyatı"></label>
+   <div class="pphead"><span>Ürün</span><span>Partnere fiyat (₺)</span><span>Satış fiyatı (₺)</span><span>En az adet</span></div>
+   <div id="ppRows">${prods.map(p=>{const ex=ppGet(pa.id,p.id),v=ex&&hasV(ex.price)?N(ex.price):'',sv=ex&&hasV(ex.sale)?N(ex.sale):'';return `<div class="pprow${v!==''?' on':''}" data-pid="${E(p.id)}" data-n="${E(lower(p.n+' '+(p.catalogCategory||'')))}"><div class="nm">${E(niceName(p.n))}<small>Liste ${TL(p.price)} · Maliyet ${TL(pc(p))}</small></div>
+    <label><span>Partnere fiyat (₺)</span><input class="inp" name="pp_${E(p.id)}" type="number" inputmode="decimal" step="any" min="0" value="${E(v)}" placeholder="Listede yok" aria-label="${E(p.n)} partner fiyatı"></label>
+    <label><span>Satış fiyatı (₺)</span><input class="inp" name="ps_${E(p.id)}" type="number" inputmode="decimal" step="any" min="0" value="${E(sv)}" placeholder="${E(N(p.price))}" aria-label="${E(p.n)} partnerin satış fiyatı"></label>
     <label><span>En az adet</span><input class="inp" name="pm_${E(p.id)}" type="number" inputmode="numeric" step="1" min="0" value="${ex&&N(ex.min)?E(ex.min):''}" placeholder="—" aria-label="${E(p.n)} en az adet"></label>
-    <div class="pi">${ppInfo(p.id,v,pa)}</div></div>`}).join('')}</div>`,
+    <div class="pi">${ppInfo(p.id,v,pa,sv)}</div></div>`}).join('')}</div>
+   <p class="note" style="margin:12px 0 0">Satış fiyatı boş bırakılan ürün, partnerin kataloğunda liste fiyatıyla görünür. Partnere fiyat boş bırakılan üründen katalog siparişi gelirse partnere liste fiyatı${N(pa.disc)?'ndan %'+pct(pa.disc)+' indirimle':''} yazılır.</p>`,
   onSubmit(f){return savePrices(pa,f)?undefined:false}});
  const body=$('#dBody'),count=()=>{const n=[...body.querySelectorAll('input[name^="pp_"]')].filter(i=>i.value!=='').length;$('#ppCount').textContent=n+' ürün'};
  body.oninput=e=>{const t=e.target;if(t.id==='ppQ'){const q=lower(t.value);body.querySelectorAll('.pprow').forEach(r=>r.style.display=!q||r.dataset.n.includes(q)?'':'none');return}
-  const row=t.closest('.pprow');if(row&&t.name?.startsWith('pp_')){row.querySelector('.pi').innerHTML=ppInfo(row.dataset.pid,t.value,pa);row.classList.toggle('on',t.value!=='');count()}};
+  const row=t.closest('.pprow');if(row&&(t.name?.startsWith('pp_')||t.name?.startsWith('ps_'))){const pid=row.dataset.pid,pv=row.querySelector('input[name^="pp_"]').value,sv=row.querySelector('input[name^="ps_"]').value;row.querySelector('.pi').innerHTML=ppInfo(pid,pv,pa,sv);row.classList.toggle('on',pv!=='');count()}};
  body.onchange=e=>{const t=e.target;if(t.id!=='ppQuote'||!t.value)return;const q=byId(S.quotes||[],t.value);if(!q)return;const c=qCalc(q);let n=0;
   (q.items||[]).forEach(i=>{const el=body.querySelector(`input[name="pp_${CSS.escape(i.prod||'')}"]`);if(!el)return;el.value=r2(N(i.price)*(1-iDp(i)/100)*(1-c.dp/100));el.dispatchEvent(new Event('input',{bubbles:true}));n++});
   t.value='';toast(n+' ürünün fiyatı '+q.no+' teklifinden alındı. Kaydetmeyi unutmayın.')};
@@ -1367,17 +1379,38 @@ function formPrices(id){
 }
 function savePrices(pa,f){
  let add=0,chg=0,del=0,bad=null;const now=td(),keep=new Set();
- S.prod.forEach(p=>{const v=f['pp_'+p.id],m=f['pm_'+p.id],ex=ppGet(pa.id,p.id);
-  if(v===undefined){if(ex)keep.add(p.id);return}if(v===''){if(ex)del++;return}
-  const price=r2(v),min=Math.max(0,Math.round(N(m)));if(!(price>=0)){bad=p.n;return}keep.add(p.id);
-  if(ex){let ch=false;if(Math.abs(N(ex.price)-price)>0.004){ex.hist=[...(ex.hist||[]),{d:ex.d||now,price:N(ex.price)}].slice(-20);ex.price=price;ex.d=now;ex.by=myUid;ch=true}
+ S.prod.forEach(p=>{const v=f['pp_'+p.id],sv=f['ps_'+p.id],m=f['pm_'+p.id],ex=ppGet(pa.id,p.id);
+  if(v===undefined){if(ex)keep.add(p.id);return}
+  if(v===''&&!hasV(sv)){if(ex)del++;return}
+  const price=v===''?null:r2(v),sale=hasV(sv)?r2(sv):null,min=Math.max(0,Math.round(N(m)));
+  if((price!==null&&!(price>=0))||(sale!==null&&!(sale>=0))){bad=p.n;return}keep.add(p.id);
+  if(ex){let ch=false;
+   if(price===null){if(hasV(ex.price)){ex.hist=[...(ex.hist||[]),{d:ex.d||now,price:N(ex.price)}].slice(-20);delete ex.price;ch=true}}
+   else if(!hasV(ex.price)||Math.abs(N(ex.price)-price)>0.004){if(hasV(ex.price))ex.hist=[...(ex.hist||[]),{d:ex.d||now,price:N(ex.price)}].slice(-20);ex.price=price;ex.d=now;ex.by=myUid;ch=true}
+   if((sale===null)!==(!hasV(ex.sale))||(sale!==null&&Math.abs(N(ex.sale)-sale)>0.004)){if(sale===null)delete ex.sale;else ex.sale=sale;ch=true}
    if(N(ex.min)!==min){if(min)ex.min=min;else delete ex.min;ch=true}if(ch)chg++}
-  else{const r={id:pa.id+':'+p.id,partner:pa.id,prod:p.id,price,d:now,by:myUid};if(min)r.min=min;pprices().push(r);add++}});
+  else{const r={id:pa.id+':'+p.id,partner:pa.id,prod:p.id,d:now,by:myUid};if(price!==null)r.price=price;if(sale!==null)r.sale=sale;if(min)r.min=min;pprices().push(r);add++}});
  if(bad){toast(bad+' için fiyat eksi olamaz.');return false}
  if(del)S.pprices=pprices().filter(x=>!(x.partner===pa.id&&prod(x.prod)&&!keep.has(x.prod)));
  if(!add&&!chg&&!del){toast('Değişiklik yok.');return true}
  logAct(pa.name+' fiyat listesini güncelledi'+[add&&add+' yeni',chg&&chg+' değişen',del&&del+' çıkarılan'].filter(Boolean).map(x=>', '+x).join(''));
  upd();toast('Fiyatlar kaydedildi: '+[add&&add+' yeni',chg&&chg+' değişen',del&&del+' çıkarılan'].filter(Boolean).join(', ')+'.');return true;
+}
+/* Partner kataloğu: partnerin müşterileri bu bağlantıdan sipariş verir, sipariş partnere yazılır. */
+function formPartnerCatalog(id){
+ const pa=byId(partners(),id);if(!pa)return;
+ if(!pa.catKey){pa.catKey=newCatKey();upd()}
+ const url=partnerLink(pa),os=S.ord.filter(o=>o.source==='partner'&&o.partner===pa.id),grp=new Set(os.map(o=>o.orderGroup)).size,tot=os.reduce((a,o)=>a+otot(o),0);
+ const noSale=S.prod.filter(p=>!hasV(ppGet(pa.id,p.id)?.sale)).length,msg=pa.name+' ürün kataloğu, buradan sipariş verebilirsiniz:';
+ openDrawer({title:pa.name+' · Katalog',sub:'Partnerin müşterileri bu bağlantıdan sipariş verir; siparişler size "'+pa.name+'" siparişi olarak gelir.',
+  body:`<div class="shcard"><div class="t">Partner katalog bağlantısı</div><div class="s">Katalogda ${E(pa.name)} adı ve partnerin satış fiyatları görünür. Partnere verdiğiniz fiyat hiçbir yerde görünmez.</div>
+   ${pa.catOff?'<p class="note bad" style="margin:12px 0 0">Katalog kapalı: bağlantı açılınca "kullanılamıyor" mesajı görünür.</p>':''}
+   <div class="shlink">${E(url)}</div>
+   <div class="shbtns">${navigator.share?`<button type="button" class="btn p sm" data-act="paCatShare" data-id="${E(pa.id)}">${IC.share}Paylaş</button>`:''}<a class="btn ${navigator.share?'s':'p'} sm" href="https://wa.me/?text=${encodeURIComponent(msg+' '+url)}" target="_blank" rel="noopener">WhatsApp ile gönder</a><button type="button" class="btn s sm" data-act="paCatCopy" data-id="${E(pa.id)}">${IC.copy}Kopyala</button><a class="btn s sm" href="${E(url)}" target="_blank" rel="noopener">Aç</a></div></div>
+   <div class="cpsum" style="margin-bottom:12px"><div><small>Katalogdan sipariş</small><b>${fg(grp)}</b></div><div><small>Tutar (size)</small><b>${TL(tot)}</b></div><div><small>Satış fiyatı girilmemiş</small><b>${fg(noSale)} ürün</b></div></div>
+   ${noSale?`<p class="note" style="margin:0 0 12px">Satış fiyatı girilmemiş ürünler katalogda liste fiyatıyla görünür. ${btn('paPrices','Fiyatları düzenle',{cls:'s sm',id:pa.id})}</p>`:''}
+   <div class="rows"><div class="r"><div class="main"><div class="t">${pa.catOff?'Katalog kapalı':'Katalog açık'}</div><div class="s">${pa.catOff?'Bu bağlantıdan sipariş alınmıyor.':'Bu bağlantıdan sipariş alınıyor.'}</div></div>${btn('paCatToggle',pa.catOff?'Aç':'Kapat',{cls:'s sm',id:pa.id})}</div>
+   <div class="r"><div class="main"><div class="t">Bağlantıyı yenile</div><div class="s">Eski bağlantı çalışmaz olur; yenisini partnerinize göndermeniz gerekir.</div></div>${btn('paCatRenew','Yenile',{cls:'s sm',id:pa.id})}</div></div>`});
 }
 function partnerOrder(id){
  const pa=byId(partners(),id);if(!pa)return;const pp=ppOf(pa.id);
@@ -1562,7 +1595,7 @@ async function save2(name,data,type='application/octet-stream'){try{const a=docu
 async function backup(){if(await save2('atolye-defteri-yedek-'+td()+'.json',JSON.stringify(S,null,1),'application/json')){S.lastBak=Date.now();upd();toast('Yedek indirildi.')}}
 const cell=v=>{v=typeof v==='number'?String(v).replace('.',','):String(v??'');if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'};
 async function csv(k){let h,rows;
- if(k==='ord'){h=['Tarih','Müşteri','Telefon','Ürün','Adet','Birim fiyat','Toplam','Ödenen','Kalan','Durum','Kaynak','Sipariş kodu','Konsinye','Satılan','İade','Müşteride'];rows=S.ord.map(o=>[o.date||'',o.cust,o.phone||'',pname(o.prod),N(o.qty),N(o.price),otot(o),N(o.paid),orem(o),o.st,o.source==='catalog'?'Katalog':'Defter',o.orderGroup||'',o.kons?'Evet':'',o.kons?kSold(o):'',o.kons?kRet(o):'',o.kons?kAt(o):''])}
+ if(k==='ord'){h=['Tarih','Müşteri','Telefon','Ürün','Adet','Birim fiyat','Toplam','Ödenen','Kalan','Durum','Kaynak','Sipariş kodu','Konsinye','Satılan','İade','Müşteride'];rows=S.ord.map(o=>[o.date||'',o.cust,o.phone||'',pname(o.prod),N(o.qty),N(o.price),otot(o),N(o.paid),orem(o),o.st,o.source==='catalog'?'Katalog':o.source==='partner'?'Partner kataloğu ('+(o.endCust||'')+')':'Defter',o.orderGroup||'',o.kons?'Evet':'',o.kons?kSold(o):'',o.kons?kRet(o):'',o.kons?kAt(o):''])}
  else{h=['Tarih','Tür','Tutar','Açıklama'];rows=S.tx.slice().sort((a,b)=>String(a.d).localeCompare(String(b.d))).map(x=>[x.d,x.t,N(x.amt),x.desc])}
  if(!rows.length)return toast('Aktarılacak kayıt yok.');
  if(await save2(k==='ord'?'siparisler.csv':'gelir-gider.csv','﻿'+[h,...rows].map(r=>r.map(cell).join(';')).join('\r\n'),'text/csv'))toast('Dosya indirildi.');
@@ -1646,7 +1679,11 @@ const ACT={
  async catDel(i){const old=categoryNames()[i];if(!old)return;if(!await confirmBox('“'+old+'” silinsin mi?','Bu kategorideki ürünler silinmez, kategorisiz kalır.','Sil'))return;S.catalogCategories=(S.catalogCategories||[]).filter(x=>x!==old);S.prod.forEach(p=>{if(String(p.catalogCategory||'').trim()===old)p.catalogCategory=''});await saveNow();_redrawCats();render();toast('Kategori silindi.')},
  newMat:()=>formMat(),editMat:id=>formMat(byId(S.mat,id)),addSpool:id=>formMat(byId(S.mat,id),true),
  async delMat(id){const m=byId(S.mat,id);if(!m)return;const u=S.prod.filter(p=>p.mat===id).length;if(u)return toast('Bu malzeme '+u+' üründe kullanılıyor; önce o ürünlerin malzemesini değiştirin.');if(!await confirmBox('Malzeme silinsin mi?',m.n+' stoktan kaldırılır.','Sil'))return;S.mat=S.mat.filter(x=>x.id!==id);upd()},
- newPartner:()=>formPartner(),editPartner:id=>formPartner(byId(partners(),id)),paPrices:id=>formPrices(id),paPdf:id=>partnerPdf(id),paShare:id=>partnerPdf(id,true),paOrder:id=>partnerOrder(id),
+ newPartner:()=>formPartner(),paCat:id=>formPartnerCatalog(id),
+ paCatCopy:id=>{const pa=byId(partners(),id);if(pa)copyText(partnerLink(pa),'Partner katalog bağlantısı kopyalandı.')},
+ paCatShare:id=>{const pa=byId(partners(),id);if(!pa)return;const url=partnerLink(pa);navigator.share({title:pa.name+' ürün kataloğu',text:pa.name+' ürün kataloğu, buradan sipariş verebilirsiniz:',url}).catch(e=>{if(e&&e.name!=='AbortError')copyText(url,'Partner katalog bağlantısı kopyalandı.')})},
+ paCatToggle:id=>{const pa=byId(partners(),id);if(!pa)return;if(pa.catOff)delete pa.catOff;else pa.catOff=true;logAct(pa.name+' kataloğunu '+(pa.catOff?'kapattı':'açtı'));upd();formPartnerCatalog(id);toast(pa.catOff?'Katalog kapatıldı.':'Katalog açıldı.')},
+ async paCatRenew(id){const pa=byId(partners(),id);if(!pa)return;if(!await confirmBox('Bağlantı yenilensin mi?','Eski bağlantı artık çalışmaz. Yeni bağlantıyı '+pa.name+' ile paylaşmanız gerekir.','Yenile'))return;pa.catKey=newCatKey();logAct(pa.name+' katalog bağlantısını yeniledi');upd();formPartnerCatalog(id);toast('Yeni bağlantı oluşturuldu.')},editPartner:id=>formPartner(byId(partners(),id)),paPrices:id=>formPrices(id),paPdf:id=>partnerPdf(id),paShare:id=>partnerPdf(id,true),paOrder:id=>partnerOrder(id),
  ppFill(k){const v=N($('#ppDisc')?.value);if($('#ppDisc').value===''||v<0||v>=100)return toast('0 ile 99 arasında bir indirim yüzdesi yazın.');let n=0;
   $('#dBody').querySelectorAll('.pprow').forEach(r=>{if(r.style.display==='none')return;const i=r.querySelector('input[name^="pp_"]'),p=prod(r.dataset.pid);if(!p||(k==='empty'&&i.value!==''))return;i.value=r2(N(p.price)*(1-v/100));i.dispatchEvent(new Event('input',{bubbles:true}));n++});
   toast(n?n+' ürüne liste fiyatından %'+pct(v)+' indirimli fiyat yazıldı. Kaydetmeyi unutmayın.':'Uygulanacak ürün yok.')},

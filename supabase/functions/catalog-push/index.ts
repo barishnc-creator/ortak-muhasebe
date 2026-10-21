@@ -139,6 +139,7 @@ Deno.serve(async (req) => {
 
       // Bildirimde sipariş kodu yerine müşterinin adı, adet ve tutar görünsün.
       let body = `Yeni sipariş alındı: ${job.order_group}`;
+      let title = "Yeni katalog siparişi";
       const { data: book } = await db
         .from("books")
         .select("ord:data->ord")
@@ -153,10 +154,16 @@ Deno.serve(async (req) => {
           .format(total).replace(/,00$/, "");
         const cust = String(items[0].cust || "Müşteri").slice(0, 60);
         body = `${cust}: ${items.length > 1 ? items.length + " ürün, " : ""}${qty} adet, ${money}`;
+        // Partner katalogundan gelen sipariş: başlıkta partner, metinde son müşteri.
+        if (items[0].source === "partner") {
+          title = `${cust} kataloğundan sipariş`;
+          const end = String(items[0].endCust || "Müşteri").slice(0, 60);
+          body = `${end}: ${items.length > 1 ? items.length + " ürün, " : ""}${qty} adet, ${money}`;
+        }
       }
 
       const payload = JSON.stringify({
-        title: "Yeni katalog siparişi",
+        title,
         body,
         url: "https://barishnc-creator.github.io/ortak-muhasebe/index.html#ord",
       });
