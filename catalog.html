@@ -187,6 +187,20 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .ci .rm{display:block;margin:6px 0 0 auto;color:var(--faint);font-size:13px;text-decoration:underline;text-underline-offset:3px}
 .ci .rm:hover{color:var(--danger)}
 .sumrow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.subrow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;color:var(--muted);font-size:14px}
+.subrow.disc{color:var(--ok,#4ADE9B);font-weight:600}
+.tiers{margin:4px 0 18px;padding:14px 16px;border-radius:18px;border:1px solid rgba(63,208,201,.28);background:linear-gradient(120deg,rgba(63,208,201,.10),rgba(63,208,201,.03));display:grid;gap:10px}
+.tiers:empty{display:none}
+.tiers .th{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tiers .th b{font:700 16px var(--display)}
+.tiers .tl{display:flex;gap:8px;flex-wrap:wrap}
+.tiers .tl span{display:inline-flex;align-items:baseline;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2,#2C4760);font-size:13.5px;color:var(--muted)}
+.tiers .tl span b{color:var(--text);font-size:15px}
+.tiers .tl span.on{background:var(--teal,#3FD0C9);border-color:var(--teal,#3FD0C9);color:var(--teal-ink,#04282B)}.tiers .tl span.on b{color:var(--teal-ink,#04282B)}
+.tiers .msg{font-size:14px;color:var(--muted)}.tiers .msg b{color:var(--text)}
+.tprog{height:6px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}.tprog i{display:block;height:100%;background:linear-gradient(90deg,var(--teal-2,#7BE6E0),var(--teal,#3FD0C9));border-radius:999px;transition:width .35s}
+.cartTier{margin:0 0 12px;padding:10px 12px;border-radius:12px;background:rgba(63,208,201,.08);font-size:13.5px;color:var(--muted);display:grid;gap:8px}.cartTier b{color:var(--text)}
+.ci small s{opacity:.6;margin-right:4px}
 .sumrow span{color:var(--muted)}
 .sumrow b{font:800 26px/1 var(--display);letter-spacing:-.02em}
 .form{display:grid;gap:14px;margin-top:22px}
@@ -372,6 +386,7 @@ html.vitrin .cart-only{display:none!important}
     <label><span class="sr">Sıralama</span><select class="sort" id="sort" onchange="renderProducts()"><option value="rec">Önerilen</option><option value="asc" class="cart-only">Fiyat: artan</option><option value="desc" class="cart-only">Fiyat: azalan</option><option value="az">Ada göre</option></select></label>
    </div>
   </div>
+  <div class="tiers cart-only" id="tiers" aria-live="polite"></div>
   <div class="grid" id="products"><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
  </section>
 </main>
@@ -433,7 +448,24 @@ function persistCart(){if(SHOW)return;try{sessionStorage.setItem(CART_KEY,JSON.s
 const rules=p=>({min:Math.max(1,Math.floor(Number(p.catalogMin)||25)),step:Math.max(1,Math.floor(Number(p.catalogStep)||25))});
 const product=id=>(catalog?.products||[]).find(p=>p.id===id);
 const inCart=id=>cart.find(x=>x.product_id===id);
-const cartTotal=()=>cart.reduce((a,x)=>a+x.price*x.qty,0);
+// Kademeli toptan indirim: sepetteki toplam adede göre bütün ürünlere uygulanır (sunucu da aynı hesabı yapar).
+let TIERS=[];
+const cartQty=()=>cart.reduce((a,x)=>a+x.qty,0);
+const tierPct=q=>TIERS.reduce((m,t)=>q>=t.min&&t.pct>m?t.pct:m,0);
+const nextTier=q=>TIERS.filter(t=>t.min>q).sort((a,b)=>a.min-b.min)[0]||null;
+const unitNet=(price,pct)=>Math.round(price*(1-pct/100)*100)/100;
+const cartGross=()=>cart.reduce((a,x)=>a+x.price*x.qty,0);
+const cartTotal=()=>{const p=tierPct(cartQty());return cart.reduce((a,x)=>a+unitNet(x.price,p)*x.qty,0)};
+function tierMsg(q){const p=tierPct(q),n=nextTier(q);
+ if(!TIERS.length)return '';
+ if(n)return (p?`<b>%${p} indirim</b> kazandınız. `:'')+`<b>${n.min-q} adet</b> daha ekleyin, <b>%${n.pct} indirim</b> olsun.`;
+ return `En yüksek indirim: <b>%${p}</b> kazandınız.`}
+function renderTiers(){
+ const el=$('tiers');if(!el)return;if(SHOW||PARTNER||!TIERS.length){el.innerHTML='';return}
+ const q=cartQty(),p=tierPct(q),n=nextTier(q),prev=TIERS.filter(t=>t.min<=q).sort((a,b)=>b.min-a.min)[0],base=prev?prev.min:0,pr=n?Math.min(100,Math.round((q-base)/(n.min-base)*100)):100;
+ el.innerHTML=`<div class="th"><b>Toptan indirim</b><div class="tl">${TIERS.slice().sort((a,b)=>a.min-b.min).map(t=>`<span class="${p===t.pct&&q>=t.min?'on':''}"><b>%${t.pct}</b>${t.min}+ adet</span>`).join('')}</div></div>
+  <div class="msg">${q?`Sepetinizde <b>${q} adet</b> var. `+tierMsg(q):'İndirim, sepetteki <b>toplam adede</b> göre (farklı ürünler dahil) bütün ürünlere uygulanır.'}</div>${q?`<div class="tprog" aria-hidden="true"><i style="width:${pr}%"></i></div>`:''}`;
+}
 function setQty(id,qty){
  const p=product(id);if(!p)return;const {min}=rules(p),line=inCart(id);
  if(line){if(qty<min){cart=cart.filter(x=>x!==line);toast(p.name+' sepetten çıkarıldı')}else line.qty=qty}
@@ -451,7 +483,7 @@ function removeLine(id){const p=product(id);cart=cart.filter(x=>x.product_id!==i
 function afterCartChange(id){persistCart();updateCartUi();id?updateCard(id):renderProducts();if($('cartDrawer').classList.contains('on')&&!$('cartBody').querySelector('.done-box'))renderCart()}
 function updateCartUi(){
  const n=cart.reduce((a,x)=>a+x.qty,0);$('count').textContent=n;
- $('mbarCount').textContent=cart.length+' ürün, '+n+' adet';$('mbarTotal').textContent=money(cartTotal());
+ const pct=tierPct(n);$('mbarCount').textContent=cart.length+' ürün, '+n+' adet'+(pct?' · %'+pct+' indirim':'');$('mbarTotal').textContent=money(cartTotal());renderTiers();
  const show=cart.length>0&&!document.querySelector('.drawer.on');$('mbar').classList.toggle('on',show);document.body.classList.toggle('has-cart',cart.length>0);
 }
 // Katalog yenilenince sepeti güncel fiyat ve kurallara göre düzelt.
@@ -482,6 +514,7 @@ async function refresh(manual){
   if(PARTNER&&!error&&!data){partnerMissing();return}
   if(error||!data)throw error||new Error('Katalog verisi alınamadı.');
   if(PARTNER)setPartner(typeof data==='string'?JSON.parse(data):data);
+  if(!SHOW&&!PARTNER){const raw=(typeof data==='string'?JSON.parse(data):data).tiers;TIERS=Array.isArray(raw)?raw.map(t=>({min:Math.round(Number(t.min)||0),pct:Math.min(90,Math.max(0,Number(t.pct)||0))})).filter(t=>t.min>0&&t.pct>0):[];renderTiers()}
   if(SHOW)setCompany((typeof data==='string'?JSON.parse(data):data).company);
   const next=normalize(data),sig=JSON.stringify(next);
   lastSync=Date.now();$('sync').classList.remove('off');
@@ -620,18 +653,19 @@ function renderCart(){
  if(!cart.length){body.innerHTML=`<div class="empty"><b>Sepetiniz boş</b>Ürünleri inceleyip adetlerini seçerek ekleyebilirsiniz.<br><button class="tbtn solid" onclick="closeDrawers();location.hash='urunler'">Ürünlere göz at</button></div>`;foot.innerHTML='';foot.style.display='none';return}
  foot.style.display='';
  const v=id=>($(id)?.value)??'';const keep={cn:v('cn'),cp:v('cp'),co:v('co')};
- body.innerHTML=cart.map(x=>{const p=product(x.product_id),r=p?rules(p):{min:x.min||1,step:x.step||1};return `<div class="ci">
+ const tq=cartQty(),tp=tierPct(tq);
+ body.innerHTML=(TIERS.length&&!PARTNER?`<div class="cartTier"><div>Toplam <b>${tq} adet</b>. ${tierMsg(tq)}</div></div>`:'')+cart.map(x=>{const p=product(x.product_id),r=p?rules(p):{min:x.min||1,step:x.step||1};return `<div class="ci">
   <div class="th">${x.image?`<img src="${esc(x.image)}" alt="">`:''}</div>
-  <div><b>${esc(x.name)}</b><small>${money(x.price)} / adet</small>
+  <div><b>${esc(x.name)}</b><small>${tp?`<s>${money(x.price)}</s>${money(unitNet(x.price,tp))}`:money(x.price)} / adet</small>
    <div class="step"><button onclick="bump('${esc(x.product_id)}',-1)" aria-label="${r.step} adet azalt">−</button><output>${x.qty}</output><button onclick="bump('${esc(x.product_id)}',1)" aria-label="${r.step} adet artır">+</button></div></div>
-  <div><div class="amt">${money(x.price*x.qty)}</div><button class="rm" onclick="removeLine('${esc(x.product_id)}')">Kaldır</button></div></div>`}).join('')+`
+  <div><div class="amt">${money(unitNet(x.price,tp)*x.qty)}</div><button class="rm" onclick="removeLine('${esc(x.product_id)}')">Kaldır</button></div></div>`}).join('')+`
   <div class="form"><h3>Sipariş bilgileri</h3>
    <div class="field"><label for="cn">Ad soyad</label><input id="cn" autocomplete="name" placeholder="Adınız ve soyadınız"></div>
    <div class="field"><label for="cp">Telefon</label><input id="cp" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx"><div class="hint">Siparişinizle ilgili size bu numaradan ulaşacağız. Takip için de gerekli.</div></div>
    <div class="field"><label for="co">Sipariş notu <i>İsteğe bağlı</i></label><textarea id="co" rows="3" placeholder="Renk, ölçü veya teslimat tercihiniz"></textarea></div>
   </div>`;
  ['cn','cp','co'].forEach(k=>{if(keep[k])$(k).value=keep[k]});
- foot.innerHTML=`<div class="sumrow"><span>Toplam (${cart.reduce((a,x)=>a+x.qty,0)} adet)</span><b>${money(cartTotal())}</b></div><button class="primary" id="sendBtn" onclick="submitOrder()">Siparişi gönder</button>`;
+ foot.innerHTML=`${tp?`<div class="subrow"><span>Ara toplam</span><span>${money(cartGross())}</span></div><div class="subrow disc"><span>Toptan indirim %${tp}</span><span>−${money(cartGross()-cartTotal())}</span></div>`:''}<div class="sumrow"><span>Toplam (${tq} adet)</span><b>${money(cartTotal())}</b></div><button class="primary" id="sendBtn" onclick="submitOrder()">Siparişi gönder</button>`;
 }
 async function submitOrder(){
  if(sending)return;
