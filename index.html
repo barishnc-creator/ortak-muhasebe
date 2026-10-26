@@ -806,14 +806,19 @@ partner(){
  const ym=td().slice(0,7),stats=all.map(st),month=stats.reduce((a,x)=>a+x.os.filter(o=>String(o.date).startsWith(ym)).reduce((b,o)=>b+otot(o),0),0),due=stats.reduce((a,x)=>a+x.r,0),priced=all.reduce((a,pa)=>a+ppOf(pa.id).length,0);
  return head('Partnerler','Ürünlerimizi satan iş ortakları ve her birine verdiğimiz fiyatlar.',btn('newPartner','Partner ekle',{cls:'p',icon:'plus'}))+
  `<div class="kpis">${kpi('Partner',all.length,'',priced+' ürün fiyatı kayıtlı')}${kpi('Bu ay partner siparişi',TL(month))}${kpi('Partnerlerden alacak',TL(due),due>0.004?'bad':'')}</div>
+ ${all.length?(()=>{const per=UI.psAll||'all',ms=[...new Set(all.flatMap(partnerMonths))].sort().reverse(),P=all.map(pa=>({pa,...partnerSales(pa,per)})).sort((a,b)=>b.tot.sold-a.tot.sold||b.tot.taken-a.tot.taken),mx=Math.max(...P.map(x=>x.tot.sold),1),T=P.reduce((t,x)=>{['taken','sold','at','amt'].forEach(k=>t[k]+=x.tot[k]);return t},{taken:0,sold:0,at:0,amt:0});
+  return `<div class="card"><div class="ch" style="margin:0"><h2 style="margin:0">Partner satışları</h2><select class="inp" style="width:auto;height:36px" data-change="psAll" aria-label="Dönem"><option value="all"${per==='all'?' selected':''}>Tüm zamanlar</option>${ms.map(k=>`<option value="${k}"${k===per?' selected':''}>${mlabel(k)}</option>`).join('')}</select></div>
+  <div class="mwrap"><table class="mtab"><thead><tr><th>Partner</th><th>Çeşit</th><th>Aldığı</th><th>Sattığı</th><th>Elinde</th><th class="rev">Tutar</th></tr></thead><tbody>${P.map(x=>`<tr><td style="white-space:normal"><button type="button" data-act="paSales" data-id="${E(x.pa.id)}" style="all:unset;cursor:pointer;font-weight:600;text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px">${E(x.pa.name)}</button></td><td>${fg(x.kinds)}</td><td>${fg(x.tot.taken)}</td><td><div class="qb">${bar(x.tot.sold,mx)}<b>${fg(x.tot.sold)}</b></div></td><td class="${x.tot.at?'':'z'}" style="${x.tot.at?'color:#F5B544;font-weight:700':''}">${fg(x.tot.at)}</td><td class="rev">${TL(x.tot.amt)}</td></tr>`).join('')}</tbody>
+  <tfoot><tr><td>Toplam</td><td></td><td>${fg(T.taken)}</td><td>${fg(T.sold)}</td><td>${fg(T.at)}</td><td class="rev">${TL(T.amt)}</td></tr></tfoot></table></div><p class="note" style="margin:10px 0 0">Partner adına dokunarak ürün ürün dökümünü açın.</p></div>`})():''}
  ${all.length?`<div class="tools"><label class="search">${IC.search}<span class="sr">Partner ara</span><input data-input="paQ" value="${E(UI.paQ)}" placeholder="Partner, yetkili, telefon, şehir ara"></label></div>`:''}
- <div class="grid pgrid">${list.map(pa=>{const x=st(pa),pp=ppOf(pa.id),upd0=pp.map(r=>r.d||'').sort().pop();
+ <div class="grid pgrid">${list.map(pa=>{const x=st(pa),pp=ppOf(pa.id),upd0=pp.map(r=>r.d||'').sort().pop(),ps=partnerSales(pa).tot;
   return `<article class="pc" data-partner="${E(pa.id)}"><div class="bd"><div style="display:flex;gap:12px;align-items:center"><span class="pav">${E(String(pa.name).charAt(0).toLocaleUpperCase('tr-TR'))}</span><div class="nm" style="min-width:0;flex:1">${E(pa.name)}<small>${[pa.contact,pa.phone,pa.city].filter(Boolean).map(E).join(' · ')||'İletişim bilgisi yok'}</small></div>${ibtn('editPartner',pa.id,'edit','Partner bilgilerini düzenle')}</div>
   <div class="pmeta"><span class="tag${pp.length?' g':''}">${pp.length?pp.length+' ürün fiyatlı':'Fiyat listesi boş'}</span>${upd0?`<span class="tag">Fiyatlar ${fdate(upd0)}</span>`:''}${pa.lastSent?`<span class="tag">Liste gönderildi ${fdate(pa.lastSent)}</span>`:''}${pa.catKey&&!pa.catOff?'<span class="tag t">Katalog açık</span>':''}</div>
   ${pp.length?`<div class="ppv">${pp.slice(0,5).map(r=>{const p=prod(r.prod),off=N(p.price)>0?Math.round((1-N(r.price)/N(p.price))*100):0;return `<div><span>${E(niceName(p.n))}</span><b>${TL(r.price)}${off>0?`<small>−%${off}</small>`:''}</b></div>`}).join('')}${pp.length>5?`<div class="more">+${pp.length-5} ürün daha</div>`:''}</div>`:`<p class="note" style="margin:0">Bu partnere hangi ürünü kaça verdiğinizi "Fiyatlar" ile kaydedin.</p>`}
-  <div class="fig"><div><small>Siparişler</small><b>${TL(x.t)}</b></div><div><small>Kalan</small><b class="${x.r>0.004?'bad':'ok'}">${TL(x.r)}</b></div><div><small>Son sipariş</small><b>${x.last?fdate(x.last):'—'}</b></div></div>
+  <div class="fig"><div><small>Aldığı</small><b>${fg(ps.taken)} adet</b></div><div><small>Sattığı</small><b>${fg(ps.sold)} adet</b></div><div><small>${ps.at?'Elinde':'Son sipariş'}</small><b style="${ps.at?'color:#F5B544':''}">${ps.at?fg(ps.at)+' adet':x.last?fdate(x.last):'—'}</b></div></div>
+  <div class="fig"><div><small>Satış tutarı</small><b>${TL(x.t)}</b></div><div><small>Kalan</small><b class="${x.r>0.004?'bad':'ok'}">${TL(x.r)}</b></div><div><small>Ödenen</small><b>${TL(x.t-x.r)}</b></div></div>
   ${pa.note?`<div class="s mu" style="font-size:13px">${E(pa.note)}</div>`:''}
-  <div class="ft">${btn('paPrices','Fiyatlar',{cls:'p sm',icon:'edit',id:pa.id})}${btn('paPdf','Fiyat listesi',{cls:'s sm',icon:'pdf',id:pa.id})}${btn('paOrder','Sipariş gir',{cls:'s sm',icon:'plus',id:pa.id})}${btn('paCat','Katalog',{cls:'s sm',icon:'share',id:pa.id})}<span style="flex:1"></span>${x.r>0.004?ibtn('cusPay',pa.name,'cash','Ödeme al'):''}${navigator.canShare?ibtn('paShare',pa.id,'share','Fiyat listesini paylaş'):''}${ibtn('delPartner',pa.id,'trash','Partneri sil')}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(all.length?'Aramaya uyan partner yok':'Henüz partner yok',all.length?'':'Ürünlerinizi satan iş ortaklarını "Partner ekle" ile kaydedin; her birine özel fiyat listesi tutun.')}</div>`}</div>`;
+  <div class="ft">${btn('paSales','Satışlar',{cls:'p sm',icon:'rapor',id:pa.id})}${btn('paPrices','Fiyatlar',{cls:'s sm',icon:'edit',id:pa.id})}${btn('paPdf','Fiyat listesi',{cls:'s sm',icon:'pdf',id:pa.id})}${btn('paOrder','Sipariş gir',{cls:'s sm',icon:'plus',id:pa.id})}${btn('paCat','Katalog',{cls:'s sm',icon:'share',id:pa.id})}<span style="flex:1"></span>${x.r>0.004?ibtn('cusPay',pa.name,'cash','Ödeme al'):''}${navigator.canShare?ibtn('paShare',pa.id,'share','Fiyat listesini paylaş'):''}${ibtn('delPartner',pa.id,'trash','Partneri sil')}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(all.length?'Aramaya uyan partner yok':'Henüz partner yok',all.length?'':'Ürünlerinizi satan iş ortaklarını "Partner ekle" ile kaydedin; her birine özel fiyat listesi tutun.')}</div>`}</div>`;
 },
 cus(){
  const recs=customerRecords(),q=lower(UI.cusQ),list=recs.filter(c=>!q||lower([c.name,c.phone,c.email,c.address].join(' ')).includes(q));
@@ -1322,6 +1327,38 @@ async function quoteToOrder(id){
  if(String(q.cust.phone||'').replace(/\D/g,'').length>=10)toast('Sipariş oluşturuldu ('+grp+').','Takip bağlantısını kopyala',()=>copyText(link,'Müşteri takip bağlantısı kopyalandı.'));else toast('Sipariş oluşturuldu ('+grp+'). Müşteri telefonu olmadığı için takip bağlantısı kullanılamaz.');
 }
 
+/* ---- Partner satışları ----
+   Aldığı: partnere giden adet (konsinye dahil, sipariş tarihine göre).
+   Sattığı: normal siparişte adetin tamamı; konsinyede hesapta "satıldı" denen adet (hesap tarihine göre).
+   Elinde: konsinyeden hâlâ partnerde duran adet (bugün itibarıyla).
+   Tutar: sattığı adet × partnere verilen fiyat (partnerin size borcu). */
+const partnerOrders=pa=>S.ord.filter(o=>o.partner===pa.id||lower(o.cust)===lower(pa.name));
+function partnerSales(pa,per='all'){
+ const inP=d=>per==='all'||String(d||'').startsWith(per),R={},row=pid=>R[pid]=R[pid]||{prod:pid,taken:0,sold:0,ret:0,at:0,amt:0,end:0};
+ partnerOrders(pa).forEach(o=>{const r=row(o.prod),u=N(o.price);
+  if(o.kons){if(inP(o.date))r.taken+=N(o.qty);(o.kh||[]).forEach(x=>{if(inP(x.d)){r.sold+=N(x.sold);r.ret+=N(x.ret);r.amt+=N(x.sold)*u}});if(per==='all'||per===td().slice(0,7))r.at+=kAt(o)}
+  else if(inP(o.date)){r.taken+=N(o.qty);r.sold+=N(o.qty);r.amt+=otot(o);if(o.source==='partner'&&hasV(o.sp))r.end+=N(o.qty)*N(o.sp)}});
+ const rows=Object.values(R).filter(r=>r.taken||r.sold||r.ret||r.at).sort((a,b)=>b.sold-a.sold||b.taken-a.taken||pname(a.prod).localeCompare(pname(b.prod),'tr'));
+ const tot=rows.reduce((t,r)=>{['taken','sold','ret','at','amt','end'].forEach(k=>t[k]+=r[k]);return t},{taken:0,sold:0,ret:0,at:0,amt:0,end:0});
+ return {rows,tot,kinds:rows.filter(r=>r.taken||r.at).length};
+}
+function partnerMonths(pa){const ms=new Set();partnerOrders(pa).forEach(o=>{if(o.date)ms.add(String(o.date).slice(0,7));(o.kh||[]).forEach(x=>x.d&&ms.add(String(x.d).slice(0,7)))});return [...ms].sort().reverse()}
+function formPartnerSales(id,per){
+ const pa=byId(partners(),id);if(!pa)return;per=per||UI.psPer||'all';const ms=partnerMonths(pa);if(per!=='all'&&!ms.includes(per))per='all';UI.psPer=per;
+ const {rows,tot,kinds}=partnerSales(pa,per),mx=Math.max(...rows.map(r=>r.sold),1),os=partnerOrders(pa),due=os.reduce((a,o)=>a+Math.max(0,orem(o)),0);
+ const monthRows=ms.slice(0,12).map(k=>({k,...partnerSales(pa,k).tot}));
+ openDrawer({title:pa.name+' · Satışlar',sub:'Hangi üründen kaç adet aldı, kaçını sattı, ne tutarda.',wide:true,
+  extra:due>0.004?`<div class="qtot"><small>Kalan borç</small><b class="bad">${TL(due)}</b></div><button type="button" class="btn s" data-act="cusPay" data-id="${E(pa.name)}">${IC.cash}Ödeme al</button>`:'',
+  body:`<div class="pptools"><select class="inp" id="psPer" aria-label="Dönem" style="max-width:220px"><option value="all"${per==='all'?' selected':''}>Tüm zamanlar</option>${ms.map(k=>`<option value="${k}"${k===per?' selected':''}>${mlabel(k)}</option>`).join('')}</select><span class="mu" style="font-size:13px">${per==='all'?'Bugüne kadar':mlabel(per)+' içinde'} · ${fg(kinds)} çeşit ürün</span></div>
+   <div class="cpsum k4" style="margin-bottom:14px"><div><small>Aldığı</small><b>${fg(tot.taken)} adet</b></div><div><small>Sattığı</small><b>${fg(tot.sold)} adet</b></div><div class="kk"><small>Elinde (konsinye)</small><b>${fg(tot.at)} adet</b></div><div><small>Satış tutarı (size)</small><b>${TL(tot.amt)}</b></div></div>
+   ${tot.end>0.004?`<p class="note" style="margin:-4px 0 14px">Katalogdan son müşterilere ${TL(tot.end)} satış yaptı; bu satışların size tutarı ${TL(os.filter(o=>o.source==='partner'&&(per==='all'||String(o.date).startsWith(per))).reduce((a,o)=>a+otot(o),0))}.</p>`:''}
+   ${rows.length?`<div class="mwrap" style="margin-top:0"><table class="mtab"><thead><tr><th>Ürün</th><th>Aldığı</th><th>Sattığı</th><th>İade</th><th>Elinde</th><th>Tutar</th></tr></thead><tbody>${rows.map(r=>`<tr><td style="white-space:normal">${E(niceName(pname(r.prod)))}</td><td>${fg(r.taken)}</td><td><div class="qb">${bar(r.sold,mx)}<b>${fg(r.sold)}</b></div></td><td class="${r.ret?'':'z'}">${fg(r.ret)}</td><td class="${r.at?'':'z'}" style="${r.at?'color:#F5B544;font-weight:700':''}">${fg(r.at)}</td><td>${TL(r.amt)}</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td>Toplam</td><td>${fg(tot.taken)}</td><td>${fg(tot.sold)}</td><td>${fg(tot.ret)}</td><td>${fg(tot.at)}</td><td>${TL(tot.amt)}</td></tr></tfoot></table></div>`:empty(per==='all'?'Bu partnerin henüz siparişi yok':'Bu dönemde hareket yok')}
+   ${monthRows.length>1&&per==='all'?`<div class="lb" style="margin:18px 0 6px">Aylara göre</div><div class="mwrap" style="margin-top:0"><table class="mtab"><thead><tr><th>Ay</th><th>Aldığı</th><th>Sattığı</th><th>Tutar</th></tr></thead><tbody>${monthRows.map(m=>`<tr><td>${mlabel(m.k)}</td><td>${fg(m.taken)}</td><td><b>${fg(m.sold)}</b></td><td>${TL(m.amt)}</td></tr>`).join('')}</tbody></table></div>`:''}
+   <p class="note" style="margin:14px 0 0">Konsinye ürünler, "Konsinye hesap" ile satıldı olarak işlendiği ayda satılmış sayılır. Elinde: şu an partnerde duran konsinye ürün.</p>`});
+ $('#psPer').addEventListener('change',e=>formPartnerSales(id,e.target.value));
+}
+
 /* ---- Partnerler ---- */
 function formPartner(pa){
  openDrawer({title:pa?'Partner bilgileri':'Yeni partner',sub:pa?pa.name:'Kaydettikten sonra bu partnere özel fiyatları girersiniz.',submit:pa?'Kaydet':'Kaydet ve fiyatları gir',
@@ -1679,7 +1716,7 @@ const ACT={
  async catDel(i){const old=categoryNames()[i];if(!old)return;if(!await confirmBox('“'+old+'” silinsin mi?','Bu kategorideki ürünler silinmez, kategorisiz kalır.','Sil'))return;S.catalogCategories=(S.catalogCategories||[]).filter(x=>x!==old);S.prod.forEach(p=>{if(String(p.catalogCategory||'').trim()===old)p.catalogCategory=''});await saveNow();_redrawCats();render();toast('Kategori silindi.')},
  newMat:()=>formMat(),editMat:id=>formMat(byId(S.mat,id)),addSpool:id=>formMat(byId(S.mat,id),true),
  async delMat(id){const m=byId(S.mat,id);if(!m)return;const u=S.prod.filter(p=>p.mat===id).length;if(u)return toast('Bu malzeme '+u+' üründe kullanılıyor; önce o ürünlerin malzemesini değiştirin.');if(!await confirmBox('Malzeme silinsin mi?',m.n+' stoktan kaldırılır.','Sil'))return;S.mat=S.mat.filter(x=>x.id!==id);upd()},
- newPartner:()=>formPartner(),paCat:id=>formPartnerCatalog(id),
+ newPartner:()=>formPartner(),paSales:id=>formPartnerSales(id),paCat:id=>formPartnerCatalog(id),
  paCatCopy:id=>{const pa=byId(partners(),id);if(pa)copyText(partnerLink(pa),'Partner katalog bağlantısı kopyalandı.')},
  paCatShare:id=>{const pa=byId(partners(),id);if(!pa)return;const url=partnerLink(pa);navigator.share({title:pa.name+' ürün kataloğu',text:pa.name+' ürün kataloğu, buradan sipariş verebilirsiniz:',url}).catch(e=>{if(e&&e.name!=='AbortError')copyText(url,'Partner katalog bağlantısı kopyalandı.')})},
  paCatToggle:id=>{const pa=byId(partners(),id);if(!pa)return;if(pa.catOff)delete pa.catOff;else pa.catOff=true;logAct(pa.name+' kataloğunu '+(pa.catOff?'kapattı':'açtı'));upd();formPartnerCatalog(id);toast(pa.catOff?'Katalog kapatıldı.':'Katalog açıldı.')},
@@ -1704,6 +1741,7 @@ document.addEventListener('change',e=>{const el=e.target,k=el.dataset?.change;if
  if(k==='status'){const o=byId(S.ord,el.dataset.id);if(o)setStatus(o,el.value)}
  else if(k==='qStatus'){const q=byId(S.quotes||[],el.dataset.id);if(q){if(el.value==='Siparişe dönüştü'&&q.status!=='Siparişe dönüştü'){el.value=q.status;quoteToOrder(q.id);return}q.status=el.value;if(el.value==='Gönderildi'&&!q.sentAt)q.sentAt=Date.now();logAct('Teklif durumunu değiştirdi: '+q.no+', '+el.value);upd()}}
  else if(k==='prodFlag'){const p=byId(S.prod,el.dataset.id);if(p){p[el.dataset.k]=el.checked;save();toast(el.checked?'Açıldı.':'Kapatıldı.')}}
+ else if(k==='psAll'){UI.psAll=el.value;render()}
  else if(k==='txM'){UI.txM=el.value;render()}else if(k==='rp'){UI.rp=el.value;render()}
  else if(k==='restoreFile'){restoreFromFile(el.files[0]);el.value=''}});
 let qT;document.addEventListener('input',e=>{const k=e.target.dataset?.input;if(!k)return;UI[k]=e.target.value;clearTimeout(qT);qT=setTimeout(()=>{const pos=e.target.selectionStart;render();const n=document.querySelector(`[data-input="${k}"]`);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}}},180)});
