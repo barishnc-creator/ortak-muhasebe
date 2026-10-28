@@ -132,6 +132,9 @@ img,video{display:block;max-width:100%}
 .slide video{padding:0;object-fit:cover;background:#081019}
 .ph{color:var(--faint);font:800 54px/1 var(--display)}
 .badge{position:absolute;left:12px;top:12px;z-index:2;padding:5px 10px;border-radius:999px;background:var(--amber);color:var(--amber-ink);font-weight:700;font-size:12.5px}
+.badge.promo{left:auto;right:12px;background:#F472B6;color:#2b0718}
+.price s{color:var(--faint);font-size:15px;font-weight:600}
+.promo-line{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font-size:12.5px;font-weight:600;color:#F9A8D4}
 .dots{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:6px;z-index:2}
 .dots button{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:999px;background:rgba(8,16,25,.72);color:var(--muted);font-size:12px;font-weight:600;border:1px solid var(--line-2)}
 .dots button[aria-pressed="true"]{color:var(--teal-ink);background:var(--teal);border-color:var(--teal)}
@@ -449,13 +452,18 @@ const rules=p=>({min:Math.max(1,Math.floor(Number(p.catalogMin)||25)),step:Math.
 const product=id=>(catalog?.products||[]).find(p=>p.id===id);
 const inCart=id=>cart.find(x=>x.product_id===id);
 // Kademeli toptan indirim: sepetteki toplam adede göre bütün ürünlere uygulanır (sunucu da aynı hesabı yapar).
-let TIERS=[];
+let TIERS=[],PROMO_STACK=false;
 const cartQty=()=>cart.reduce((a,x)=>a+x.qty,0);
 const tierPct=q=>TIERS.reduce((m,t)=>q>=t.min&&t.pct>m?t.pct:m,0);
 const nextTier=q=>TIERS.filter(t=>t.min>q).sort((a,b)=>a.min-b.min)[0]||null;
 const unitNet=(price,pct)=>Math.round(price*(1-pct/100)*100)/100;
-const cartGross=()=>cart.reduce((a,x)=>a+x.price*x.qty,0);
-const cartTotal=()=>{const p=tierPct(cartQty());return cart.reduce((a,x)=>a+unitNet(x.price,p)*x.qty,0)};
+// Kalem birim fiyatı: kampanya ve toptan indirim; ayara göre büyük olan ya da ikisi birlikte (sunucuyla aynı yuvarlama).
+const lineList=x=>{const p=product(x.product_id);return p?p.list:x.price};
+const linePromo=x=>product(x.product_id)?.promo?.pct||0;
+const unitCalc=(list,pp,tp)=>Math.round(list*(PROMO_STACK?(1-pp/100)*(1-tp/100):(1-Math.max(pp,tp)/100))*100)/100;
+const lineUnit=(x,tp)=>unitCalc(lineList(x),linePromo(x),tp);
+const cartGross=()=>cart.reduce((a,x)=>a+lineList(x)*x.qty,0);
+const cartTotal=()=>{const p=tierPct(cartQty());return cart.reduce((a,x)=>a+lineUnit(x,p)*x.qty,0)};
 function tierMsg(q){const p=tierPct(q),n=nextTier(q);
  if(!TIERS.length)return '';
  if(n)return (p?`<b>%${p} indirim</b> kazandınız. `:'')+`<b>${n.min-q} adet</b> daha ekleyin, <b>%${n.pct} indirim</b> olsun.`;
@@ -505,7 +513,7 @@ function niceName(n){
 function normalize(data){
  const c=typeof data==='string'?JSON.parse(data):data;
  if(!c||!Array.isArray(c.products))throw new Error('Katalog verisi beklenen biçimde değil.');
- return {products:c.products.filter(p=>p.catalogVisible!==false&&p.catalogActive!==false).map(p=>({id:String(p.id),name:niceName(p.name||p.n||'Ürün'),price:Number(p.price??p.fiyat??0),desc:p.catalogDescription||p.description||p.desc||'',image:p.catalogImage||p.image||'',video:p.catalogVideo||p.video||'',category:String(p.catalogCategory||'').trim(),best:!!p.catalogBestSeller,catalogMin:p.catalogMin,catalogStep:p.catalogStep}))};
+ return {products:c.products.filter(p=>p.catalogVisible!==false&&p.catalogActive!==false).map(p=>({id:String(p.id),name:niceName(p.name||p.n||'Ürün'),list:Number(p.price??p.fiyat??0),promo:p.promo&&Number(p.promo.pct)>0?{pct:Number(p.promo.pct),name:String(p.promo.name||''),end:String(p.promo.end||'')}:null,price:p.promo&&Number(p.promo.pct)>0?Math.round(Number(p.price)*(1-Number(p.promo.pct)/100)*100)/100:Number(p.price??p.fiyat??0),desc:p.catalogDescription||p.description||p.desc||'',image:p.catalogImage||p.image||'',video:p.catalogVideo||p.video||'',category:String(p.catalogCategory||'').trim(),best:!!p.catalogBestSeller,catalogMin:p.catalogMin,catalogStep:p.catalogStep}))};
 }
 async function refresh(manual){
  if(refreshing)return;refreshing=true;const btn=$('refreshBtn');if(manual)btn.classList.add('spin');
@@ -514,7 +522,7 @@ async function refresh(manual){
   if(PARTNER&&!error&&!data){partnerMissing();return}
   if(error||!data)throw error||new Error('Katalog verisi alınamadı.');
   if(PARTNER)setPartner(typeof data==='string'?JSON.parse(data):data);
-  if(!SHOW&&!PARTNER){const raw=(typeof data==='string'?JSON.parse(data):data).tiers;TIERS=Array.isArray(raw)?raw.map(t=>({min:Math.round(Number(t.min)||0),pct:Math.min(90,Math.max(0,Number(t.pct)||0))})).filter(t=>t.min>0&&t.pct>0):[];renderTiers()}
+  if(!SHOW&&!PARTNER){const dd=typeof data==='string'?JSON.parse(data):data;PROMO_STACK=!!dd.promoStack;const raw=dd.tiers;TIERS=Array.isArray(raw)?raw.map(t=>({min:Math.round(Number(t.min)||0),pct:Math.min(90,Math.max(0,Number(t.pct)||0))})).filter(t=>t.min>0&&t.pct>0):[];renderTiers()}
   if(SHOW)setCompany((typeof data==='string'?JSON.parse(data):data).company);
   const next=normalize(data),sig=JSON.stringify(next);
   lastSync=Date.now();$('sync').classList.remove('off');
@@ -536,9 +544,9 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 function renderCategories(){
  const ps=catalog.products,cats=[...new Set(ps.map(p=>p.category).filter(Boolean))],hasBest=ps.some(p=>p.best);
- const items=[['all','Tümü',ps.length],...cats.map(c=>['c:'+c,c,ps.filter(p=>p.category===c).length]),...(hasBest?[['best','Çok satanlar',ps.filter(p=>p.best).length]]:[])];
+ const hasPromo=ps.some(p=>p.promo),items=[['all','Tümü',ps.length],...(hasPromo?[['promo','Kampanyalı',ps.filter(p=>p.promo).length]]:[]),...cats.map(c=>['c:'+c,c,ps.filter(p=>p.category===c).length]),...(hasBest?[['best','Çok satanlar',ps.filter(p=>p.best).length]]:[])];
  if(!items.some(i=>i[0]===activeCategory))activeCategory='all';
- $('cats').innerHTML=items.length>2||cats.length>1||hasBest?items.map(([k,label,n])=>`<button class="chip" data-k="${esc(k)}" aria-pressed="${k===activeCategory}">${esc(label)}<span class="c">${n}</span></button>`).join(''):'';
+ $('cats').innerHTML=items.length>2||cats.length>1||hasBest||hasPromo?items.map(([k,label,n])=>`<button class="chip" data-k="${esc(k)}" aria-pressed="${k===activeCategory}">${esc(label)}<span class="c">${n}</span></button>`).join(''):'';
 }
 $('cats').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;activeCategory=b.dataset.k;$('cats').querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderProducts()});
 
@@ -550,7 +558,7 @@ function renderHero(){
 
 function filtered(){
  const q=lower($('q').value).trim();let ps=catalog.products.filter(p=>{
-  const okCat=activeCategory==='all'||(activeCategory==='best'?p.best:'c:'+p.category===activeCategory);
+  const okCat=activeCategory==='all'||(activeCategory==='best'?p.best:activeCategory==='promo'?!!p.promo:'c:'+p.category===activeCategory);
   return okCat&&(!q||lower(p.name).includes(q)||lower(p.desc).includes(q))});
  const s=$('sort').value,byName=(a,b)=>a.name.localeCompare(b.name,'tr');
  if(s==='asc')ps.sort((a,b)=>a.price-b.price||byName(a,b));else if(s==='desc')ps.sort((a,b)=>b.price-a.price||byName(a,b));else if(s==='az')ps.sort(byName);else ps.sort((a,b)=>(b.best-a.best)||byName(a,b));
@@ -604,10 +612,10 @@ function cardHtml(p){
  if(SHOW)return vitrinCard(p);
  const {min,step}=rules(p),line=inCart(p.id),qty=line?.qty??draft[p.id]??min;
  return `<article class="card${line?' in':''}" data-id="${esc(p.id)}">
-  <div class="media">${p.best?'<span class="badge">Çok satan</span>':''}${mediaHtml(p)}</div>
+  <div class="media">${p.best?'<span class="badge">Çok satan</span>':''}${p.promo?`<span class="badge promo">%${p.promo.pct} indirim</span>`:''}${mediaHtml(p)}</div>
   <div class="body">
    <h3>${esc(p.name)}</h3>${p.desc?`<p class="desc">${esc(p.desc)}</p>`:''}
-   <div class="price"><b>${money(p.price)}</b><span>/ adet</span></div>
+   <div class="price"><b>${money(p.price)}</b>${p.promo?`<s>${money(p.list)}</s>`:''}<span>/ adet</span></div>${p.promo?`<div class="promo-line">${esc(p.promo.name||'Kampanya')}${p.promo.end?' · son gün '+esc(new Date(p.promo.end+'T12:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'long'})):''}</div>`:''}
    <div class="rule">En az ${min} adet${step>1?`, ${step}’er artar`:''}</div>
    <div class="buy">
     <div class="step"><button onclick="bump('${esc(p.id)}',-1)" aria-label="${step} adet azalt"${!line&&qty<=min?' disabled':''}>−</button><output aria-live="polite">${qty}</output><button onclick="bump('${esc(p.id)}',1)" aria-label="${step} adet artır">+</button></div>
@@ -656,16 +664,17 @@ function renderCart(){
  const tq=cartQty(),tp=tierPct(tq);
  body.innerHTML=(TIERS.length&&!PARTNER?`<div class="cartTier"><div>Toplam <b>${tq} adet</b>. ${tierMsg(tq)}</div></div>`:'')+cart.map(x=>{const p=product(x.product_id),r=p?rules(p):{min:x.min||1,step:x.step||1};return `<div class="ci">
   <div class="th">${x.image?`<img src="${esc(x.image)}" alt="">`:''}</div>
-  <div><b>${esc(x.name)}</b><small>${tp?`<s>${money(x.price)}</s>${money(unitNet(x.price,tp))}`:money(x.price)} / adet</small>
+  <div><b>${esc(x.name)}</b><small>${lineUnit(x,tp)<lineList(x)-0.004?`<s>${money(lineList(x))}</s>${money(lineUnit(x,tp))}`:money(lineList(x))} / adet${linePromo(x)?' · kampanya':''}</small>
    <div class="step"><button onclick="bump('${esc(x.product_id)}',-1)" aria-label="${r.step} adet azalt">−</button><output>${x.qty}</output><button onclick="bump('${esc(x.product_id)}',1)" aria-label="${r.step} adet artır">+</button></div></div>
-  <div><div class="amt">${money(unitNet(x.price,tp)*x.qty)}</div><button class="rm" onclick="removeLine('${esc(x.product_id)}')">Kaldır</button></div></div>`}).join('')+`
+  <div><div class="amt">${money(lineUnit(x,tp)*x.qty)}</div><button class="rm" onclick="removeLine('${esc(x.product_id)}')">Kaldır</button></div></div>`}).join('')+`
   <div class="form"><h3>Sipariş bilgileri</h3>
    <div class="field"><label for="cn">Ad soyad</label><input id="cn" autocomplete="name" placeholder="Adınız ve soyadınız"></div>
    <div class="field"><label for="cp">Telefon</label><input id="cp" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx"><div class="hint">Siparişinizle ilgili size bu numaradan ulaşacağız. Takip için de gerekli.</div></div>
    <div class="field"><label for="co">Sipariş notu <i>İsteğe bağlı</i></label><textarea id="co" rows="3" placeholder="Renk, ölçü veya teslimat tercihiniz"></textarea></div>
   </div>`;
  ['cn','cp','co'].forEach(k=>{if(keep[k])$(k).value=keep[k]});
- foot.innerHTML=`${tp?`<div class="subrow"><span>Ara toplam</span><span>${money(cartGross())}</span></div><div class="subrow disc"><span>Toptan indirim %${tp}</span><span>−${money(cartGross()-cartTotal())}</span></div>`:''}<div class="sumrow"><span>Toplam (${tq} adet)</span><b>${money(cartTotal())}</b></div><button class="primary" id="sendBtn" onclick="submitOrder()">Siparişi gönder</button>`;
+ const hasP=cart.some(x=>linePromo(x)>0),dl=[hasP&&'Kampanya',tp&&'Toptan %'+tp].filter(Boolean).join(PROMO_STACK?' + ':' / ');
+ foot.innerHTML=`${cartGross()-cartTotal()>0.004?`<div class="subrow"><span>Ara toplam</span><span>${money(cartGross())}</span></div><div class="subrow disc"><span>İndirim (${dl})</span><span>−${money(cartGross()-cartTotal())}</span></div>`:''}<div class="sumrow"><span>Toplam (${tq} adet)</span><b>${money(cartTotal())}</b></div><button class="primary" id="sendBtn" onclick="submitOrder()">Siparişi gönder</button>`;
 }
 async function submitOrder(){
  if(sending)return;
