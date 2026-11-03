@@ -737,6 +737,8 @@ const pc=p=>{const m=mat(p.mat);return(N(p.gram)*gc(m)+(pmin(p)/60)*N(S.set.hr)+
 const kSold=o=>N(o.sold),kRet=o=>N(o.ret),kAt=o=>o.kons?Math.max(0,N(o.qty)-kSold(o)-kRet(o)):0;
 const oq=o=>o.kons?kSold(o):N(o.qty); // satılmış sayılan adet: konsinyede yalnızca satılanlar
 const otot=o=>oq(o)*N(o.price),orem=o=>otot(o)-N(o.paid);
+// Hesaba yazılan alacak: sipariş teslim edilmeden müşterinin borcuna geçmez.
+const isDel=o=>o.st===ST[3],odue=o=>isDel(o)?orem(o):0;
 const jobs=o=>S.job.filter(j=>j.ord===o.id),rem=o=>Math.max(0,N(o.qty)-jobs(o).reduce((x,j)=>x+N(j.qty),0));
 const sumT=(a,t)=>a.filter(x=>x.t===t).reduce((q,x)=>q+N(x.amt),0);
 const pname=id=>prod(id)?.n||'Silinmiş ürün';
@@ -796,14 +798,14 @@ function orderRow(o,compact){
  const endLine=o.source==='partner'?`<div class="s">Son müşteri: <b style="color:var(--text)">${E(o.endCust||'')}</b>${o.endPhone?', '+E(o.endPhone):''}${hasV(o.sp)?', katalog fiyatı '+TL(o.sp):''}</div>`:'';
  const prodLine=jobs(o).length?(()=>{const a=jobs(o),d=a.filter(j=>j.st==='Tamamlandı').reduce((x,j)=>x+N(j.qty),0),b=a.filter(j=>j.st==='Baskıda').reduce((x,j)=>x+N(j.qty),0);return `<div class="s">Üretim: ${d}/${N(o.qty)} tamamlandı${b?`, ${b} baskıda`:''}</div>`})():'';
  return `<div class="r ord${UI.hiOrd===o.id?' hi':''}" data-oid="${E(o.id)}"><div class="main"><div class="t">${E(o.cust)} <span class="mu" style="font-weight:500">· ${N(o.qty)} × ${E(pname(o.prod))}</span>${o.kons?'<span class="ktag">Konsinye</span>':''}${o.source==='partner'?'<span class="ktag" style="background:var(--teal-soft);color:var(--teal-2)">Partner kataloğu</span>':''}</div><div class="s">${meta}${dueTag?' · '+dueTag:''}</div>${endLine}${o.kons?`<div class="s kline"><span>Gönderilen ${fg(o.qty)}</span><span>Satılan ${fg(kSold(o))}</span><span>İade ${fg(kRet(o))}</span>${ka?`<b>Müşteride ${fg(ka)}</b>`:'<span class="ok">Konsinye kapandı</span>'}</div>`:''}${o.note?`<div class="s">Not: ${E(o.note)}</div>`:''}${prodLine}${!compact?`<div class="s">Birim ${TL(o.price)}${N(o.dp)?' ('+TL(o.gp)+' üzerinden %'+pct(o.dp)+' iskontolu'+(o.promo?', kampanya: '+E(o.promo):'')+')':''}${kar!==null?', tahmini kâr '+TL(kar):''}</div>`:''}</div>
- <div class="amt">${TL(tot)}<small class="${r>0.004?'bad':o.kons&&ka&&!tot?'mu':'ok'}">${r>0.004?'Kalan '+TL(r):r<-0.004?'Fazla ödeme '+TL(-r):o.kons&&ka&&!tot?'Henüz satış yok':'Ödendi'}</small></div>
+ <div class="amt">${TL(tot)}${!isDel(o)?`<small class="mu">${N(o.paid)>0.004?'Ön ödeme '+TL(o.paid)+' · ':''}Teslimde hesaba geçer</small>`:`<small class="${r>0.004?'bad':o.kons&&ka&&!tot?'mu':'ok'}">${r>0.004?'Kalan '+TL(r):r<-0.004?'Fazla ödeme '+TL(-r):o.kons&&ka&&!tot?'Henüz satış yok':'Ödendi'}</small>`}</div>
  <div class="acts">${stSel(o)}${o.kons&&(ka||(o.kh||[]).length)?ibtn('kons',o.id,'kons','Konsinye hesap'):''}${compact?'':ibtn('jobFor',o.id,'job','Baskıya ver')+ibtn('editOrd',o.id,'edit','Düzenle')+ibtn('delOrd',o.id,'trash','Sil')}</div></div>`;
 }
 
 const V_={
 ozet(){
  const ym=td().slice(0,7),t=S.tx.filter(x=>String(x.d).startsWith(ym)),gl=sumT(t,'gelir'),gd=sumT(t,'gider');
- const al=S.ord.reduce((a,o)=>a+Math.max(0,orem(o)),0),open=S.ord.filter(o=>o.st!==ST[3]);
+ const al=S.ord.reduce((a,o)=>a+Math.max(0,odue(o)),0),wsum=S.ord.filter(o=>!isDel(o)).reduce((a,o)=>a+otot(o),0),open=S.ord.filter(o=>o.st!==ST[3]);
  const fresh=S.ord.filter(o=>o.st===ST[0]).slice().reverse(),ready=S.ord.filter(o=>o.st===ST[2]);
  const act=S.job.filter(j=>j.st==='Baskıda'),low=S.mat.filter(m=>N(m.g)<LOW);
  const debts=S.debt.filter(x=>x.left>0).sort((p,q)=>p.due.localeCompare(q.due)).filter(x=>dleft(x.due)<=14);
@@ -817,7 +819,7 @@ ozet(){
  S.ord.filter(o=>kAt(o)>0&&o.date&&(Date.now()-new Date(o.date+'T12:00').getTime())/864e5>=30).forEach(o=>todo.push(`<div class="r"><div class="main"><div class="t">${E(o.cust)}: konsinye hesabı</div><div class="s">${fg(kAt(o))} × ${E(pname(o.prod))} müşteride, ${Math.floor((Date.now()-new Date(o.date+'T12:00').getTime())/864e5)} gündür</div></div>${btn('kons','Hesap',{cls:'s sm',id:o.id})}</div>`));
  ready.forEach(o=>todo.push(`<div class="r"><div class="main"><div class="t">${E(o.cust)} siparişi hazır</div><div class="s">${N(o.qty)} × ${E(pname(o.prod))}${orem(o)>0.004?', kalan '+TL(orem(o)):''}</div></div>${btn('deliver','Teslim edildi',{cls:'s sm',id:o.id})}</div>`));
  return head(hi,new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'}),btn('newOrd','Yeni sipariş',{cls:'p',icon:'plus'})+btn('newTx','Gelir / gider',{icon:'plus'}))+
- `<div class="kpis">${kpi('Bu ay gelir',TL(gl),'ok')}${kpi('Bu ay gider',TL(gd),'bad')}${kpi('Bu ay net',TL(gl-gd),gl-gd>=0?'':'bad','Gelir − gider')}${kpi('Tahsil edilecek',TL(al),al>0?'warn':'',S.ord.filter(o=>orem(o)>0.004).length+' siparişte')}${kpi('Açık sipariş',open.length,'',fresh.length?fresh.length+' yeni':'')}</div>
+ `<div class="kpis">${kpi('Bu ay gelir',TL(gl),'ok')}${kpi('Bu ay gider',TL(gd),'bad')}${kpi('Bu ay net',TL(gl-gd),gl-gd>=0?'':'bad','Gelir − gider')}${kpi('Tahsil edilecek',TL(al),al>0?'warn':'',S.ord.filter(o=>odue(o)>0.004).length+' teslim edilmiş siparişte'+(wsum>0.004?' · teslim bekleyen '+TL(wsum):''))}${kpi('Açık sipariş',open.length,'',fresh.length?fresh.length+' yeni':'')}</div>
  <div class="cols"><div>
   ${(()=>{const T=td(),l=[...calOverdue('me'),...calItems(T,T,'me')],open=l.filter(x=>!x.done).length;return `<div class="card"><div class="ch"><h2>Bugün${open?` <span class="tag t" style="vertical-align:3px">${open}</span>`:''}</h2><a class="btn q" href="#takvim">Takvim</a></div><div class="qa" style="padding:0 0 8px;border-bottom:1px solid var(--line);margin-bottom:4px"><div class="qa-in">${IC.plus}<input id="qaIn" data-qa="1" placeholder="Hızlı ekle: yarın 10:00 filament siparişi ver" autocomplete="off" aria-label="Hızlı iş ekle"><button type="button" class="btn p sm" data-act="qaAdd">Ekle</button></div><div class="qa-prev" id="qaPrev"></div></div>${l.slice(0,8).map(x=>ciRow(x,{date:x.late})).join('')||empty('Bugün için iş yok','Yarına ya da haftaya iş planlamak için yukarıya yazın.')}${l.length>8?`<p class="note" style="margin:8px 0 0">${l.length-8} kayıt daha takvimde.</p>`:''}</div>`})()}
   <div class="card"><div class="ch"><h2>Yeni siparişler</h2><a class="btn q" href="#ord">Tümü</a></div><div class="rows">${fresh.slice(0,6).map(o=>orderRow(o,true)).join('')||empty('Bekleyen yeni sipariş yok','Katalogdan gelen siparişler burada görünür.')}</div></div>
@@ -834,7 +836,7 @@ ord(){
  const list=S.ord.filter(o=>fOrd(o,UI.ordF)&&(!q||lower(o.cust+' '+pname(o.prod)+' '+(o.orderGroup||'')+' '+(o.phone||'')+' '+(o.endCust||'')+' '+(o.endPhone||'')).includes(q))).slice().reverse();
  const F=[['all','Tümü'],['open','Açık'],...ST.map((s,i)=>['s'+i,s]),['due','Bakiyesi olan'],['kons','Konsinyede']];
  const kOpen=S.ord.filter(o=>kAt(o)>0);
- return head('Siparişler',S.ord.length+' sipariş, tahsil edilecek '+TL(S.ord.reduce((a,o)=>a+Math.max(0,orem(o)),0))+(kOpen.length?', konsinyede '+fg(kOpen.reduce((a,o)=>a+kAt(o),0))+' adet ('+TL(kOpen.reduce((a,o)=>a+kAt(o)*N(o.price),0))+')':''),btn('newOrd','Yeni sipariş',{cls:'p',icon:'plus'}))+
+ return head('Siparişler',S.ord.length+' sipariş, tahsil edilecek '+TL(S.ord.reduce((a,o)=>a+Math.max(0,odue(o)),0))+(()=>{const w=S.ord.filter(o=>!isDel(o)).reduce((a,o)=>a+otot(o),0);return w>0.004?', teslim bekleyen '+TL(w):''})()+(kOpen.length?', konsinyede '+fg(kOpen.reduce((a,o)=>a+kAt(o),0))+' adet ('+TL(kOpen.reduce((a,o)=>a+kAt(o)*N(o.price),0))+')':''),btn('newOrd','Yeni sipariş',{cls:'p',icon:'plus'}))+
  `<div class="tools"><div class="chips">${F.map(([k,l])=>`<button class="chip" data-act="ordF" data-id="${k}" aria-pressed="${UI.ordF===k}">${l}<span class="c">${cnt(k)}</span></button>`).join('')}</div><label class="search">${IC.search}<span class="sr">Siparişlerde ara</span><input data-input="ordQ" value="${E(UI.ordQ)}" placeholder="Müşteri, ürün, kod ara"></label></div>
  <div class="card"><div class="rows" id="ordList">${list.map(o=>orderRow(o)).join('')||empty(S.ord.length?'Bu filtreye uyan sipariş yok':'Henüz sipariş yok',S.ord.length?'':'İlk siparişi "Yeni sipariş" ile ekleyin.')}</div></div>`;
 },
@@ -880,7 +882,7 @@ takvim(){return takvimPage()},
 indirim(){return indirimPage()},
 partner(){
  const all=partners().slice().sort((a,b)=>a.name.localeCompare(b.name,'tr')),q=lower(UI.paQ);
- const st=pa=>{const os=S.ord.filter(o=>lower(o.cust)===lower(pa.name)),t=os.reduce((a,o)=>a+otot(o),0),r=os.reduce((a,o)=>a+Math.max(0,orem(o)),0),last=os.map(o=>o.date||'').sort().pop()||'';return {n:os.length,t,r,last,os}};
+ const st=pa=>{const os=S.ord.filter(o=>lower(o.cust)===lower(pa.name)),t=os.filter(isDel).reduce((a,o)=>a+otot(o),0),r=os.reduce((a,o)=>a+Math.max(0,odue(o)),0),last=os.map(o=>o.date||'').sort().pop()||'';return {n:os.length,t,r,last,os}};
  const list=all.filter(pa=>!q||lower([pa.name,pa.contact,pa.phone,pa.email,pa.city].join(' ')).includes(q));
  const ym=td().slice(0,7),stats=all.map(st),month=stats.reduce((a,x)=>a+x.os.filter(o=>String(o.date).startsWith(ym)).reduce((b,o)=>b+otot(o),0),0),due=stats.reduce((a,x)=>a+x.r,0),priced=all.reduce((a,pa)=>a+ppOf(pa.id).length,0);
  return head('Partnerler','Ürünlerimizi satan iş ortakları ve her birine verdiğimiz fiyatlar.',btn('newPartner','Partner ekle',{cls:'p',icon:'plus'}))+
@@ -905,7 +907,8 @@ cus(){
  `<div class="tools"><label class="search">${IC.search}<span class="sr">Müşteri ara</span><input data-input="cusQ" value="${E(UI.cusQ)}" placeholder="Ad, telefon, e-posta ara"></label></div>
  <div class="grid">${list.map(c=>{const bal=c.t-c.p,ko=S.ord.filter(o=>kAt(o)>0&&lower(o.cust)===lower(c.name)),kq=ko.reduce((a,o)=>a+kAt(o),0),kv=ko.reduce((a,o)=>a+kAt(o)*N(o.price),0);return `<article class="pc"><div class="bd"><div style="display:flex;gap:12px;align-items:center"><span style="flex:none;width:42px;height:42px;border-radius:12px;background:var(--teal-soft);color:var(--teal-2);display:grid;place-items:center;font:800 18px/1 var(--display)">${E(String(c.name).charAt(0).toLocaleUpperCase('tr-TR'))}</span><div class="nm" style="min-width:0">${E(c.name)}${partnerByName(c.name)?' <span class="tag g" style="vertical-align:2px">Partner</span>':''}<small>${c.n} sipariş${c.phone?' · '+E(c.phone):''}</small></div></div>
   ${c.email||c.address||c.notes?`<div class="s mu" style="font-size:13.5px">${[c.email,c.address,c.notes].filter(Boolean).map(E).join('<br>')}</div>`:''}
-  <div class="fig"><div><small>Toplam</small><b>${TL(c.t)}</b></div><div><small>Ödenen</small><b>${TL(c.p)}</b></div><div><small>Kalan</small><b class="${bal>0.004?'bad':'ok'}">${TL(Math.max(0,bal))}</b></div></div>
+  <div class="fig"><div><small>Teslim edilen</small><b>${TL(c.t)}</b></div><div><small>Ödenen</small><b>${TL(c.p)}</b></div><div><small>Kalan</small><b class="${bal>0.004?'bad':'ok'}">${TL(Math.max(0,bal))}</b></div></div>
+  ${c.wn?`<div class="s" style="font-size:13px;color:var(--muted)"><span class="tag">Teslim bekleyen</span> ${c.wn} sipariş · ${TL(c.w)}${c.wp>0.004?' · ön ödeme '+TL(c.wp):''}<br><span class="fa" style="font-size:12px">Teslim edildi olarak işaretlenince hesaba yazılır.</span></div>`:''}
   ${kq?`<div class="s kline" style="font-size:13px"><span class="ktag" style="margin:0">Konsinye</span><span>Müşteride <b>${fg(kq)} adet</b> · ${TL(kv)} değerinde</span></div>`:''}
   <div class="ft">${bal>0.004?btn('cusPay','Ödeme al',{cls:'p sm',icon:'cash',id:c.name}):''}${c.id?btn('editCus','Düzenle',{cls:'s sm',icon:'edit',id:c.id}):btn('cardCus','Kart oluştur',{cls:'s sm',icon:'plus',extra:`data-name="${E(c.name)}"`})}<span style="flex:1"></span>${c.id?ibtn('delCus',c.id,'trash','Kartı sil'):''}</div></div></article>`}).join('')||`<div class="card" style="grid-column:1/-1">${empty(recs.length?'Aramaya uyan müşteri yok':'Henüz müşteri yok','Sipariş ekledikçe müşteriler burada otomatik görünür.')}</div>`}</div>`;
 },
@@ -1014,14 +1017,14 @@ ayar(){
  </div></div>`;
 },
 };
-const fOrd=(o,k)=>k==='all'||(k==='open'?o.st!==ST[3]:k==='due'?orem(o)>0.004:k==='kons'?!!o.kons&&kAt(o)>0:o.st===ST[+k.slice(1)]);
+const fOrd=(o,k)=>k==='all'||(k==='open'?o.st!==ST[3]:k==='due'?odue(o)>0.004:k==='kons'?!!o.kons&&kAt(o)>0:o.st===ST[+k.slice(1)]);
 const filamentLine=o=>{const p=prod(o.prod);if(!p)return '';const need=N(p.gram)*rem(o)*(1+N(S.set.fire)/100),m=mat(p.mat);if(!m)return '';const short=need>N(m.g);return `<div class="s">${fg(need)} g ${E(m.n)} gerekiyor${short?` <span class="bad">· stokta ${fg(need-N(m.g))} g eksik</span>`:''}</div>`};
 const jobRow=j=>{const o=S.ord.find(x=>x.id===j.ord);return `<div class="r"><div class="main"><div class="t">${N(j.qty)} × ${E(pname(j.prod))}</div><div class="s">${o?E(o.cust)+' siparişi':'Stok için'}, ${fdate(j.d)}${j.g?', '+fg(j.g)+' g':''}</div></div>${j.st==='Baskıda'?btn('doneJob','Tamamlandı',{cls:'s sm',icon:'check',id:j.id}):'<span class="tag g">Tamamlandı</span>'}<div class="acts">${ibtn('delJob',j.id,'trash','Sil')}</div></div>`};
 function customerRecords(){
  const list=Array.isArray(S.customers)?S.customers:(S.customers=[]),tot={};
- S.ord.forEach(o=>{const k=lower(o.cust);if(!k)return;const c=tot[k]=tot[k]||{t:0,p:0,n:0};c.t+=otot(o);c.p+=N(o.paid);c.n++});
+ S.ord.forEach(o=>{const k=lower(o.cust);if(!k)return;const c=tot[k]=tot[k]||{t:0,p:0,n:0,w:0,wp:0,wn:0};if(isDel(o)){c.t+=otot(o);c.p+=N(o.paid)}else{c.w+=otot(o);c.wp+=N(o.paid);c.wn++}c.n++});
  const names=new Map();[...list.map(c=>c.name),...S.ord.map(o=>o.cust)].forEach(n=>{n=String(n||'').trim();if(n&&!names.has(lower(n)))names.set(lower(n),n)});
- return [...names.entries()].map(([k,name])=>({...(list.find(c=>lower(c.name)===k)||{}),name,...(tot[k]||{t:0,p:0,n:0})})).sort((a,b)=>a.name.localeCompare(b.name,'tr'));
+ return [...names.entries()].map(([k,name])=>({...(list.find(c=>lower(c.name)===k)||{}),name,...(tot[k]||{t:0,p:0,n:0,w:0,wp:0,wn:0})})).sort((a,b)=>a.name.localeCompare(b.name,'tr'));
 }
 
 /* ---- Formlar ---- */
@@ -1042,7 +1045,7 @@ function formOrd(o,pre){
    <p class="note" style="margin:10px 0 0">Birim fiyatı istediğiniz gibi değiştirebilirsiniz; liste fiyatı yalnızca başlangıç değeridir. Kaydedilen fiyat bu müşteri için hatırlanır.</p></div>
   <div class="qsec"><h3>${edit&&o.kons?'Konsinye, ödeme ve not':'Satış şekli, ödeme ve not'}</h3><div class="fg">
    ${edit?(o.kons?`<div class="w cpafter" style="border-color:rgba(245,181,68,.35)"><div><span class="mu">Konsinye</span><div class="hint" style="margin-top:4px">Gönderilen ${fg(o.qty)} · satılan ${fg(kSold(o))} · iade ${fg(kRet(o))} · müşteride ${fg(kAt(o))}</div></div><button type="button" class="btn s sm" data-act="ordToKons" data-id="${E(o.id)}">Konsinye hesap</button></div>`:''):`<div class="fl w"><div class="lb">Satış şekli</div><div class="seg"><label><input type="radio" name="kind" value="sale" checked><span>Satış</span></label><label><input type="radio" name="kind" value="kons"><span>Konsinye</span></label></div><div class="hint" id="kindHint">Ürünler satılmış sayılır, tutarın tamamı müşterinin borcuna yazılır.</div></div>`}
-   ${edit?`<div class="w cpafter"><div><span class="mu">Bu siparişte ödenen</span><div class="hint" style="margin-top:4px">Ödemeler yalnızca müşteri kartındaki "Ödeme al" ile girilir.</div></div><div style="display:flex;align-items:center;gap:10px"><b>${TL(o.paid)}</b>${orem(o)>0.004?`<button type="button" class="btn s sm" data-act="ordToPay" data-id="${E(o.cust)}">Ödeme al</button>`:''}</div></div>`:fl('dep','Kapora (₺)',{type:'number',value:0,opt:true,hint:'Girilirse kasaya gelir olarak yazılır.'})}
+   ${edit?`<div class="w cpafter"><div><span class="mu">Bu siparişte ödenen</span><div class="hint" style="margin-top:4px">Ödemeler yalnızca müşteri kartındaki "Ödeme al" ile girilir.</div></div><div style="display:flex;align-items:center;gap:10px"><b>${TL(o.paid)}</b>${odue(o)>0.004?`<button type="button" class="btn s sm" data-act="ordToPay" data-id="${E(o.cust)}">Ödeme al</button>`:!isDel(o)?'<span class="fa" style="font-size:12.5px">Teslim edilince hesaba geçer</span>':''}</div></div>`:fl('dep','Kapora (₺)',{type:'number',value:0,opt:true,hint:'Girilirse kasaya gelir olarak yazılır.'})}
    ${fl('due','Teslim tarihi',{type:'date',value:o?.due||'',opt:true,hint:'Girilirse takvimde görünür; yaklaşınca ve geciktiğinde hatırlatılır.'})}
    ${fta('note','Not',o?.note||'')}</div></div>
   <div class="qsec"><div class="qsum" id="qSum"></div></div>`,
@@ -1196,20 +1199,22 @@ function formMat(m,spoolOnly){
 /* Müşteriden toplu ödeme: tutar açık siparişlere en eskiden başlayarak dağıtılır. */
 const PAYM=['Nakit','Havale / EFT','Kredi kartı','Diğer'];
 const custOrders=name=>{const k=lower(name);return S.ord.map((o,i)=>({o,i})).filter(x=>lower(x.o.cust)===k).sort((a,b)=>String(a.o.date||'').localeCompare(String(b.o.date||''))||a.i-b.i).map(x=>x.o)};
-function payPlan(name,amt){let left=r2(amt);return custOrders(name).filter(o=>orem(o)>0.004).map(o=>{const r=r2(orem(o)),a=r2(Math.min(left,r));left=r2(left-a);return {o,r,a}})}
+function payPlan(name,amt){let left=r2(amt);return custOrders(name).filter(o=>odue(o)>0.004).map(o=>{const r=r2(orem(o)),a=r2(Math.min(left,r));left=r2(left-a);return {o,r,a}})}
 function formCusPay(name){
- name=String(name||'').trim();const os=custOrders(name);if(!os.length)return toast('Bu müşterinin siparişi yok.');
+ name=String(name||'').trim();const all=custOrders(name);if(!all.length)return toast('Bu müşterinin siparişi yok.');
+ const os=all.filter(isDel),wait=all.filter(o=>!isDel(o)),wsum=wait.reduce((a,o)=>a+otot(o),0);
  const tot=os.reduce((a,o)=>a+otot(o),0),paid=os.reduce((a,o)=>a+N(o.paid),0),due=r2(os.reduce((a,o)=>a+Math.max(0,orem(o)),0));
- if(due<=0.004)return toast(name+' için kalan bakiye yok.');
+ if(due<=0.004)return toast(wait.length?name+' için teslim edilmiş ve ödenmemiş sipariş yok. '+wait.length+' sipariş ('+TL(wsum)+') teslim bekliyor; teslim edildi olarak işaretlenince hesaba yazılır.':name+' için kalan bakiye yok.');
  const k=lower(name),hist=S.tx.filter(t=>t.t==='gelir'&&/^(Tahsilat|Kapora): /.test(t.desc||'')&&lower(String(t.desc).replace(/^(Tahsilat|Kapora): /,'').replace(/ \(.*\)$/,''))===k).sort((a,b)=>String(b.d).localeCompare(String(a.d))).slice(0,5);
  const open=payPlan(name,0);
  openDrawer({title:'Ödeme al',sub:name,submit:'Ödemeyi kaydet',
-  body:`<div class="fg"><div class="w cpsum"><div><small>Toplam sipariş</small><b>${TL(tot)}</b></div><div><small>Ödenen</small><b>${TL(paid)}</b></div><div class="k" data-due="${due}"><small>Kalan</small><b>${TL(due)}</b></div></div>
+  body:`<div class="fg"><div class="w cpsum"><div><small>Teslim edilen</small><b>${TL(tot)}</b></div><div><small>Ödenen</small><b>${TL(paid)}</b></div><div class="k" data-due="${due}"><small>Kalan</small><b>${TL(due)}</b></div></div>
    <div class="fl w"><label for="f_amt">Alınan tutar (₺)</label><div style="display:flex;gap:8px"><input id="f_amt" name="amt" type="number" step="any" inputmode="decimal" min="0" required placeholder="0" style="flex:1"><button type="button" class="btn s" data-act="cpAll">Tamamı</button></div><div class="hint">Tutar, açık siparişlere en eski siparişten başlayarak dağıtılır ve kasaya gelir olarak yazılır.</div></div>
    ${fl('date','Tarih',{type:'date',value:td()})}${fsel('method','Ödeme şekli',PAYM.map(x=>[x,x]),'Nakit')}
    ${fl('pnote','Not',{opt:true,wide:true,ph:'Örn. dekont no, kim getirdi'})}
    <div class="w cpafter"><span class="mu">Ödemeden sonra kalan</span><b id="cpLeft">${TL(due)}</b></div>
-   <div class="w"><div class="lb" style="margin-bottom:6px">Açık siparişler (${open.length})</div><div class="rows cpo" id="cpOrders"></div></div>
+   <div class="w"><div class="lb" style="margin-bottom:6px">Teslim edilmiş, ödenmemiş siparişler (${open.length})</div><div class="rows cpo" id="cpOrders"></div></div>
+   ${wait.length?`<p class="note w" style="margin:0">Teslim bekleyen ${wait.length} sipariş (${TL(wsum)}) hesaba yazılmadı; teslim edildi olarak işaretlenince yazılır.</p>`:''}
    ${hist.length?`<div class="w"><div class="lb" style="margin-bottom:6px">Son ödemeler</div><div class="rows">${hist.map(t=>`<div class="r"><div class="main"><div class="t">${TL(t.amt)}</div><div class="s">${fdate(t.d)}${/^Kapora/.test(t.desc)?', kapora':''}${(String(t.desc).match(/ \((.*)\)$/)||[])[1]?', '+E(String(t.desc).match(/ \((.*)\)$/)[1]):''}${t.by?', '+E(pname2(t.by)):''}</div></div></div>`).join('')}</div></div>`:''}</div>`,
   onSubmit(f){
    const amt=r2(f.amt);if(!need(amt>0,'Alınan tutarı yazın.','amt'))return false;
@@ -1670,7 +1675,7 @@ function partnerSales(pa,per='all'){
 function partnerMonths(pa){const ms=new Set();partnerOrders(pa).forEach(o=>{if(o.date)ms.add(String(o.date).slice(0,7));(o.kh||[]).forEach(x=>x.d&&ms.add(String(x.d).slice(0,7)))});return [...ms].sort().reverse()}
 function formPartnerSales(id,per){
  const pa=byId(partners(),id);if(!pa)return;per=per||UI.psPer||'all';const ms=partnerMonths(pa);if(per!=='all'&&!ms.includes(per))per='all';UI.psPer=per;
- const {rows,tot,kinds}=partnerSales(pa,per),mx=Math.max(...rows.map(r=>r.sold),1),os=partnerOrders(pa),due=os.reduce((a,o)=>a+Math.max(0,orem(o)),0);
+ const {rows,tot,kinds}=partnerSales(pa,per),mx=Math.max(...rows.map(r=>r.sold),1),os=partnerOrders(pa),due=os.reduce((a,o)=>a+Math.max(0,odue(o)),0);
  const monthRows=ms.slice(0,12).map(k=>({k,...partnerSales(pa,k).tot}));
  openDrawer({title:pa.name+' · Satışlar',sub:'Hangi üründen kaç adet aldı, kaçını sattı, ne tutarda.',wide:true,
   extra:due>0.004?`<div class="qtot"><small>Kalan borç</small><b class="bad">${TL(due)}</b></div><button type="button" class="btn s" data-act="cusPay" data-id="${E(pa.name)}">${IC.cash}Ödeme al</button>`:'',
@@ -1933,6 +1938,8 @@ function setStatus(o,s){
  const prev=o.st;if(prev===s)return;o.st=s;const who=meName()||'Ortağınız',c=o.cust||'Müşteri';
  addNotification(c+' siparişi: '+s,who+' durumu "'+(prev||'—')+'" → "'+s+'" yaptı. '+ordDesc(o)+(o.note?'. Not: '+o.note:''),null,{ord:o.id});
  logAct(c+' siparişini '+s+' yaptı: '+ordDesc(o));
+ if(s===ST[3]&&orem(o)>0.004)setTimeout(()=>toast(TL(orem(o))+' '+c+' hesabına yazıldı.','Ödeme al',()=>formCusPay(c)),60);
+ else if(prev===ST[3]&&orem(o)>0.004)setTimeout(()=>toast(c+' hesabından '+TL(orem(o))+' çıkarıldı (teslim geri alındı).'),60);
  if(ST.indexOf(s)>=1&&!o.ded&&!o.dj){const p=prod(o.prod),m=p&&mat(p.mat);if(m){m.g=N(m.g)-N(p.gram)*N(o.qty)*(1+N(S.set.fire)/100);o.ded=true}}
  upd();
 }
