@@ -468,6 +468,7 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 <div class="dialog" id="dialog" role="alertdialog" aria-modal="true" aria-labelledby="qTitle"><h2 id="qTitle"></h2><p id="qText"></p><div class="df"><button class="btn s" id="qNo">Vazgeç</button><button class="btn d" id="qYes">Sil</button></div></div>
 <div class="toast" id="t" role="status"></div>
 
+<script src="plan.js"></script>
 <script>
 /* ---- Yardımcılar ---- */
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -515,9 +516,11 @@ const IC={
  cash:I('<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'),
  print:I('<path d="M6 9V3h12v6M6 14h12v7H6z"/>'),
  check:I('<path d="m5 12 5 5 9-10"/>'),
+ up:I('<path d="m18 15-6-6-6 6"/>'),down:I('<path d="m6 9 6 6 6-6"/>'),
+ plan:I('<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M7 13.5h6M7 17h10"/>'),
 };
 /* Sayfalar: [anahtar, ad, açıklama, grup] */
-const TABS=[['ozet','Özet','Bugünün durumu','Günlük'],['takvim','Takvim','Yapılacaklar ve plan','Günlük'],['ord','Siparişler','Müşteri siparişleri ve tahsilat','Günlük'],['teklif','Teklifler','Müşteriye özel fiyat teklifleri','Günlük'],['partner','Partnerler','İş ortaklarına özel fiyat listeleri','Günlük'],['job','Üretim','Baskıdaki ve bekleyen işler','Günlük'],['tx','Kasa','Gelir ve gider kayıtları','Günlük'],
+const TABS=[['ozet','Özet','Bugünün durumu','Günlük'],['takvim','Takvim','Yapılacaklar ve plan','Günlük'],['ord','Siparişler','Müşteri siparişleri ve tahsilat','Günlük'],['teklif','Teklifler','Müşteriye özel fiyat teklifleri','Günlük'],['partner','Partnerler','İş ortaklarına özel fiyat listeleri','Günlük'],['job','Üretim','Baskıdaki ve bekleyen işler','Günlük'],['plan','Üretim planlaması','Hangi sipariş, hangi gün, hangi sırayla basılacak','Günlük'],['tx','Kasa','Gelir ve gider kayıtları','Günlük'],
  ['prod','Ürünler','Maliyet kartları ve katalog','Katalog ve stok'],['indirim','İndirimler','Toptan indirim ve kampanyalar','Katalog ve stok'],['mat','Malzeme','Filament stoku','Katalog ve stok'],['cus','Müşteriler','İletişim ve bakiyeler','Katalog ve stok'],
  ['rapor','Rapor','Aylık özet ve karşılaştırma','Analiz'],['oneri','Öneriler','Satış fırsatları','Analiz'],
  ['debt','Borçlar','Taksit ve kredi ödemeleri','Diğer'],['notify','Bildirimler','Siparişler ve uyarılar','Diğer'],['ayar','Ayarlar ve yedek','Defter, maliyet ayarları, yedekler','Diğer']];
@@ -740,6 +743,10 @@ const otot=o=>oq(o)*N(o.price),orem=o=>otot(o)-N(o.paid);
 // Hesaba yazılan alacak: sipariş teslim edilmeden müşterinin borcuna geçmez.
 const isDel=o=>o.st===ST[3],odue=o=>isDel(o)?orem(o):0;
 const jobs=o=>S.job.filter(j=>j.ord===o.id),rem=o=>Math.max(0,N(o.qty)-jobs(o).reduce((x,j)=>x+N(j.qty),0));
+// Üretim planı: planlanabilir sipariş = teslim edilmemiş, henüz Hazır değil ve basılacak adedi kalmış.
+const planOk=o=>o.st!==ST[3]&&ST.indexOf(o.st)<2&&rem(o)>0;
+const planMins=o=>{const p=prod(o.prod);return p?rem(o)*pmin(p):0};
+function planSched(d){const os=PLAN.day(S.ord.filter(planOk),d),r=PLAN.schedule(os.map(o=>({id:o.id,mins:planMins(o)})),S.set.ps);return os.map((o,i)=>({o,...r[i]}))}
 const sumT=(a,t)=>a.filter(x=>x.t===t).reduce((q,x)=>q+N(x.amt),0);
 const pname=id=>prod(id)?.n||'Silinmiş ürün';
 const ds=()=>S.lastBak?Math.floor((Date.now()-S.lastBak)/864e5):null;
@@ -847,6 +854,17 @@ job(){
  `<div class="cols"><div><div class="card"><h2>Şu an baskıda</h2><div class="rows">${act.map(jobRow).join('')||empty('Aktif baskı yok','Bekleyen bir siparişi baskıya verin.')}</div></div>
  <div class="card"><h2>Son tamamlananlar</h2><div class="rows">${dn.map(jobRow).join('')||empty('Henüz tamamlanan yok')}</div></div></div>
  <div><div class="card"><h2>Üretim bekleyen siparişler</h2><div class="rows">${waiting.map(o=>`<div class="r"><div class="main"><div class="t">${E(o.cust)}</div><div class="s">${rem(o)} / ${N(o.qty)} × ${E(pname(o.prod))} kaldı</div>${filamentLine(o)}</div>${btn('jobFor','Baskıya ver',{cls:'s sm',id:o.id})}</div>`).join('')||empty('Bekleyen sipariş yok')}</div></div></div></div>`;
+},
+plan(){
+ const T=td(),ok=S.ord.filter(planOk),un=ok.filter(o=>!o.pd).sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999')||String(a.date).localeCompare(String(b.date)));
+ const days=[...new Set([T,...ok.filter(o=>o.pd).map(o=>o.pd)])].sort();
+ const dIn=o=>`<input type="date" class="inp" style="width:auto;height:34px" data-change="planD" data-id="${E(o.id)}" value="${E(o.pd||'')}" aria-label="Baskı günü">`;
+ const info=(o,mins)=>[rem(o)+' × '+E(pname(o.prod)),mins?PLAN.dur(mins):'<span class="warn">Ürünün baskı süresi yok</span>',o.due?`<span class="${o.pd&&o.pd>o.due?'bad':''}">Teslim ${E(shortDay(o.due))}${o.pd&&o.pd>o.due?' · teslimden sonra basılıyor':''}</span>`:''].filter(Boolean).join(' · ');
+ const dayCard=d=>{const it=planSched(d),tot=it.reduce((a,x)=>a+x.end-x.start,0),lbl=(d===T?'Bugün':d===addDays(T,1)?'Yarın':DAYS[wday(d)])+', '+shortDay(d);
+  return `<div class="card"><div class="ch"><h2>${E(lbl)}${d<T?' <span class="tag b">Geçti</span>':''}</h2><span class="mu">${it.length?it.length+' sipariş · '+PLAN.dur(tot)+(it.length?' · bitiş '+PLAN.fmt(it[it.length-1].end):''):''}</span></div><div class="rows">${it.map((x,i)=>`<div class="r"><div class="main"><div class="t">${i+1}. <b>${PLAN.fmt(x.start)}–${PLAN.fmt(x.end)}</b> · ${E(x.o.cust)}</div><div class="s">${info(x.o,x.end-x.start)}</div></div><div class="acts">${dIn(x.o)}${i?ibtn('planUp',x.o.id,'up','Yukarı taşı'):'<span class="ib" style="visibility:hidden"></span>'}${i<it.length-1?ibtn('planDown',x.o.id,'down','Aşağı taşı'):'<span class="ib" style="visibility:hidden"></span>'}${ibtn('planOff',x.o.id,'trash','Plandan çıkar')}</div></div>`).join('')||empty('Bu gün için plan yok','Aşağıdaki siparişlerden ekleyin.')}</div></div>`};
+ return head('Üretim planlaması',(ok.length-un.length)+' sipariş planlandı, '+un.length+' planlanmayı bekliyor',`<label class="mu" style="display:flex;align-items:center;gap:8px">Gün başlangıcı <input type="time" class="inp" style="width:auto;height:38px" data-change="planStart" value="${E(PLAN.fmt(PLAN.hm(S.set.ps)))}"></label>`)+
+ days.map(dayCard).join('')+
+ `<div class="card"><h2>Planlanmayı bekleyen siparişler</h2><div class="rows">${un.map(o=>`<div class="r"><div class="main"><div class="t">${E(o.cust)}</div><div class="s">${info(o,planMins(o))}</div></div><div class="acts">${btn('planToday','Bugüne ekle',{cls:'s sm',id:o.id})}${dIn(o)}</div></div>`).join('')||empty('Bekleyen sipariş yok','Tüm üretim bekleyen siparişler planda.')}</div></div>`;
 },
 tx(){
  const ms=[...new Set([td().slice(0,7),...S.tx.map(x=>String(x.d).slice(0,7))])].filter(Boolean).sort().reverse();
@@ -1492,7 +1510,7 @@ function formPromo(x){
 const DAYS=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'],DAY3=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
 const TCAT=[['genel','Genel','#8FA6B8'],['uretim','Üretim','#3FD0C9'],['teslim','Teslimat','#7BE6E0'],['odeme','Ödeme / tahsilat','#4ADE9B'],['musteri','Müşteri','#B69CFF'],['alim','Alım / malzeme','#F5B544']];
 const TREP=[['','Tekrarlamaz'],['daily','Her gün'],['weekdays','Hafta içi her gün'],['weekly','Her hafta'],['monthly','Her ay'],['yearly','Her yıl']];
-const KIND={ord:['Teslim','#7BE6E0'],debt:['Taksit','#FF8A93'],quote:['Teklif','#B69CFF'],kons:['Konsinye','#F5B544'],promo:['Kampanya','#F472B6']};
+const KIND={plan:['Baskı','#9BD27A'],ord:['Teslim','#7BE6E0'],debt:['Taksit','#FF8A93'],quote:['Teklif','#B69CFF'],kons:['Konsinye','#F5B544'],promo:['Kampanya','#F472B6']};
 const tasks=()=>Array.isArray(S.tasks)?S.tasks:(S.tasks=[]);
 const wday=d=>new Date(d+'T12:00:00').getDay();
 const dBetween=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);
@@ -1519,6 +1537,7 @@ function calItems(from,to,mode){
  if(UI.calAuto!==false){
   const g=new Map();S.ord.forEach(o=>{if(!o.due||o.st===ST[3]||o.due<from||o.due>to)return;const k=(o.orderGroup||lower(o.cust))+'|'+o.due;if(!g.has(k))g.set(k,[]);g.get(k).push(o)});
   g.forEach(os=>{const o=os[0];out.push({key:'o|'+o.id,d:o.due,kind:'ord',title:'Teslim: '+o.cust,sub:os.map(x=>N(x.qty)+' × '+niceName(pname(x.prod))).join(', '),ord:o.id,qty:os.reduce((a,x)=>a+N(x.qty),0)})});
+  [...new Set(S.ord.filter(o=>o.pd&&o.pd>=from&&o.pd<=to).map(o=>o.pd))].forEach(d=>planSched(d).forEach(x=>out.push({key:'pl|'+x.o.id,d,time:PLAN.fmt(x.start),kind:'plan',title:'Baskı: '+x.o.cust,sub:rem(x.o)+' × '+niceName(pname(x.o.prod))+' · '+PLAN.fmt(x.start)+'–'+PLAN.fmt(x.end)})));
   S.debt.forEach(x=>{if(!(x.left>0)||!x.due)return;let d=x.due;for(let i=0;i<x.left&&i<120&&d<=to;i++){if(d>=from)out.push({key:'d|'+x.id+'|'+d,d,kind:'debt',title:'Taksit: '+x.n,sub:TL(x.amt)+(x.bank?' · '+x.bank:''),amt:N(x.amt),debt:x.id,first:i===0});d=addM(d,N(x.day)||+x.due.slice(8))}});
   (S.quotes||[]).filter(qOpen).forEach(q=>{const d=qValid(q);if(d>=from&&d<=to)out.push({key:'q|'+q.id,d,kind:'quote',title:'Teklif süresi bitiyor: '+(q.cust?.name||''),sub:q.no+' · '+TL(qCalc(q).total),quote:q.id})});
   promos().forEach(x=>{if(x.on===false)return;const sub='%'+pct(x.pct)+' · '+(x.all?'tüm ürünler':(x.prods||[]).length+' ürün');if(x.start&&x.start>=from&&x.start<=to)out.push({key:'p|'+x.id+'|s',d:x.start,kind:'promo',title:'Kampanya başlıyor: '+x.name,sub});if(x.end&&x.end>=from&&x.end<=to)out.push({key:'p|'+x.id+'|e',d:x.end,kind:'promo',title:'Kampanyanın son günü: '+x.name,sub})});
@@ -1586,7 +1605,7 @@ function ciRow(it,o={}){
  if(it.kind==='task'){const t=it.t,c=TCAT.find(x=>x[0]===(t.cat||'genel'))||TCAT[0],lo=t.ord&&byId(S.ord,t.ord);
   const meta=[it.time?`<b>${E(it.time)}</b>`:'',o.date||late?`<span class="${late?'bad':''}">${late?(-dleft(it.d))+' gün gecikti · ':''}${E(shortDay(it.d))}</span>`:'',t.cat&&t.cat!=='genel'?`<span><i class="dot" style="background:${c[2]}"></i>${E(c[1])}</span>`:'',t.who?`<span>${avatar(t.who,18)} ${E(pname2(t.who))}</span>`:'',t.rep?`<span>${IC.rpt} ${E(repLabel(t.rep))}</span>`:'',lo?`<span>Sipariş: ${E(lo.cust)}</span>`:'',t.note?`<span>${E(String(t.note).slice(0,60))}${String(t.note).length>60?'…':''}</span>`:''].filter(Boolean).join('');
   return `<div class="ci${it.done?' done':''}"><button type="button" class="ck${it.done?' on':''}" data-act="tDone" data-id="${E(t.id)}" data-d="${E(it.d)}" aria-label="${it.done?'Tamamlanmadı yap':'Tamamlandı'}" aria-pressed="${it.done}">${IC.check}</button><div class="main"><button type="button" class="tt" data-act="tEdit" data-id="${E(t.id)}">${E(t.title)}</button>${meta?`<div class="mt">${meta}</div>`:''}</div></div>`}
- const k=KIND[it.kind],act=it.kind==='ord'?btn('goOrd','Sipariş',{cls:'s sm',id:it.ord}):it.kind==='debt'&&it.first?btn('calPayDebt','Ödendi',{cls:'s sm',id:it.debt}):it.kind==='quote'?btn('calQuote','Teklif',{cls:'s sm',id:it.quote}):it.kind==='kons'?btn('kons','Hesap',{cls:'s sm',id:it.ord}):it.kind==='promo'?btn('calPromo','İndirimler',{cls:'s sm'}):'';
+ const k=KIND[it.kind],act=it.kind==='ord'?btn('goOrd','Sipariş',{cls:'s sm',id:it.ord}):it.kind==='debt'&&it.first?btn('calPayDebt','Ödendi',{cls:'s sm',id:it.debt}):it.kind==='quote'?btn('calQuote','Teklif',{cls:'s sm',id:it.quote}):it.kind==='kons'?btn('kons','Hesap',{cls:'s sm',id:it.ord}):it.kind==='promo'?btn('calPromo','İndirimler',{cls:'s sm'}):it.kind==='plan'?'<a class="btn s sm" href="#plan">Plan</a>':'';
  return `<div class="ci auto"><span class="kd" style="background:${k[1]}22"><i style="background:${k[1]}"></i></span><div class="main"><div class="tt" style="cursor:default">${E(it.title)}</div><div class="mt">${o.date||late?`<span class="${late?'bad':''}">${late?(-dleft(it.d))+' gün gecikti · ':''}${E(shortDay(it.d))}</span>`:''}<span>${E(k[0])}</span>${it.sub?`<span>${E(it.sub)}</span>`:''}</div></div><div class="acts">${act}</div></div>`;
 }
 const cchip=it=>{const c=it.kind==='task'?(TCAT.find(x=>x[0]===(it.t.cat||'genel'))||TCAT[0])[2]:KIND[it.kind][1];return `<span class="cchip${it.done?' done':''}" style="--c:${c}">${it.time?E(it.time)+' ':''}${E(it.title)}</span>`};
@@ -1619,7 +1638,7 @@ function takvimPage(){
  `<div class="card qa"><div class="qa-in">${IC.plus}<input id="qaIn" data-qa="1" placeholder="Hızlı ekle: yarın 14:00 Yenbu'yu ara @erdem" autocomplete="off" aria-label="Hızlı iş ekle"><button type="button" class="btn p sm" data-act="qaAdd">Ekle</button></div><div class="qa-prev" id="qaPrev"></div></div>
  <div class="tools caltools"><div class="chips">${[['ag','Ajanda'],['wk','Hafta'],['mo','Ay']].map(([k,l])=>`<button class="chip" data-act="calV" data-id="${k}" aria-pressed="${v===k}">${l}</button>`).join('')}<span style="width:8px"></span>${[['all','Herkes'],['me','Benim']].map(([k,l])=>`<button class="chip" data-act="calWho" data-id="${k}" aria-pressed="${(UI.calWho||'all')===k}">${l}</button>`).join('')}</div>
  ${v!=='ag'?`<div class="calnav">${ibtn('calNav','-1','chevL','Önceki')}<button class="btn s sm" data-act="calToday">Bugün</button>${ibtn('calNav','1','chevR','Sonraki')}<b>${E(navTitle)}</b></div>`:''}
- <label class="chk"><input type="checkbox" data-change="calAuto"${UI.calAuto!==false?' checked':''}>Teslim, taksit, teklif</label></div>${body}`;
+ <label class="chk"><input type="checkbox" data-change="calAuto"${UI.calAuto!==false?' checked':''}>Teslim, baskı, taksit, teklif</label></div>${body}`;
 }
 function formDay(d){
  UI.dayOpen=d;const od=d===td()?calOverdue():[],l=calItems(d,d);
@@ -2013,6 +2032,8 @@ async function enablePush(){
 
 /* Düğmelerin tamamı veri öznitelikleriyle çalışır (satır içi kod yok; kullanıcı metinleri koda karışmaz). */
 const byId=(arr,id)=>arr.find(x=>String(x.id)===String(id));
+function planSet(id,d){const o=byId(S.ord,id);if(!o||(o.pd||'')===d)return;if(d){o.pd=d;o.pn=PLAN.next(S.ord.filter(x=>x!==o),d);logAct(o.cust+' siparişini '+shortDay(d)+' baskı planına aldı')}else{delete o.pd;delete o.pn;logAct(o.cust+' siparişini baskı planından çıkardı')}upd()}
+function planMove(id,dir){const o=byId(S.ord,id);if(!o||!o.pd)return;PLAN.move(planSched(o.pd).map(x=>x.o.id),o.id,dir).forEach((k,i)=>{byId(S.ord,k).pn=i});upd()}
 const ACT={
  close:()=>closeDrawer(),signout:()=>signout(),
  more(){openDrawer({title:'Bölümler',body:`<div class="nav">${navHtml()}</div>`});$('#dBody').querySelectorAll('a').forEach(a=>a.addEventListener('click',closeDrawer))},
@@ -2037,7 +2058,8 @@ const ACT={
   o.sold=Math.max(0,kSold(o)-N(x.sold));o.ret=Math.max(0,kRet(o)-N(x.ret));o.kh=o.kh.slice(0,-1);logAct(o.cust+' konsinye kaydını geri aldı');upd();formKons(o)},
  deliver:id=>{const o=byId(S.ord,id);if(o)setStatus(o,ST[3])},
  ordF:k=>{UI.ordF=k;render()},txF:k=>{UI.txF=k;render()},
- newJob:()=>formJob(),jobFor:id=>formJob(byId(S.ord,id)),
+ newJob:()=>formJob(),
+ planUp:id=>planMove(id,-1),planDown:id=>planMove(id,1),planToday:id=>planSet(id,td()),planOff:id=>planSet(id,''),jobFor:id=>formJob(byId(S.ord,id)),
  doneJob(id){const j=byId(S.job,id);if(!j)return;j.st='Tamamlandı';logAct(N(j.qty)+' × '+pname(j.prod)+' baskısını tamamladı');const o=S.ord.find(x=>x.id===j.ord);if(o){const d=jobs(o).filter(x=>x.st==='Tamamlandı').reduce((a,x)=>a+N(x.qty),0);if(d>=N(o.qty)&&ST.indexOf(o.st)<2)o.st=ST[2]}upd();toast('Baskı tamamlandı.')},
  async delJob(id){const j=byId(S.job,id);if(!j)return;const act=j.st==='Baskıda'&&N(j.g);if(!await confirmBox('Baskı kaydı silinsin mi?',act?'Stoktan düşülen '+fg(j.g)+' g filament geri eklenir.':'Tamamlanan baskının filamenti geri eklenmez.','Sil'))return;if(act){const m=mat(prod(j.prod)?.mat);if(m)m.g=N(m.g)+N(j.g)}S.job=S.job.filter(x=>x.id!==id);upd()},
  newTx:()=>formTx(),editTx:id=>formTx(byId(S.tx,id)),
@@ -2100,6 +2122,8 @@ document.addEventListener('change',e=>{const el=e.target,k=el.dataset?.change;if
  else if(k==='qStatus'){const q=byId(S.quotes||[],el.dataset.id);if(q){if(el.value==='Siparişe dönüştü'&&q.status!=='Siparişe dönüştü'){el.value=q.status;quoteToOrder(q.id);return}q.status=el.value;if(el.value==='Gönderildi'&&!q.sentAt)q.sentAt=Date.now();logAct('Teklif durumunu değiştirdi: '+q.no+', '+el.value);upd()}}
  else if(k==='prodFlag'){const p=byId(S.prod,el.dataset.id);if(p){p[el.dataset.k]=el.checked;save();toast(el.checked?'Açıldı.':'Kapatıldı.')}}
  else if(k==='psAll'){UI.psAll=el.value;render()}
+ else if(k==='planD')planSet(el.dataset.id,el.value);
+ else if(k==='planStart'){S.set.ps=el.value;upd()}
  else if(k==='calAuto'){UI.calAuto=el.checked;render()}
  else if(k==='promoStack'){S.set.promoStack=el.checked;logAct('Kampanya ve toptan indirimi '+(el.checked?'birlikte uygulanacak':'büyük olan uygulanacak')+' şekilde ayarladı');upd();toast(el.checked?'Kampanya ve toptan indirim birlikte uygulanacak.':'Yalnızca büyük olan indirim uygulanacak.')}
  else if(k==='txM'){UI.txM=el.value;render()}else if(k==='rp'){UI.rp=el.value;render()}
