@@ -668,7 +668,8 @@ async function load(){
    if(v&&Number(v.version)>VER){const row=await fetchBook();if(row)applyRemoteData(row.data,row.version)}
   }catch(e){console.warn('Defter güncelleme kontrolü başarısız:',e?.message||e)}
  };
- realtime=sb.channel('book-'+workspaceId).on('postgres_changes',{event:'*',schema:'public',table:'books',filter:'workspace_id=eq.'+workspaceId},payload=>{
+ // load() ikinci kez çalışırsa (ör. oturum açılırken Giriş'e de basılırsa) aynı kanal zaten aboneliktedir; yeniden kurulmaz.
+ if(!realtime)realtime=sb.channel('book-'+workspaceId).on('postgres_changes',{event:'*',schema:'public',table:'books',filter:'workspace_id=eq.'+workspaceId},payload=>{
   const n=payload.new||{};
   if(n.data&&n.version!=null)applyRemoteData(n.data,n.version);else checkRemote();
  }).subscribe();

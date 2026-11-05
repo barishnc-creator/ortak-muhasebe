@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test" },
+  "devDependencies": { "@supabase/supabase-js": "^2.119.0" }
+}
