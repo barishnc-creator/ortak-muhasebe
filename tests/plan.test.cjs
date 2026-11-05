@@ -1,4 +1,4 @@
-// Çalıştır: node --test tests/
+// Çalıştır: node --test tests/plan.test.cjs
 const test=require('node:test'),assert=require('node:assert/strict');
 const P=require('../plan.js');
 
