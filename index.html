@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 <style>
 :root{
  color-scheme:dark;
@@ -469,6 +470,7 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 <div class="toast" id="t" role="status"></div>
 
 <script src="plan.js"></script>
+<script src="atolye.js"></script>
 <script>
 /* ---- Yardımcılar ---- */
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -495,6 +497,7 @@ const IC={
  cus:I('<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/>'),
  rapor:I('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
  oneri:I('<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2"/>'),
+ atolye:I('<path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M12 12 3 7M12 12l9-5M12 12v10"/><path d="m17 3.5 1 1.5 1.5 1-1.5 1-1 1.5-1-1.5-1.5-1 1.5-1z"/>'),
  debt:I('<path d="M3 10 12 4l9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/>'),
  notify:I('<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/>'),
  ayar:I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1"/>'),
@@ -522,6 +525,7 @@ const IC={
 /* Sayfalar: [anahtar, ad, açıklama, grup] */
 const TABS=[['ozet','Özet','Bugünün durumu','Günlük'],['takvim','Takvim','Yapılacaklar ve plan','Günlük'],['ord','Siparişler','Müşteri siparişleri ve tahsilat','Günlük'],['teklif','Teklifler','Müşteriye özel fiyat teklifleri','Günlük'],['partner','Partnerler','İş ortaklarına özel fiyat listeleri','Günlük'],['job','Üretim','Baskıdaki ve bekleyen işler','Günlük'],['plan','Üretim planlaması','Hangi sipariş, hangi gün, hangi sırayla basılacak','Günlük'],['tx','Kasa','Gelir ve gider kayıtları','Günlük'],
  ['prod','Ürünler','Maliyet kartları ve katalog','Katalog ve stok'],['indirim','İndirimler','Toptan indirim ve kampanyalar','Katalog ve stok'],['mat','Malzeme','Filament stoku','Katalog ve stok'],['cus','Müşteriler','İletişim ve bakiyeler','Katalog ve stok'],
+ ['atolye','3D Atölye','Fotoğraftan baskıya hazır STL','Katalog ve stok'],
  ['rapor','Rapor','Aylık özet ve karşılaştırma','Analiz'],['oneri','Öneriler','Satış fırsatları','Analiz'],
  ['debt','Borçlar','Taksit ve kredi ödemeleri','Diğer'],['notify','Bildirimler','Siparişler ve uyarılar','Diğer'],['ayar','Ayarlar ve yedek','Defter, maliyet ayarları, yedekler','Diğer']];
 const MAIN=['ozet','ord','job','tx'];
@@ -788,7 +792,7 @@ function render(){
  $('#nav').innerHTML=navHtml();$('#wsName').textContent=workspaceName+(WS_LIST.length>1?'':'');
  $('#bnav').innerHTML=MAIN.map(k=>{const t=TABS.find(x=>x[0]===k);return `<a href="#${k}"${k===tab?' aria-current="page"':''}>${IC[k]}<span>${t[1]}</span></a>`}).join('')+`<button data-act="more"${more?' aria-current="page"':''}>${more?IC[tab]:IC.more}<span>${more?cur[1]:'Daha fazla'}</span>${unread()?'<i class="dot"></i>':''}</button>`;
  $('#mTitle').textContent=cur[1];if($('#meChip'))$('#meChip').innerHTML=meName()?avatar(myUid,26)+'<span style="overflow:hidden;text-overflow:ellipsis">'+E(meName())+'</span>':'Adınızı ekleyin';document.title=cur[1]+' · Atölye Defteri';
- $('#v').innerHTML=V_[tab]();
+ $('#v').innerHTML=V_[tab]();if(tab==='atolye'&&typeof atMount==='function')atMount();
 }
 window.addEventListener('hashchange',()=>{const k=location.hash.slice(1);if(k&&k!==tab&&TABS.some(t=>t[0]===k)){tab=k;closeDrawer();render();scrollTo(0,0)}});
 const head=(title,sub,acts='')=>`<div class="ph"><div><h1>${E(title)}</h1>${sub?`<p>${sub}</p>`:''}</div>${acts?`<div class="acts">${acts}</div>`:''}</div>`;
@@ -1006,6 +1010,7 @@ debt(){
  `<div class="kpis">${kpi('Kalan toplam borç',TL(tot),'bad')}${kpi('Aylık taksit',TL(mo),'warn')}${kpi('30 gün içinde',TL(n30))}</div>
  <div class="card"><h2>Aktif borçlar</h2><div class="rows">${a.map(row).join('')||empty('Kayıtlı borç yok')}</div></div>${z.length?`<div class="card"><h2>Tamamlananlar</h2><div class="rows">${z.map(row).join('')}</div></div>`:''}`;
 },
+atolye:()=>typeof atView==='function'?atView():'',
 notify(){
  const ns=(S.notifs||[]).slice().reverse();
  return head('Bildirimler',unread()?unread()+' okunmamış bildirim':'Tümü okundu',unread()?btn('readAll','Tümünü okundu yap'):'')+
@@ -2126,6 +2131,7 @@ const ACT={
 };
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||!ACT[b.dataset.act])return;if(b.tagName==='A')return;e.preventDefault();ACT[b.dataset.act](b.dataset.id,b)});
 document.addEventListener('change',e=>{const el=e.target,k=el.dataset?.change;if(!k)return;
+ if(k.startsWith('at')&&typeof atChange==='function')return atChange(k,el);
  if(k==='status'){const o=byId(S.ord,el.dataset.id);if(o)setStatus(o,el.value)}
  else if(k==='qStatus'){const q=byId(S.quotes||[],el.dataset.id);if(q){if(el.value==='Siparişe dönüştü'&&q.status!=='Siparişe dönüştü'){el.value=q.status;quoteToOrder(q.id);return}q.status=el.value;if(el.value==='Gönderildi'&&!q.sentAt)q.sentAt=Date.now();logAct('Teklif durumunu değiştirdi: '+q.no+', '+el.value);upd()}}
  else if(k==='prodFlag'){const p=byId(S.prod,el.dataset.id);if(p){p[el.dataset.k]=el.checked;save();toast(el.checked?'Açıldı.':'Kapatıldı.')}}
@@ -2144,5 +2150,6 @@ function setSync(ok){['#sync','#sync2'].forEach(s=>$(s)?.classList.toggle('off',
 window.addEventListener('online',()=>setSync(true));window.addEventListener('offline',()=>setSync(false));
 if(sb)sb.auth.getSession().then(({data})=>{if(data.session)startApp();else $('#auth').classList.remove('hidden')});else{$('#auth').classList.remove('hidden');authMsg('Bağlantı kütüphanesi yüklenemedi. İnternetinizi kontrol edip sayfayı yenileyin.')}
 </script>
+<script src="atolye-ui.js"></script>
 </body>
 </html>
