@@ -3,7 +3,12 @@
 const AT={step:'giris',desc:'',note:'',file:null,photo:'',list:[],pick:null,busy:'',err:'',mm:80,v:null};
 const AT_SPACE='tencent/Hunyuan3D-2.1',AT_KONTEXT='black-forest-labs/FLUX.1-Kontext-Dev',AT_STUDIO='https://3d.hunyuan.tencent.com/';
 const atTok=()=>{try{return localStorage.getItem('hf_token')||''}catch(_){return ''}};
-const atGradio=()=>import('https://cdn.jsdelivr.net/npm/@gradio/client@1.19.1/dist/browser.js');
+// gradio istemcisi çerezli (credentials:include) istek atıyor; HF alanları buna CORS izni vermiyor → çerezsiz gönder.
+let atFetchFix=false;
+const atGradio=()=>{if(!atFetchFix){atFetchFix=true;const of=window.fetch.bind(window);window.fetch=(u,o)=>/\.hf\.space|huggingface\.co/.test(String(u?.url||u))?of(u,{...o,credentials:'omit'}):of(u,o)}
+ return import('https://cdn.jsdelivr.net/npm/@gradio/client@1.19.1/dist/browser.js')};
+// istemcinin handle_file'ı tarayıcıda yalnız File kabul ediyor (düz Blob'da Buffer hatası).
+const atAsFile=b=>b instanceof File?b:new File([b],'gorsel.'+((b.type||'image/png').split('/')[1]||'png'),{type:b.type||'image/png'});
 const atLib=()=>Promise.all([import('three'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/loaders/STLLoader.js'),import('three/addons/exporters/STLExporter.js'),import('three/addons/controls/OrbitControls.js')]);
 const atSet=o=>{Object.assign(AT,o);if(tab==='atolye')render()};
 
@@ -76,7 +81,7 @@ async function atKontext(c,base,gen){
  try{
   const {Client,handle_file}=await atGradio();
   AT.kc=AT.kc||await Client.connect(AT_KONTEXT,{hf_token:atTok()});
-  const r=await AT.kc.predict('/infer',[handle_file(base),c.prompt,0,true,2.5,20]);
+  const r=await AT.kc.predict('/infer',[handle_file(atAsFile(base)),c.prompt,0,true,2.5,20]);
   const f=r.data?.[0];c.src=f?.url||'';if(!c.src)throw new Error('Görsel gelmedi.');
  }catch(e){console.error(e);c.fail=true;AT.kc=null;const m=String(e?.message||e);
   if(AT.gen===gen)AT.err=window.ATOLYE.quota(m)?'Bugünkü ücretsiz Hugging Face GPU kotası doldu.':'Konsept üretilemedi: '+m}
@@ -108,7 +113,7 @@ async function atMake(){
   const {Client,handle_file}=await atGradio();
   const c=await Client.connect(AT_SPACE,{hf_token:tok});
   // Girdi sırası (durum bileşeni hariç): görsel, ön/arka/sol/sağ, adım, guidance, seed, octree, arka plan sil, chunk, rastgele seed
-  const r=await c.predict('/shape_generation',[handle_file(blob),null,null,null,null,30,5,1234,256,true,8000,true]);
+  const r=await c.predict('/shape_generation',[handle_file(atAsFile(blob)),null,null,null,null,30,5,1234,256,true,8000,true]);
   const f=r.data?.[0],url=f?.url||f?.path&&c.config.root+'/file='+f.path;if(!url)throw new Error('Model dosyası gelmedi.');
   const g=await fetch(url);if(!g.ok)throw new Error('Model dosyası indirilemedi.');
   await atShow(await g.arrayBuffer(),'glb');
