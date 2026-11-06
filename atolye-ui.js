@@ -22,7 +22,8 @@ function atView(){
   <label class="btn s" style="cursor:pointer">Hazır GLB/STL yükle<input type="file" accept=".glb,.stl" data-change="atModel" hidden></label></div></div>`;
  // 2) konsept
  if(AT.list.length)h+=`<div class="card"${stepCls('konsept')}><h3 style="margin:0 0 12px">2. Konsept seç</h3>
-  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${AT.list.map((c,i)=>`<button data-act="atPick" data-id="${i}" style="padding:0;border-radius:14px;overflow:hidden;border:2px solid ${AT.pick===i?'var(--teal)':'var(--line)'};background:#fff;aspect-ratio:1"><img src="${E(c.url)}" data-alt="${E(c.alt)}" alt="Konsept ${i+1}" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover;display:block" onerror="if(this.dataset.alt&&this.src!==this.dataset.alt){this.src=this.dataset.alt}"></button>`).join('')}</div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${AT.list.map((c,i)=>`<button data-act="atPick" data-id="${i}"${c.src?'':' disabled'} style="padding:0;display:flex;align-items:center;justify-content:center;border-radius:14px;overflow:hidden;border:2px solid ${AT.pick===i?'var(--teal)':'var(--line)'};background:#fff;aspect-ratio:1">${c.src?`<img src="${E(c.src)}" alt="Konsept ${i+1}" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover;display:block">`:`<span style="color:#667;font-size:13px;padding:8px">${c.fail?'Üretilemedi':i===AT.list.findIndex(x=>!x.src&&!x.fail)?'Üretiliyor…':'Sırada'}</span>`}</button>`).join('')}</div>
+  <div class="hint" style="color:var(--faint);font-size:12.5px;margin-top:8px">Ücretsiz servis 45 saniyede 1 görsel veriyor; görseller sırayla gelir. Hazır olanı hemen seçebilirsin.</div>
   <div class="fl" style="margin-top:12px"><label for="at_note">Değişiklik notu <i>İsteğe bağlı</i></label><input id="at_note" value="${E(AT.note)}" placeholder="Örn. kulakları daha büyük olsun" oninput="AT.note=this.value"></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">${btn('atGen','Yeniden üret',{cls:'s'})}${btn('atMake','Onayla ve 3D yap',{cls:'p',extra:AT.pick==null?'disabled':''})}</div></div>`;
  // 3) model
@@ -44,8 +45,8 @@ function atResize(){const v=AT.v,el=document.getElementById('atView');if(!v||!el
 addEventListener('resize',atResize);
 
 async function atUpload(blob,name,type){
- const path=`${workspaceId}/atolye/${AT.id}/${name}`;
- const {error}=await sb.storage.from('catalog-media').upload(path,blob,{upsert:true,contentType:type});if(error)throw error;
+ const path=`${workspaceId}/atolye-${AT.id}/${Date.now()}-${name}`;
+ const {error}=await sb.storage.from('catalog-media').upload(path,blob,{upsert:false,contentType:type});if(error)throw error;
  return sb.storage.from('catalog-media').getPublicUrl(path).data.publicUrl;
 }
 
@@ -55,10 +56,23 @@ async function atGen(){
  AT.id=AT.id||uid();
  if(AT.file&&!AT.photo){atSet({busy:'Fotoğraf yükleniyor…',err:''});
   try{AT.photo=await atUpload(AT.file,'foto.'+((AT.file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')),AT.file.type||'image/jpeg')}
-  catch(e){console.error(e);toast('Fotoğraf yüklenemedi, konseptler yalnız açıklamayla üretilecek.')}}
- const list=A.concepts(AT.desc.trim()||'figurine',AT.photo,AT.note.trim()).map(c=>({...c,url:c.url+'&r='+Date.now()}));
+  catch(e){console.error(e);toast('Fotoğraf yüklenemedi ('+(e?.message||e)+'), konseptler yalnız açıklamayla üretilecek.')}}
+ const r='&r='+Date.now(),list=A.concepts(AT.desc.trim()||'figurine',AT.photo,AT.note.trim()).map(c=>({...c,url:c.url+r,alt:c.alt+r,src:''}));
+ const gen=AT.gen=(AT.gen||0)+1;
  atSet({list,pick:null,step:'konsept',busy:'',err:''});
+ // Ücretsiz Pollinations: 45 sn'de 1 istek. Görselleri sırayla, aralıklı iste; fotoğraf referanslı istek reddedilirse yazıyla üretime düş.
+ for(const c of list){
+  for(const u of (c.url===c.alt||AT.noRef)?[c.alt]:[c.url,c.alt]){
+   const wait=atLast+AT_GAP-Date.now();if(wait>0)await new Promise(f=>setTimeout(f,wait));
+   if(AT.gen!==gen)return;atLast=Date.now();
+   if(await atLoad(u)){c.src=u;break}
+   if(u===c.url)AT.noRef=true;
+  }
+  if(!c.src)c.fail=true;if(AT.gen===gen)atSet({});
+ }
 }
+let atLast=0;const AT_GAP=46000;
+const atLoad=u=>new Promise(f=>{const i=new Image();i.crossOrigin='anonymous';i.onload=()=>f(true);i.onerror=()=>f(false);i.src=u});
 
 async function atImageBlob(){
  if(AT.pick==='foto'){if(!AT.file)throw new Error('Fotoğraf seçilmedi.');return AT.file}
