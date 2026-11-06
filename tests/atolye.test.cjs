@@ -46,3 +46,12 @@ test('HF anahtarı biçimi',()=>{
  assert.ok(A.token('hf_abcdefghijklmnopqrstuvwxyz12'));
  assert.ok(!A.token('abc'));assert.ok(!A.token('hf_kisa'));
 });
+test('Kontext istemleri: 2 farklı stil, açıklama ve not eklenir, baskıya uygun kurallar var',()=>{
+ const p=A.kontextPrompts('oturan kedi','kulaklar büyük');
+ assert.equal(p.length,2);assert.notEqual(p[0],p[1]);
+ for(const s of p){assert.ok(s.includes('oturan kedi'));assert.ok(s.includes('kulaklar büyük'));assert.ok(/white background/.test(s));assert.ok(/base/.test(s))}
+});
+test('Kontext düzeltme istemi: yalnız notu uygular, gerisini korur',()=>{
+ const s=A.kontextEdit('kuyruğu kısalt');
+ assert.ok(s.includes('kuyruğu kısalt'));assert.ok(/keep everything else/i.test(s));
+});
