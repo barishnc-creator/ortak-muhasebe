@@ -19,8 +19,14 @@
   return [11,23,37,51].map(seed=>{const q=`?width=768&height=768&nologo=true&seed=${seed}`,alt=`${POL}${p}${q}&model=flux`;
    return {seed,alt,url:photo?`${POL}${p}${q}&model=kontext&image=${encodeURIComponent(photo)}`:alt}});
  };
+ // FLUX Kontext (fotoğraf referanslı) istemleri: 2 farklı stil.
+ const RULES='single solid object, smooth surfaces, no thin fragile parts, flat stable base, matte light grey PLA, plain white background, centered, full view, no text';
+ const kontextPrompts=(desc,note)=>{const d=[desc,note].filter(Boolean).join('. ');
+  return [`Turn the main subject of this photo into a realistic 3D printable figurine${d?': '+d:''}. Keep its proportions and details. ${RULES}`,
+   `Turn the main subject of this photo into a stylized, chunky, cute 3D printable figurine${d?': '+d:''}. Simplified shapes, slightly bigger head. ${RULES}`]};
+ const kontextEdit=note=>`Edit this figurine: ${note}. Keep everything else the same. ${RULES}`;
  const quota=m=>/quota|zerogpu|exceeded|gpu task aborted/i.test(String(m||''));
  const token=t=>/^hf_[A-Za-z0-9]{20,}$/.test(String(t||'').trim());
- const A={fit,mm,stlName,concepts,quota,token};
+ const A={fit,mm,stlName,concepts,kontextPrompts,kontextEdit,quota,token};
  if(typeof module!=='undefined'&&module.exports)module.exports=A;else root.ATOLYE=A;
 })(this);

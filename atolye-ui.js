@@ -1,7 +1,7 @@
 /* 3D Atölye arayüzü: fotoğraf + açıklama → konsept görseller → onay → Hunyuan3D-2.1 (ücretsiz HF alanı) → ölçekli STL.
    index.html'deki yardımcıları ($, E, S, sb, head, btn, toast, upd, render...) kullanır. Saf hesaplar atolye.js'de. */
 const AT={step:'giris',desc:'',note:'',file:null,photo:'',list:[],pick:null,busy:'',err:'',mm:80,v:null};
-const AT_SPACE='tencent/Hunyuan3D-2.1',AT_STUDIO='https://3d.hunyuan.tencent.com/';
+const AT_SPACE='tencent/Hunyuan3D-2.1',AT_KONTEXT='black-forest-labs/FLUX.1-Kontext-Dev',AT_STUDIO='https://3d.hunyuan.tencent.com/';
 const atTok=()=>{try{return localStorage.getItem('hf_token')||''}catch(_){return ''}};
 const atGradio=()=>import('https://cdn.jsdelivr.net/npm/@gradio/client@1.19.1/dist/browser.js');
 const atLib=()=>Promise.all([import('three'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/loaders/STLLoader.js'),import('three/addons/exporters/STLExporter.js'),import('three/addons/controls/OrbitControls.js')]);
@@ -23,9 +23,9 @@ function atView(){
  // 2) konsept
  if(AT.list.length)h+=`<div class="card"${stepCls('konsept')}><h3 style="margin:0 0 12px">2. Konsept seç</h3>
   <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${AT.list.map((c,i)=>`<button data-act="atPick" data-id="${i}"${c.src?'':' disabled'} style="padding:0;display:flex;align-items:center;justify-content:center;border-radius:14px;overflow:hidden;border:2px solid ${AT.pick===i?'var(--teal)':'var(--line)'};background:#fff;aspect-ratio:1">${c.src?`<img src="${E(c.src)}" alt="Konsept ${i+1}" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover;display:block">`:`<span style="color:#667;font-size:13px;padding:8px">${c.fail?'Üretilemedi':i===AT.list.findIndex(x=>!x.src&&!x.fail)?'Üretiliyor…':'Sırada'}</span>`}</button>`).join('')}</div>
-  <div class="hint" style="color:var(--faint);font-size:12.5px;margin-top:8px">Ücretsiz servis 45 saniyede 1 görsel veriyor; görseller sırayla gelir. Hazır olanı hemen seçebilirsin.</div>
+  <div class="hint" style="color:var(--faint);font-size:12.5px;margin-top:8px">${AT.file?'Görseller fotoğrafından Hugging Face (FLUX Kontext) ile üretilir, her biri yaklaşık 30 sn.':'Fotoğraf olmadan ücretsiz servis 45 sn\'de 1 görsel veriyor.'} Hazır olanı hemen seçebilirsin; bir konsept seçip not yazarsan sadece o düzeltilir.</div>
   <div class="fl" style="margin-top:12px"><label for="at_note">Değişiklik notu <i>İsteğe bağlı</i></label><input id="at_note" value="${E(AT.note)}" placeholder="Örn. kulakları daha büyük olsun" oninput="AT.note=this.value"></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">${btn('atGen','Yeniden üret',{cls:'s'})}${btn('atMake','Onayla ve 3D yap',{cls:'p',extra:AT.pick==null?'disabled':''})}</div></div>`;
+  <div style="display:flex;gap:8px;flex-wrap:wrap">${btn('atGen','Yeniden üret',{cls:'s'})}${AT.pick!=null&&AT.file?btn('atFix','Seçileni nota göre düzelt',{cls:'s'}):''}${btn('atMake','Onayla ve 3D yap',{cls:'p',extra:AT.pick==null?'disabled':''})}</div></div>`;
  // 3) model
  if(AT.v)h+=`<div class="card"><h3 style="margin:0 0 12px">3. Ölçekle ve indir</h3>
   <div id="atView" style="height:340px;border-radius:14px;overflow:hidden;background:var(--bg);touch-action:none"></div>
@@ -53,30 +53,48 @@ async function atUpload(blob,name,type){
 async function atGen(){
  const A=window.ATOLYE;AT.desc=(document.getElementById('at_desc')||{}).value??AT.desc;
  if(!AT.desc.trim()&&!AT.file)return toast('Bir fotoğraf seçin ya da açıklama yazın.');
- AT.id=AT.id||uid();
- if(AT.file&&!AT.photo){atSet({busy:'Fotoğraf yükleniyor…',err:''});
-  try{AT.photo=await atUpload(AT.file,'foto.'+((AT.file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')),AT.file.type||'image/jpeg')}
-  catch(e){console.error(e);toast('Fotoğraf yüklenemedi ('+(e?.message||e)+'), konseptler yalnız açıklamayla üretilecek.')}}
- const r='&r='+Date.now(),list=A.concepts(AT.desc.trim()||'figurine',AT.photo,AT.note.trim()).map(c=>({...c,url:c.url+r,alt:c.alt+r,src:''}));
- const gen=AT.gen=(AT.gen||0)+1;
- atSet({list,pick:null,step:'konsept',busy:'',err:''});
- // Ücretsiz Pollinations: 45 sn'de 1 istek. Görselleri sırayla, aralıklı iste; fotoğraf referanslı istek reddedilirse yazıyla üretime düş.
- for(const c of list){
-  for(const u of (c.url===c.alt||AT.noRef)?[c.alt]:[c.url,c.alt]){
-   const wait=atLast+AT_GAP-Date.now();if(wait>0)await new Promise(f=>setTimeout(f,wait));
-   if(AT.gen!==gen)return;atLast=Date.now();
-   if(await atLoad(u)){c.src=u;break}
-   if(u===c.url)AT.noRef=true;
-  }
-  if(!c.src)c.fail=true;if(AT.gen===gen)atSet({});
+ AT.id=AT.id||uid();const gen=AT.gen=(AT.gen||0)+1;
+ if(AT.file){ // fotoğraf referanslı: FLUX Kontext (HF), sırayla
+  if(!A.token(atTok()))return atKey();
+  const list=A.kontextPrompts(AT.desc.trim(),AT.note.trim()).map(prompt=>({prompt,src:''}));
+  atSet({list,pick:null,step:'konsept',busy:'',err:''});
+  for(const c of list){if(AT.gen!==gen)return;await atKontext(c,AT.file,gen)}
+  return;
  }
+ // fotoğrafsız: Pollinations flux (anonim, 45 sn'de 1)
+ const r='&r='+Date.now(),list=A.concepts(AT.desc.trim(),'',AT.note.trim()).map(c=>({url:c.alt+r,src:''}));
+ atSet({list,pick:null,step:'konsept',busy:'',err:''});
+ for(const c of list){
+  const wait=atLast+AT_GAP-Date.now();if(wait>0)await new Promise(f=>setTimeout(f,wait));
+  if(AT.gen!==gen)return;atLast=Date.now();
+  if(await atLoad(c.url))c.src=c.url;else c.fail=true;
+  if(AT.gen===gen)atSet({});
+ }
+}
+// Tek görsel üret: Kontext /infer(görsel, istem, seed, rastgele, guidance, adım) → [görsel, seed]
+async function atKontext(c,base,gen){
+ try{
+  const {Client,handle_file}=await atGradio();
+  AT.kc=AT.kc||await Client.connect(AT_KONTEXT,{hf_token:atTok()});
+  const r=await AT.kc.predict('/infer',[handle_file(base),c.prompt,0,true,2.5,20]);
+  const f=r.data?.[0];c.src=f?.url||'';if(!c.src)throw new Error('Görsel gelmedi.');
+ }catch(e){console.error(e);c.fail=true;AT.kc=null;const m=String(e?.message||e);
+  if(AT.gen===gen)AT.err=window.ATOLYE.quota(m)?'Bugünkü ücretsiz Hugging Face GPU kotası doldu.':'Konsept üretilemedi: '+m}
+ if(AT.gen===gen)atSet({});
+}
+async function atFix(){
+ const note=((document.getElementById('at_note')||{}).value??AT.note).trim();if(!note)return toast('Önce ne değişsin, yazın.');
+ if(AT.pick==null||!AT.list[AT.pick]?.src)return toast('Önce bir konsept seçin.');
+ const base=await atImageBlob(),c={prompt:window.ATOLYE.kontextEdit(note),src:''},gen=AT.gen;
+ AT.list.push(c);atSet({err:''});await atKontext(c,base,gen);
+ if(c.src)atSet({pick:AT.list.indexOf(c),note:''});
 }
 let atLast=0;const AT_GAP=46000;
 const atLoad=u=>new Promise(f=>{const i=new Image();i.crossOrigin='anonymous';i.onload=()=>f(true);i.onerror=()=>f(false);i.src=u});
 
 async function atImageBlob(){
  if(AT.pick==='foto'){if(!AT.file)throw new Error('Fotoğraf seçilmedi.');return AT.file}
- const img=document.querySelectorAll('#v [data-act="atPick"] img')[AT.pick];const src=img?.currentSrc||AT.list[AT.pick].url;
+ const img=document.querySelectorAll('#v [data-act="atPick"] img')[AT.pick];const src=img?.currentSrc||AT.list[AT.pick].src;
  const r=await fetch(src);if(!r.ok)throw new Error('Görsel alınamadı.');return await r.blob();
 }
 
@@ -94,7 +112,6 @@ async function atMake(){
   const f=r.data?.[0],url=f?.url||f?.path&&c.config.root+'/file='+f.path;if(!url)throw new Error('Model dosyası gelmedi.');
   const g=await fetch(url);if(!g.ok)throw new Error('Model dosyası indirilemedi.');
   await atShow(await g.arrayBuffer(),'glb');
-  if(AT.pick!=='foto'&&AT.pick!=null)AT.img=AT.list[AT.pick].url;else AT.img=AT.photo;
   atSet({busy:'',step:'model'});
  }catch(e){console.error(e);const m=String(e?.message||e);
   atSet({busy:'',err:A.quota(m)?'Bugünkü ücretsiz GPU kotası doldu.':'3D üretim başarısız: '+m})}
@@ -133,7 +150,8 @@ async function atDl(){
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
  AT.id=AT.id||uid();let stl='';
  try{stl=await atUpload(blob,name,'application/octet-stream')}catch(e){console.error(e);toast('STL indirildi ama buluta kaydedilemedi: '+(e?.message||e))}
- S.atolye=S.atolye||[];S.atolye.push({id:AT.id,desc:AT.desc.trim(),mm,img:AT.img||'',stl,at:Date.now(),by:meName()||''});
+ let img='';if(AT.blob)try{img=await atUpload(AT.blob,'konsept.'+((AT.blob.type||'image/png').split('/')[1]||'png'),AT.blob.type||'image/png')}catch(e){console.error(e)}
+ S.atolye=S.atolye||[];S.atolye.push({id:AT.id,desc:AT.desc.trim(),mm,img,stl,at:Date.now(),by:meName()||''});
  logAct?.('3D model kaydetti: '+(AT.desc.trim()||'Model'));AT.id=null;upd();toast('STL indirildi ve geçmişe kaydedildi.');
 }
 
@@ -146,7 +164,7 @@ function atKey(thenMake){
 }
 
 Object.assign(ACT,{
- atKey:()=>atKey(),atGen,atMake,atDl,
+ atKey:()=>atKey(),atGen,atMake,atDl,atFix,
  atDirect(){if(!AT.file)return toast('Önce bir fotoğraf seçin.');AT.pick='foto';atMake()},
  atPick:id=>atSet({pick:+id}),
  atSaveImg:async()=>{try{const b=AT.blob||await atImageBlob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='konsept.png';a.click()}catch(e){toast('Görsel indirilemedi.')}},
@@ -154,7 +172,7 @@ Object.assign(ACT,{
 });
 // index.html'deki change dinleyicisinden çağrılır.
 function atChange(k,el){
- if(k==='atFile'){AT.file=el.files[0]||null;AT.photo='';AT.id=null}
+ if(k==='atFile'){AT.file=el.files[0]||null;AT.photo='';AT.blob=null;AT.id=null}
  else if(k==='atMm'){const m=window.ATOLYE.mm(el.value);if(!m){toast('Yükseklik 5–300 mm arası olmalı.');el.value=AT.mm;return}AT.mm=m;if(AT.v){atScale(m);render()}}
  else if(k==='atModel'){const f=el.files[0];if(!f)return;const kind=/\.stl$/i.test(f.name)?'stl':'glb';
   f.arrayBuffer().then(b=>atShow(b,kind)).then(()=>{AT.desc=AT.desc||f.name.replace(/\.\w+$/,'');atSet({step:'model',err:''})}).catch(e=>{console.error(e);toast('Dosya açılamadı: '+(e?.message||e))})}
