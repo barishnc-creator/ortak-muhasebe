@@ -158,6 +158,12 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 .fg .w{grid-column:1/-1}
 .fl label,.fl .lb{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;font-weight:600;margin-bottom:6px}
 .fl label i{font-style:normal;color:var(--faint);font-weight:500}
+.pgal{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-bottom:8px}
+.pgal figure{position:relative;margin:0;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--line-2);background:var(--bg)}
+.pgal img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.pgal figure>span,.pgal figure>.btn{position:absolute;left:6px;bottom:6px;height:24px;padding:0 8px;border-radius:999px;font-size:11.5px;font-weight:600;background:rgba(8,16,25,.78);color:var(--text);display:inline-flex;align-items:center}
+.pgal figure>span{background:var(--teal);color:var(--teal-ink)}
+.pgal .ib{position:absolute;top:4px;right:4px;width:28px;height:28px;background:rgba(8,16,25,.78)}
 .fl input:not([type=checkbox]):not([type=file]),.fl select,.fl textarea,.inp{width:100%;height:42px;padding:0 12px;border-radius:var(--r-sm);border:1px solid var(--line-2);background:var(--bg);outline:none;font-size:15px}
 .fl textarea{height:auto;padding:10px 12px;resize:vertical;min-height:84px}
 .fl input:focus,.fl select:focus,.fl textarea:focus,.inp:focus{border-color:var(--teal)}
@@ -470,6 +476,7 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 <div class="toast" id="t" role="status"></div>
 
 <script src="plan.js"></script>
+<script src="galeri.js"></script>
 <script src="atolye.js"></script>
 <script>
 /* ---- Yardımcılar ---- */
@@ -1189,17 +1196,17 @@ function formProd(p){
   ${fl('catalogMin','En az sipariş adedi',{type:'number',value:p?Math.max(1,N(p.catalogMin)||25):25})}${fl('catalogStep','Adet artış miktarı',{type:'number',value:p?Math.max(1,N(p.catalogStep)||25):25})}
   ${fta('catalogDescription','Katalog açıklaması',p?.catalogDescription||'',{ph:'Ürünün kısa açıklaması'})}
   <div class="w" style="display:grid;gap:8px">${fchk('catalogVisible','Katalogda göster',p?p.catalogVisible!==false:true)}${fchk('catalogActive','Siparişe açık',p?p.catalogActive!==false:true)}${fchk('catalogBestSeller','Çok satanlarda göster',!!p?.catalogBestSeller)}</div>
-  <div class="fl"><label for="f_img">Fotoğraf${p?.catalogImage?'<i>Yüklü</i>':''}</label><input id="f_img" name="img" type="file" accept="image/*">${p?.catalogImage?`<button type="button" class="btn q" data-act="delMedia" data-id="${E(p.id)}" data-k="image" style="margin-top:4px">Fotoğrafı kaldır</button>`:''}</div>
+  <div class="fl w"><label for="f_img">Fotoğraflar${pimgs(p).length?'<i>'+pimgs(p).length+' / '+GALERI.MAX+'</i>':'<i>Birden fazla seçebilirsiniz</i>'}</label>${pimgs(p).length?`<div class="pgal">${pimgs(p).map((u,i)=>`<figure><img src="${E(u)}" alt="">${i?`<button type="button" class="btn q" data-act="coverImg" data-id="${E(p.id)}" data-u="${E(u)}">Kapak yap</button>`:'<span>Kapak</span>'}<button type="button" class="ib" data-act="delImg" data-id="${E(p.id)}" data-u="${E(u)}" aria-label="Fotoğrafı kaldır"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></figure>`).join('')}</div>`:''}<input id="f_img" name="img" type="file" accept="image/*" multiple></div>
   <div class="fl"><label for="f_vid">Video${p?.catalogVideo?'<i>Yüklü</i>':'<i>İsteğe bağlı</i>'}</label><input id="f_vid" name="vid" type="file" accept="video/*,.mp4,.webm,.mov,.m4v">${p?.catalogVideo?`<button type="button" class="btn q" data-act="delMedia" data-id="${E(p.id)}" data-k="video" style="margin-top:4px">Videoyu kaldır</button>`:''}</div>
-  <p class="note w" style="margin:0">Yeni dosya seçilirse mevcut medyanın yerine geçer. En fazla 25 MB.</p></div>`,
+  <p class="note w" style="margin:0">Yeni fotoğraflar mevcutların sonuna eklenir; katalogda kaydırarak gezilir. Yeni video mevcut videonun yerine geçer. Dosya başına en fazla 25 MB.</p></div>`,
   async onSubmit(f,form){
    const n=String(f.n||'').trim(),min=Math.floor(N(f.catalogMin)),step=Math.floor(N(f.catalogStep));
    if(!need(n,'Ürün adını yazın.','n')||!need(min>=1&&step>=1,'En az adet ve artış miktarı en az 1 olmalı.','catalogMin')||!need(N(f.price)>=0&&N(f.gram)>=0&&N(f.mins)>=0,'Gram, süre ve fiyat eksi olamaz.','price'))return false;
    const vals={n,mat:f.mat,gram:N(f.gram),mins:N(f.mins),extra:N(f.extra),price:N(f.price),catalogCategory:f.catalogCategory||'',catalogMin:min,catalogStep:step,catalogDescription:String(f.catalogDescription||'').trim(),catalogVisible:!!f.catalogVisible,catalogActive:!!f.catalogActive,catalogBestSeller:!!f.catalogBestSeller};
-   const img=form.querySelector('#f_img').files[0],vid=form.querySelector('#f_vid').files[0];
+   const img=[...form.querySelector('#f_img').files],vid=form.querySelector('#f_vid').files[0];
    let it=p;if(it)Object.assign(it,vals);else{it={id:uid(),...vals};S.prod.push(it)}logAct((p?'Ürünü düzenledi: ':'Ürün ekledi: ')+n);
    await saveNow();render();
-   if(img)await uploadProductMedia(it.id,'image',img);if(vid)await uploadProductMedia(it.id,'video',vid);
+   if(img.length)await uploadProductImages(it.id,img);if(vid)await uploadProductMedia(it.id,'video',vid);
    toast(p?'Ürün kaydedildi.':'Ürün eklendi.');
   }});
  const calc=()=>{const m=mat(V('f_mat')),c=(N(V('f_gram'))*gc(m)+N(V('f_mins'))/60*N(S.set.hr)+N(V('f_extra')))*(1+N(S.set.fire)/100),pr=N(V('f_price'));$('#costOut').textContent=TL(c);$('#marOut').textContent=pr?'Kâr %'+Math.round((pr-c)/pr*100):'';$('#marOut').className=pr&&pr<c?'bad':'mu'};
@@ -1984,11 +1991,28 @@ async function uploadProductMedia(id,type,file){
  if(type==='video'&&!mime.startsWith('video/')&&!/\.(mp4|webm|mov|m4v|ogv)$/i.test(file.name))return toast('MP4, WebM ya da MOV video seçin.');
  if(file.size>25*1024*1024)return toast('Dosya 25 MB\'dan küçük olmalı.');
  try{toast(type==='image'?'Fotoğraf yükleniyor…':'Video yükleniyor…');const ext=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'');
-  const path=`${workspaceId}/${id}/${type}-${Date.now()}.${ext}`;const {error}=await sb.storage.from('catalog-media').upload(path,file,{upsert:false,contentType:mime||(type==='video'?'video/mp4':'application/octet-stream')});if(error)throw error;
-  const {data}=sb.storage.from('catalog-media').getPublicUrl(path);if(!data?.publicUrl)throw new Error('Dosya bağlantısı oluşturulamadı.');
-  p[type==='image'?'catalogImage':'catalogVideo']=data.publicUrl;await saveNow();render();toast(type==='image'?'Fotoğraf yüklendi.':'Video yüklendi.');
+  const url=await putMedia(id,type,file,ext);
+  if(type==='image')Object.assign(p,GALERI.fields([...pimgs(p),url]));else p.catalogVideo=url;await saveNow();render();toast(type==='image'?'Fotoğraf yüklendi.':'Video yüklendi.');
  }catch(e){console.error(e);toast('Medya yüklenemedi: '+(e?.message||e))}
 }
+async function putMedia(id,type,file,ext){
+ const path=`${workspaceId}/${id}/${type}-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;const {error}=await sb.storage.from('catalog-media').upload(path,file,{upsert:false,contentType:file.type||(type==='video'?'video/mp4':'application/octet-stream')});if(error)throw error;
+ const {data}=sb.storage.from('catalog-media').getPublicUrl(path);if(!data?.publicUrl)throw new Error('Dosya bağlantısı oluşturulamadı.');return data.publicUrl;
+}
+const pimgs=p=>p?GALERI.list(p.catalogImages,p.catalogImage):[];
+async function uploadProductImages(id,files){
+ const p=prod(id);if(!p)return;const room=GALERI.MAX-pimgs(p).length;
+ if(room<=0)return toast('Bir ürüne en fazla '+GALERI.MAX+' fotoğraf eklenebilir.');
+ if(files.length>room)toast('İlk '+room+' fotoğraf eklenecek (en fazla '+GALERI.MAX+').');
+ for(const f of files.slice(0,room))await uploadProductMedia(id,'image',f);
+}
+async function removeStored(url){const marker='/storage/v1/object/public/catalog-media/',at=url.indexOf(marker);if(at<0)return;const {error}=await sb.storage.from('catalog-media').remove([decodeURIComponent(url.slice(at+marker.length).split('?')[0])]);if(error)console.warn(error.message)}
+async function deleteProductImage(id,url){
+ const p=prod(id);if(!p||!pimgs(p).includes(url))return;
+ if(!await confirmBox('Fotoğraf kaldırılsın mı?','Katalogdan da kalkar.','Kaldır'))return;
+ try{await removeStored(url);Object.assign(p,GALERI.fields(GALERI.without(pimgs(p),url)));await saveNow();formProd(p);render();toast('Fotoğraf kaldırıldı.')}catch(e){console.error(e);toast('Kaldırılamadı: '+(e?.message||e))}
+}
+async function coverProductImage(id,url){const p=prod(id);if(!p)return;Object.assign(p,GALERI.fields(GALERI.toFront(pimgs(p),url)));await saveNow();formProd(p);render();toast('Kapak fotoğrafı değişti.')}
 async function deleteProductMedia(id,type){
  const p=prod(id);if(!p)return;const key=type==='image'?'catalogImage':'catalogVideo';if(!p[key])return;
  if(!await confirmBox(type==='image'?'Fotoğraf kaldırılsın mı?':'Video kaldırılsın mı?','Katalogdan da kalkar.','Kaldır'))return;
@@ -2081,7 +2105,7 @@ const ACT={
  async delProd(id){const p=byId(S.prod,id);if(!p)return;const used=S.ord.filter(o=>o.prod===id).length;
   if(!await confirmBox('Ürün silinsin mi?',used?`Bu ürün ${used} siparişte kullanılıyor; silinirse o siparişlerin maliyeti ve kârı hesaplanamaz. Satıştan kaldırmak için "Siparişe açık" seçeneğini kapatmanız daha güvenli.`:p.n+' kalıcı olarak silinir.',used?'Yine de sil':'Sil'))return;
   S.prod=S.prod.filter(x=>x.id!==id);upd();toast('Ürün silindi.')},
- delMedia:(id,el)=>deleteProductMedia(id,el.dataset.k),cats:()=>formCats(),
+ delMedia:(id,el)=>deleteProductMedia(id,el.dataset.k),delImg:(id,el)=>deleteProductImage(id,el.dataset.u),coverImg:(id,el)=>coverProductImage(id,el.dataset.u),cats:()=>formCats(),
  async catAdd(){const n=V('f_newcat').trim();if(!n)return toast('Kategori adını yazın.');if(categoryNames().some(x=>lower(x)===lower(n)))return toast('Bu kategori zaten var.');S.catalogCategories=[...(S.catalogCategories||[]),n];await saveNow();_redrawCats();toast('Kategori eklendi.')},
  async catRen(i){const names=categoryNames(),old=names[i],v=V('cat_'+i).trim();if(!old||!v)return toast('Kategori adı boş olamaz.');if(v!==old&&names.some(x=>x!==old&&lower(x)===lower(v)))return toast('Bu isimde başka kategori var.');S.catalogCategories=[...new Set((S.catalogCategories||[]).map(x=>x===old?v:x).concat((S.catalogCategories||[]).includes(old)?[]:[v]))];S.prod.forEach(p=>{if(String(p.catalogCategory||'').trim()===old)p.catalogCategory=v});await saveNow();_redrawCats();render();toast('Kategori güncellendi.')},
  async catDel(i){const old=categoryNames()[i];if(!old)return;if(!await confirmBox('“'+old+'” silinsin mi?','Bu kategorideki ürünler silinmez, kategorisiz kalır.','Sil'))return;S.catalogCategories=(S.catalogCategories||[]).filter(x=>x!==old);S.prod.forEach(p=>{if(String(p.catalogCategory||'').trim()===old)p.catalogCategory=''});await saveNow();_redrawCats();render();toast('Kategori silindi.')},
