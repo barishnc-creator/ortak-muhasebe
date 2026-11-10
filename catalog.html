@@ -21,6 +21,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="galeri.js"></script>
+<script src="kademe.js"></script>
 <style>
 :root{
  color-scheme:dark;
@@ -353,6 +354,42 @@ html.vitrin .cart-only{display:none!important}
  body.locked .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top));transform:translate(-50%,-20px)}
  body.locked .toast.on{transform:translate(-50%,0)}
 }
+/* Cam tema: bulanık petrol mavisi zemin, cam yüzeyler (ızgarada bulanıklık yok, telefon yavaşlamasın) */
+:root{--glass:rgba(16,34,50,.55);--glass-line:rgba(255,255,255,.09);--glass-hi:inset 0 1px 0 rgba(255,255,255,.07);--blur:saturate(150%) blur(18px)}
+html{background:#071019}body{background:transparent}
+body:before{content:"";position:fixed;inset:-10%;z-index:-1;pointer-events:none;background:
+ radial-gradient(40% 35% at 18% 12%,rgba(63,208,201,.30),transparent 70%),
+ radial-gradient(38% 34% at 85% 18%,rgba(64,120,220,.45),transparent 70%),
+ radial-gradient(32% 28% at 70% 80%,rgba(245,150,70,.22),transparent 70%),
+ radial-gradient(45% 40% at 25% 90%,rgba(30,110,170,.45),transparent 70%),
+ linear-gradient(160deg,#0A1A2A,#06101A 60%,#0A1622);filter:blur(30px)}
+.top{background:rgba(8,20,31,.55);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.top.scrolled{border-bottom-color:var(--glass-line)}
+.hero,.steps,.drawer,.tiers{border-color:var(--glass-line);box-shadow:var(--glass-hi),0 10px 30px rgba(0,0,0,.2);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.hero,.steps{background:var(--glass)}
+.drawer,.df{background:rgba(14,30,45,.88)}
+.hero-tag{background:rgba(8,20,31,.6);border-color:var(--glass-line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.bar{background:rgba(7,16,25,.6);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.card{background:rgba(15,32,47,.78);border-color:var(--glass-line);box-shadow:var(--glass-hi);transition:border-color .2s,box-shadow .25s,transform .25s}
+.card:hover{border-color:rgba(123,230,224,.35);box-shadow:var(--glass-hi),0 0 0 1px rgba(63,208,201,.12),0 14px 40px -10px rgba(63,208,201,.28);transform:translateY(-2px)}
+.card.in{border-color:rgba(63,208,201,.6);box-shadow:var(--glass-hi),0 0 24px -6px rgba(63,208,201,.45)}
+.price b{text-shadow:0 0 18px rgba(123,230,224,.18)}
+.add,.solid,.primary{box-shadow:0 0 18px -4px rgba(63,208,201,.55),inset 0 1px 0 rgba(255,255,255,.3)}
+.search input,.sort,.field input,.field textarea{background-color:rgba(6,16,26,.55)}
+.chip[aria-pressed="true"]{background:linear-gradient(180deg,var(--teal-2),var(--teal));border-color:var(--teal);color:var(--teal-ink);box-shadow:0 0 16px -2px rgba(63,208,201,.5)}
+.tprog{height:8px}.tprog i{box-shadow:0 0 12px rgba(123,230,224,.7)}
+.cartTier{grid-template-columns:auto 1fr;align-items:center;gap:14px;padding:12px 14px;border:1px solid rgba(63,208,201,.25);background:linear-gradient(120deg,rgba(63,208,201,.12),rgba(63,208,201,.03))}
+.tring{position:relative;width:58px;height:58px}
+.tring svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.tring circle{fill:none;stroke-width:6}.tring .tr{stroke:rgba(255,255,255,.08)}
+.tring .pr{stroke:var(--teal);stroke-linecap:round;filter:drop-shadow(0 0 5px rgba(63,208,201,.7));transition:stroke-dashoffset .5s cubic-bezier(.2,.8,.2,1)}
+.tring.full .pr{stroke:var(--ok);filter:drop-shadow(0 0 5px rgba(74,222,155,.7))}
+.tring b{position:absolute;inset:0;display:grid;place-items:center;font:800 14px/1 var(--display);color:var(--text)}
+.tstep.done:before,.tstep.now:before{box-shadow:0 0 10px rgba(63,208,201,.7)}
+.tstep.done span{box-shadow:0 0 14px rgba(63,208,201,.55)}
+.tstep.now span{box-shadow:0 0 0 5px var(--teal-soft),0 0 18px rgba(63,208,201,.5)}
+.tnow{-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+@media (prefers-reduced-transparency:reduce){.top,.hero,.steps,.drawer,.bar,.card,.tiers{background:var(--surface)!important;-webkit-backdrop-filter:none;backdrop-filter:none}}
 @media (prefers-reduced-motion:reduce){
  *,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
@@ -477,9 +514,12 @@ function tierMsg(q){const p=tierPct(q),n=nextTier(q);
  if(!TIERS.length)return '';
  if(n)return (p?`<b>%${p} indirim</b> kazandınız. `:'')+`<b>${n.min-q} adet</b> daha ekleyin, <b>%${n.pct} indirim</b> olsun.`;
  return `En yüksek indirim: <b>%${p}</b> kazandınız.`}
+// Sepette parlayan halka: bir sonraki indirim kademesine ne kadar kaldı
+function tierRing(q){const g=KADEME.progress(q,TIERS),C=2*Math.PI*24,p=tierPct(q);
+ return `<div class="cartTier"><div class="tring${g.next?'':' full'}" aria-hidden="true"><svg viewBox="0 0 60 60"><circle class="tr" cx="30" cy="30" r="24"/><circle class="pr" cx="30" cy="30" r="24" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-g.ratio/100)).toFixed(1)}"/></svg><b>${p?'%'+p:g.next?'%'+g.next.pct:''}</b></div><div>Toplam <b>${q} adet</b>. ${tierMsg(q)}</div></div>`}
 function renderTiers(){
  const el=$('tiers');if(!el)return;if(SHOW||PARTNER||!TIERS.length){el.innerHTML='';return}
- const q=cartQty(),p=tierPct(q),n=nextTier(q),prev=TIERS.filter(t=>t.min<=q).sort((a,b)=>b.min-a.min)[0],base=prev?prev.min:0,pr=n?Math.min(100,Math.round((q-base)/(n.min-base)*100)):100;
+ const q=cartQty(),p=tierPct(q),pr=KADEME.progress(q,TIERS).ratio;
  el.innerHTML=`<div class="th"><b>Toptan indirim</b><div class="tl">${TIERS.slice().sort((a,b)=>a.min-b.min).map(t=>`<span class="${p===t.pct&&q>=t.min?'on':''}"><b>%${t.pct}</b>${t.min}+ adet</span>`).join('')}</div></div>
   <div class="msg">${q?`Sepetinizde <b>${q} adet</b> var. `+tierMsg(q):'İndirim, sepetteki <b>toplam adede</b> göre (farklı ürünler dahil) bütün ürünlere uygulanır.'}</div>${q?`<div class="tprog" aria-hidden="true"><i style="width:${pr}%"></i></div>`:''}`;
 }
@@ -676,7 +716,7 @@ function renderCart(){
  foot.style.display='';
  const v=id=>($(id)?.value)??'';const keep={cn:v('cn'),cp:v('cp'),co:v('co')};
  const tq=cartQty(),tp=tierPct(tq);
- body.innerHTML=(TIERS.length&&!PARTNER?`<div class="cartTier"><div>Toplam <b>${tq} adet</b>. ${tierMsg(tq)}</div></div>`:'')+cart.map(x=>{const p=product(x.product_id),r=p?rules(p):{min:x.min||1,step:x.step||1};return `<div class="ci">
+ body.innerHTML=(TIERS.length&&!PARTNER?tierRing(tq):'')+cart.map(x=>{const p=product(x.product_id),r=p?rules(p):{min:x.min||1,step:x.step||1};return `<div class="ci">
   <div class="th">${x.image?`<img src="${esc(x.image)}" alt="">`:''}</div>
   <div><b>${esc(x.name)}</b><small>${lineUnit(x,tp)<lineList(x)-0.004?`<s>${money(lineList(x))}</s>${money(lineUnit(x,tp))}`:money(lineList(x))} / adet${linePromo(x)?' · kampanya':''}</small>
    <div class="step"><button onclick="bump('${esc(x.product_id)}',-1)" aria-label="${r.step} adet azalt">−</button><output>${x.qty}</output><button onclick="bump('${esc(x.product_id)}',1)" aria-label="${r.step} adet artır">+</button></div></div>
