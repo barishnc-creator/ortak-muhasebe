@@ -438,6 +438,54 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
  .mtab .qb .bar,.mtab .rev{display:none}
  .fig b{font-size:13px}
 }
+/* Cam tema: bulanık petrol mavisi zemin, buzlu cam yüzeyler */
+:root{--glass:rgba(16,34,50,.52);--glass-2:rgba(22,44,64,.62);--glass-line:rgba(255,255,255,.09);--glass-hi:inset 0 1px 0 rgba(255,255,255,.07);--blur:saturate(150%) blur(18px)}
+html{background:#071019}body{background:transparent}
+body:before{content:"";position:fixed;inset:-10%;z-index:-1;pointer-events:none;background:
+ radial-gradient(40% 35% at 18% 12%,rgba(63,208,201,.30),transparent 70%),
+ radial-gradient(38% 34% at 85% 18%,rgba(64,120,220,.45),transparent 70%),
+ radial-gradient(32% 28% at 70% 80%,rgba(245,150,70,.22),transparent 70%),
+ radial-gradient(45% 40% at 25% 90%,rgba(30,110,170,.45),transparent 70%),
+ linear-gradient(160deg,#0A1A2A,#06101A 60%,#0A1622);filter:blur(30px)}
+.card,.kpi,.pc,.wkd,.mo,.drawer,.dialog,.bnav,.authbox{background:var(--glass);border-color:var(--glass-line);box-shadow:var(--glass-hi),0 10px 30px rgba(0,0,0,.18);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.drawer,.dialog{background:rgba(14,30,45,.86)}
+.side{background:rgba(10,24,36,.55);border-right-color:var(--glass-line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.mtop{background:rgba(8,20,31,.6)!important;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.app,.auth{background:transparent}
+.nav-g>span{font:600 10.5px/1 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.16em;text-transform:uppercase;padding:6px 10px 8px}
+.nav a[aria-current="page"]{color:var(--teal-ink);background:linear-gradient(180deg,var(--teal-2),var(--teal));box-shadow:0 0 18px rgba(63,208,201,.35),inset 0 1px 0 rgba(255,255,255,.35)}
+.nav a[aria-current="page"]:before{display:none}
+.nav a[aria-current="page"] .badge{background:var(--teal-ink);color:var(--teal-2)}
+.kpi{position:relative;overflow:hidden}
+.kpi:after{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,rgba(123,230,224,.35),transparent)}
+.kpi .ki{width:26px;height:26px;border-radius:8px;display:inline-grid;place-items:center;margin-right:8px;vertical-align:-8px;background:var(--teal-soft);color:var(--teal-2)}
+.kpi .ki svg{width:15px;height:15px}
+.kpi .ki.ok{background:var(--ok-soft);color:var(--ok)}.kpi .ki.bad{background:var(--bad-soft);color:var(--bad)}.kpi .ki.warn{background:var(--amber-soft);color:var(--amber)}.kpi .ki.blue{background:var(--blue-soft);color:var(--blue)}
+.fl input:not([type=checkbox]):not([type=file]),.fl select,.fl textarea,.inp,.search input{background:rgba(6,16,26,.55)}
+/* Özet: haftalık gelir grafiği ve geçen aya oran halkası */
+.ozg{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.ozg .card{margin:0}
+.wbars{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;align-items:end;height:190px;padding-top:22px}
+.wbars .col{display:flex;flex-direction:column;align-items:center;gap:8px;height:100%}
+.wbars .b{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;position:relative}
+.wbars i{width:min(34px,80%);min-height:3px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,rgba(123,230,224,.95),rgba(63,208,201,.45));transform-origin:bottom;animation:grow .7s cubic-bezier(.2,.8,.2,1) both}
+.wbars .col.cur i{background:linear-gradient(180deg,#E8FFFD,var(--teal-2) 35%,var(--teal));box-shadow:0 0 22px rgba(123,230,224,.55)}
+.wbars em{position:absolute;left:0;right:0;text-align:center;font:600 11px/1 var(--body);font-style:normal;color:var(--muted)}
+.wbars small{color:var(--faint);font-size:11.5px}
+.wbars .col.cur small{color:var(--teal-2);font-weight:700}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.ring{position:relative;width:150px;height:150px;margin:8px auto 4px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.ring circle{fill:none;stroke-width:11}
+.ring .tr{stroke:rgba(255,255,255,.07)}
+.ring .pr{stroke:var(--teal);stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(63,208,201,.6));transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)}
+.ring div{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring b{font:800 30px/1 var(--display);letter-spacing:-.02em}
+.ring small{color:var(--muted);font-size:12px;margin-top:4px}
+@media (max-width:760px){.ozg{grid-template-columns:1fr}.wbars{gap:6px}}
+/* Cam desteklenmiyorsa ya da kullanıcı saydamlık istemiyorsa düz yüzey */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.card,.kpi,.pc,.wkd,.mo,.drawer,.dialog,.bnav,.side,.authbox{background:var(--surface)}}
+@media (prefers-reduced-transparency:reduce){.card,.kpi,.pc,.wkd,.mo,.drawer,.dialog,.bnav,.side,.authbox,.mtop{background:var(--surface)!important;-webkit-backdrop-filter:none;backdrop-filter:none}}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -476,6 +524,7 @@ main{min-width:0;padding:28px clamp(16px,3.2vw,40px) 60px;max-width:1240px;width
 <div class="toast" id="t" role="status"></div>
 
 <script src="plan.js"></script>
+<script src="ozet.js"></script>
 <script src="galeri.js"></script>
 <script src="atolye.js"></script>
 <script>
@@ -805,7 +854,7 @@ window.addEventListener('hashchange',()=>{const k=location.hash.slice(1);if(k&&k
 const head=(title,sub,acts='')=>`<div class="ph"><div><h1>${E(title)}</h1>${sub?`<p>${sub}</p>`:''}</div>${acts?`<div class="acts">${acts}</div>`:''}</div>`;
 const btn=(act,label,{cls='s',icon='',id='',extra=''}={})=>`<button class="btn ${cls}" data-act="${act}"${id?` data-id="${E(id)}"`:''} ${extra}>${icon?IC[icon]:''}${E(label)}</button>`;
 const ibtn=(act,id,icon,label)=>`<button class="ib" data-act="${act}" data-id="${E(id)}" aria-label="${E(label)}" title="${E(label)}">${IC[icon]}</button>`;
-const kpi=(label,value,cls='',sub='')=>`<div class="kpi"><small>${label}</small><b class="${cls}">${value}</b>${sub?`<span>${sub}</span>`:''}</div>`;
+const kpi=(label,value,cls='',sub='',ic='',icc='')=>`<div class="kpi"><small>${ic&&IC[ic]?`<span class="ki ${icc}">${IC[ic]}</span>`:''}${label}</small><b class="${cls}">${value}</b>${sub?`<span>${sub}</span>`:''}</div>`;
 const empty=(t,s='')=>`<div class="empty"><b>${t}</b>${s}</div>`;
 const stSel=o=>`<select class="stsel s${Math.max(0,ST.indexOf(o.st))}" data-change="status" data-id="${E(o.id)}" aria-label="Sipariş durumu">${ST.map(s=>`<option${s===o.st?' selected':''}>${s}</option>`).join('')}</select>`;
 const bar=(v,mx,cls='')=>`<div class="bar ${cls}"><i style="width:${mx>0?Math.max(2,Math.min(100,Math.abs(v)/mx*100)):0}%"></i></div>`;
@@ -821,6 +870,16 @@ function orderRow(o,compact){
  <div class="acts">${stSel(o)}${o.kons&&(ka||(o.kh||[]).length)?ibtn('kons',o.id,'kons','Konsinye hesap'):''}${compact?'':ibtn('jobFor',o.id,'job','Baskıya ver')+ibtn('editOrd',o.id,'edit','Düzenle')+ibtn('delOrd',o.id,'trash','Sil')}</div></div>`;
 }
 
+// Özet: son 8 haftanın geliri ve bu ayın geçen aya oranı
+function ozetGrafik(){
+ const T=td(),w=OZET.weeks(S.tx,T,8),mx=Math.max(1,...w.map(x=>x.kurus));
+ const ym=T.slice(0,7),d=new Date(T+'T12:00:00'),pm=new Date(d.getFullYear(),d.getMonth()-1,15),pym=pm.getFullYear()+'-'+String(pm.getMonth()+1).padStart(2,'0');
+ const k=m=>S.tx.filter(x=>x.t==='gelir'&&String(x.d).startsWith(m)).reduce((a,x)=>a+Math.round(N(x.amt)*100),0);
+ const cur=k(ym),prev=k(pym),r=OZET.ratio(cur,prev),C=2*Math.PI*52,fill=r===null?(cur>0?1:0):Math.min(r,100)/100;
+ const lbl=s=>{const [,m,g]=s.split('-');return +g+'.'+m};
+ return `<div class="ozg"><div class="card"><div class="ch"><h2>Haftalık gelir</h2><span class="tag t">Son 8 hafta</span></div><div class="wbars">${w.map((x,i)=>`<div class="col${i===w.length-1?' cur':''}" title="${lbl(x.start)} haftası: ${TL(x.kurus/100)}"><div class="b"><i style="height:${x.kurus/mx*100}%;animation-delay:${i*40}ms"></i>${x.kurus?`<em style="bottom:calc(${x.kurus/mx*100}% + 6px)">${new Intl.NumberFormat('tr-TR',{notation:'compact',maximumFractionDigits:1}).format(x.kurus/100)}</em>`:''}</div><small>${i===w.length-1?'Bu hafta':lbl(x.start)}</small></div>`).join('')}</div></div>
+ <div class="card"><div class="ch"><h2>Geçen aya göre</h2><a class="btn q" href="#rapor">Rapor</a></div><div class="ring"><svg viewBox="0 0 120 120"><circle class="tr" cx="60" cy="60" r="52"/><circle class="pr" cx="60" cy="60" r="52" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-fill)).toFixed(1)}"/></svg><div><b>${r===null?'—':'%'+r}</b><small>${r===null?'Geçen ay gelir yok':'geçen ayın geliri'}</small></div></div><p class="note" style="text-align:center;margin-top:6px">Bu ay ${TL(cur/100)} · geçen ay ${TL(prev/100)}</p></div></div>`;
+}
 const V_={
 ozet(){
  const ym=td().slice(0,7),t=S.tx.filter(x=>String(x.d).startsWith(ym)),gl=sumT(t,'gelir'),gd=sumT(t,'gider');
@@ -838,7 +897,8 @@ ozet(){
  S.ord.filter(o=>kAt(o)>0&&o.date&&(Date.now()-new Date(o.date+'T12:00').getTime())/864e5>=30).forEach(o=>todo.push(`<div class="r"><div class="main"><div class="t">${E(o.cust)}: konsinye hesabı</div><div class="s">${fg(kAt(o))} × ${E(pname(o.prod))} müşteride, ${Math.floor((Date.now()-new Date(o.date+'T12:00').getTime())/864e5)} gündür</div></div>${btn('kons','Hesap',{cls:'s sm',id:o.id})}</div>`));
  ready.forEach(o=>todo.push(`<div class="r"><div class="main"><div class="t">${E(o.cust)} siparişi hazır</div><div class="s">${N(o.qty)} × ${E(pname(o.prod))}${orem(o)>0.004?', kalan '+TL(orem(o)):''}</div></div>${btn('deliver','Teslim edildi',{cls:'s sm',id:o.id})}</div>`));
  return head(hi,new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'}),btn('newOrd','Yeni sipariş',{cls:'p',icon:'plus'})+btn('newTx','Gelir / gider',{icon:'plus'}))+
- `<div class="kpis">${kpi('Bu ay gelir',TL(gl),'ok')}${kpi('Bu ay gider',TL(gd),'bad')}${kpi('Bu ay net',TL(gl-gd),gl-gd>=0?'':'bad','Gelir − gider')}${kpi('Tahsil edilecek',TL(al),al>0?'warn':'',S.ord.filter(o=>odue(o)>0.004).length+' teslim edilmiş siparişte'+(wsum>0.004?' · teslim bekleyen '+TL(wsum):''))}${kpi('Açık sipariş',open.length,'',fresh.length?fresh.length+' yeni':'')}</div>
+ `<div class="kpis">${kpi('Bu ay gelir',TL(gl),'ok','','up','ok')}${kpi('Bu ay gider',TL(gd),'bad','','tx','bad')}${kpi('Bu ay net',TL(gl-gd),gl-gd>=0?'':'bad','Gelir − gider','rapor')}${kpi('Tahsil edilecek',TL(al),al>0?'warn':'',S.ord.filter(o=>odue(o)>0.004).length+' teslim edilmiş siparişte'+(wsum>0.004?' · teslim bekleyen '+TL(wsum):''),'cash','warn')}${kpi('Açık sipariş',open.length,'',fresh.length?fresh.length+' yeni':'','ord','blue')}</div>
+ ${ozetGrafik()}
  <div class="cols"><div>
   ${(()=>{const T=td(),l=[...calOverdue('me'),...calItems(T,T,'me')],open=l.filter(x=>!x.done).length;return `<div class="card"><div class="ch"><h2>Bugün${open?` <span class="tag t" style="vertical-align:3px">${open}</span>`:''}</h2><a class="btn q" href="#takvim">Takvim</a></div><div class="qa" style="padding:0 0 8px;border-bottom:1px solid var(--line);margin-bottom:4px"><div class="qa-in">${IC.plus}<input id="qaIn" data-qa="1" placeholder="Hızlı ekle: yarın 10:00 filament siparişi ver" autocomplete="off" aria-label="Hızlı iş ekle"><button type="button" class="btn p sm" data-act="qaAdd">Ekle</button></div><div class="qa-prev" id="qaPrev"></div></div>${l.slice(0,8).map(x=>ciRow(x,{date:x.late})).join('')||empty('Bugün için iş yok','Yarına ya da haftaya iş planlamak için yukarıya yazın.')}${l.length>8?`<p class="note" style="margin:8px 0 0">${l.length-8} kayıt daha takvimde.</p>`:''}</div>`})()}
   <div class="card"><div class="ch"><h2>Yeni siparişler</h2><a class="btn q" href="#ord">Tümü</a></div><div class="rows">${fresh.slice(0,6).map(o=>orderRow(o,true)).join('')||empty('Bekleyen yeni sipariş yok','Katalogdan gelen siparişler burada görünür.')}</div></div>
