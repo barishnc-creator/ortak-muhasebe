@@ -9,7 +9,7 @@ Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu se
 
 - **Notların tek kayıt yeri:** `claude/lingerie-ecommerce-planning-sw8cx4` dalı → `docs/ic-camasiri-projesi-durum.md` (ana belge; "Şu an" tablosu güncel durumu verir). Diğer belgeler aynı klasörde.
 - **Araçlar:** bu skill ve `.claude/agents/rakip-avcisi.md`, `.claude/agents/urun-hazirlayici.md` — `main` dalında.
-- **Masaüstü paneli:** https://claude.ai/artifact/77euetsRAMfcKRiC715DXW — kullanıcı işi buradan izler ve yönetir. Verisi `ArtifactData` aracıyla (bu URL) okunup yazılır: `panel/durum` belgesi ve `onaylar` koleksiyonu. Panel, "3K'ye devam et" düğmesiyle bu skill'i çalıştıran yeni bir bulut oturumu açar (etiket `3k`).
+- **Masaüstü paneli:** https://claude.ai/artifact/77euetsRAMfcKRiC715DXW — kullanıcı işi buradan izler ve yönetir. Verisi `ArtifactData` aracıyla (bu URL) okunup yazılır: `panel/durum` belgesi ve `onaylar` koleksiyonu. Paneldeki "3K'ye devam et" düğmesi komutu kopyalar ve Claude Code'u açar; kullanıcı yeni oturuma yapıştırır. Panele yazılan notlar `komutlar` koleksiyonunda bekler.
 - **İzinler (kullanıcı, 11 Kas 2026):** kayıt dalına ve 3K araçları için `main`'e doğrudan push serbest. `main`'de yalnızca `.claude/` ve `CLAUDE.md` 3K için değişir; muhasebe uygulamasının koduna dokunma.
 
 ## 1. Her seferinde önce: güncel kaydı topla
