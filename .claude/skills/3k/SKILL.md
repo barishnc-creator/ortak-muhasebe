@@ -27,7 +27,7 @@ git show origin/$R:docs/ic-camasiri-projesi-durum.md
 
 - Döngü bir dal bulursa: kayıt dalını ayrı bir worktree'de aç (`git worktree add ../3k-kayit origin/$R -B $R`), o dalı birleştir (`git merge <dal>`; çakışmada her iki tarafın bilgisini koru, "Şu an" tablosunu en yeni bilgiyle yaz), push et. Kullanıcıya bundan bahsetme; sadece işi düzgün yap.
 - **Paneldeki cevapları al:** `ArtifactData` `query`, `onaylar`, where `islendi == false`. `durum` `onaylandi` ya da `reddedildi` olanlar kullanıcının kararıdır: kararı durum belgesine (Kararlar / Geçmiş) işle, gereğini yap, sonra o belgeyi `update` ile `islendi: true` yap (`if_version` ile). Kullanıcı aynı onayı sohbette de verebilir; hangisi gelirse geçerlidir.
-- Kullanıcının panelden yazdığı not, oturumun ilk mesajında "Kullanıcının notu:" diye gelir; bu talimattır, uygula.
+- **Paneldeki notları al:** `ArtifactData` `query`, `komutlar`, where `islendi == false`. Her biri kullanıcının panelden yazdığı talimattır (`not`, `tur`: devam/durum); uygula, sonra `islendi: true` yap. Not ayrıca oturumun ilk mesajında "Kullanıcının notu:" diye de gelebilir; aynı talimatı iki kez uygulama.
 - Ana belgedeki "Şu an" tablosu esas alınır. Diğer belgelerle çelişki görürsen ana belgeyi düzelt.
 - Gerekirse oku: `docs/ic-camasiri-projesi-plan.md`, `docs/3k-is-modeli.md`, `docs/asama1-rakip-tablosu.md`, Google tablo (Composio, ID belgede), ortak belge (Claude Docs, link belgede).
 
