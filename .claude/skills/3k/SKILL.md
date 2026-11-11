@@ -9,6 +9,7 @@ Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu se
 
 - **Notların tek kayıt yeri:** `claude/lingerie-ecommerce-planning-sw8cx4` dalı → `docs/ic-camasiri-projesi-durum.md` (ana belge; "Şu an" tablosu güncel durumu verir). Diğer belgeler aynı klasörde.
 - **Araçlar:** bu skill ve `.claude/agents/rakip-avcisi.md`, `.claude/agents/urun-hazirlayici.md` — `main` dalında.
+- **Masaüstü paneli:** https://claude.ai/artifact/77euetsRAMfcKRiC715DXW — kullanıcı işi buradan izler ve yönetir. Verisi `ArtifactData` aracıyla (bu URL) okunup yazılır: `panel/durum` belgesi ve `onaylar` koleksiyonu. Panel, "3K'ye devam et" düğmesiyle bu skill'i çalıştıran yeni bir bulut oturumu açar (etiket `3k`).
 - **İzinler (kullanıcı, 11 Kas 2026):** kayıt dalına ve 3K araçları için `main`'e doğrudan push serbest. `main`'de yalnızca `.claude/` ve `CLAUDE.md` 3K için değişir; muhasebe uygulamasının koduna dokunma.
 
 ## 1. Her seferinde önce: güncel kaydı topla
@@ -25,6 +26,8 @@ git show origin/$R:docs/ic-camasiri-projesi-durum.md
 ```
 
 - Döngü bir dal bulursa: kayıt dalını ayrı bir worktree'de aç (`git worktree add ../3k-kayit origin/$R -B $R`), o dalı birleştir (`git merge <dal>`; çakışmada her iki tarafın bilgisini koru, "Şu an" tablosunu en yeni bilgiyle yaz), push et. Kullanıcıya bundan bahsetme; sadece işi düzgün yap.
+- **Paneldeki cevapları al:** `ArtifactData` `query`, `onaylar`, where `islendi == false`. `durum` `onaylandi` ya da `reddedildi` olanlar kullanıcının kararıdır: kararı durum belgesine (Kararlar / Geçmiş) işle, gereğini yap, sonra o belgeyi `update` ile `islendi: true` yap (`if_version` ile). Kullanıcı aynı onayı sohbette de verebilir; hangisi gelirse geçerlidir.
+- Kullanıcının panelden yazdığı not, oturumun ilk mesajında "Kullanıcının notu:" diye gelir; bu talimattır, uygula.
 - Ana belgedeki "Şu an" tablosu esas alınır. Diğer belgelerle çelişki görürsen ana belgeyi düzelt.
 - Gerekirse oku: `docs/ic-camasiri-projesi-plan.md`, `docs/3k-is-modeli.md`, `docs/asama1-rakip-tablosu.md`, Google tablo (Composio, ID belgede), ortak belge (Claude Docs, link belgede).
 
@@ -50,4 +53,6 @@ Kısa Türkçe özet: hangi aşamadayız, en son ne yapıldı, senden ne bekleni
    - Yeni doğrulanmış yöntem varsa "Nasıl yapılır"a, yeni karar varsa "Kararlar"a yaz.
 2. Commit et ve `git push origin claude/lingerie-ecommerce-planning-sw8cx4`. Ağ hatasında 2/4/8/16 sn arayla tekrar dene.
 3. Kayıt dalına push reddedilirse oturumun kendi dalına push et; bir sonraki oturum 1. adımda bunu toplar.
-4. Bu skill veya alt ajanlar değişirse `main`'e de push et (yalnız `.claude/` ve `CLAUDE.md`).
+4. **Paneli güncelle** (her kayıtta, sorulmadan): `ArtifactData` `get` `panel/durum` → `set` (`if_version` ile) şu alanlarla: `asama` (sayı), `asamaAdi`, `sonYapilan`, `bekleyen`, `siradaki` (durum belgesinin "Şu an" tablosuyla aynı, kısa ve sade Türkçe), `guncelleme` (ISO zaman, `date -u +%FT%TZ`), `sayilar` {`rakip`, `taranan`, `eslesen`, `onaylanan`, `hedef`: 1000} (Google tablodan say), `gecmis` (en yeni başta, en fazla 8 öğe, {`tarih`: "11 Kas", `metin`}).
+5. **Onay gerekiyorsa** (aşama sonu, para/yayın/hesap işi, öneri): `onaylar` koleksiyonuna yeni belge ekle — `soru` (tek cümle), `detay` (kısa gerekçe/maliyet), `durum`: "bekliyor", `olusturma` (ISO), `islendi`: false. Artık geçerli olmayan bekleyen onayı silme; `durum`: "iptal", `islendi`: true yap.
+6. Bu skill veya alt ajanlar değişirse `main`'e de push et (yalnız `.claude/` ve `CLAUDE.md`).
