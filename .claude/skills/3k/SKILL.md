@@ -9,7 +9,7 @@ Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu se
 
 - **Notların tek kayıt yeri:** `claude/lingerie-ecommerce-planning-sw8cx4` dalı → `docs/ic-camasiri-projesi-durum.md` (ana belge; "Şu an" tablosu güncel durumu verir). Diğer belgeler aynı klasörde.
 - **Araçlar:** bu skill ve `.claude/agents/rakip-avcisi.md`, `.claude/agents/urun-hazirlayici.md` — `main` dalında.
-- **Masaüstü paneli:** https://claude.ai/artifact/77euetsRAMfcKRiC715DXW — kullanıcı işi buradan izler ve yönetir. Verisi `ArtifactData` aracıyla (bu URL) okunup yazılır: `panel/durum` belgesi ve `onaylar` koleksiyonu. Paneldeki "3K'ye devam et" düğmesi komutu kopyalar ve Claude Code'u açar; kullanıcı yeni oturuma yapıştırır. Panele yazılan notlar `komutlar` koleksiyonunda bekler.
+- **Masaüstü paneli:** https://claude.ai/artifact/77euetsRAMfcKRiC715DXW — kullanıcı işi buradan izler ve yönetir. Verisi `ArtifactData` aracıyla (bu URL) okunup yazılır: `panel/durum`, `onaylar`, `komutlar`, `tablolar/*`, `belgeler/*`. Paneldeki "3K'ye devam et" düğmesi komutu kopyalar ve Claude Code'u açar; kullanıcı yeni oturuma yapıştırır. Panele yazılan notlar `komutlar` koleksiyonunda bekler.
 - **İzinler (kullanıcı, 11 Kas 2026):** kayıt dalına ve 3K araçları için `main`'e doğrudan push serbest. `main`'de yalnızca `.claude/` ve `CLAUDE.md` 3K için değişir; muhasebe uygulamasının koduna dokunma.
 
 ## 1. Her seferinde önce: güncel kaydı topla
@@ -54,5 +54,9 @@ Kısa Türkçe özet: hangi aşamadayız, en son ne yapıldı, senden ne bekleni
 2. Commit et ve `git push origin claude/lingerie-ecommerce-planning-sw8cx4`. Ağ hatasında 2/4/8/16 sn arayla tekrar dene.
 3. Kayıt dalına push reddedilirse oturumun kendi dalına push et; bir sonraki oturum 1. adımda bunu toplar.
 4. **Paneli güncelle** (her kayıtta, sorulmadan): `ArtifactData` `get` `panel/durum` → `set` (`if_version` ile) şu alanlarla: `asama` (sayı), `asamaAdi`, `sonYapilan`, `bekleyen`, `siradaki` (durum belgesinin "Şu an" tablosuyla aynı, kısa ve sade Türkçe), `guncelleme` (ISO zaman, `date -u +%FT%TZ`), `sayilar` {`rakip`, `taranan`, `eslesen`, `onaylanan`, `hedef`: 1000} (Google tablodan say), `gecmis` (en yeni başta, en fazla 8 öğe, {`tarih`: "11 Kas", `metin`}).
+4b. **Panel içi görünümleri güncelle** (panel dış sekme açmaz; her şeyi buradan gösterir). `ArtifactData` `set` (`file_path` ile JSON dosyası, var olana `if_version`):
+   - `tablolar/rakip`: Google tablo `Rakip Siteler` sekmesi → {`baslik`: "Rakip Siteler", `sutunlar`: [başlık satırı], `satirlar`: [{`c`: [hücreler]}], `toplam`, `guncelleme`}.
+   - `tablolar/urunler`: `Sayfa1` → aynı biçim, `baslik`: "Ürün listesi"; görsel sütununu çıkar (panel dış görsel gösteremez); en yeni 400 satır, `toplam` gerçek satır sayısı.
+   - `belgeler/durum` ve `belgeler/plan`: {`baslik`, `md`: dosyanın tam metni, `guncelleme`} — `docs/ic-camasiri-projesi-durum.md` ve `docs/ic-camasiri-projesi-plan.md`.
 5. **Onay gerekiyorsa** (aşama sonu, para/yayın/hesap işi, öneri): `onaylar` koleksiyonuna yeni belge ekle — `soru` (tek cümle), `detay` (kısa gerekçe/maliyet), `durum`: "bekliyor", `olusturma` (ISO), `islendi`: false. Artık geçerli olmayan bekleyen onayı silme; `durum`: "iptal", `islendi`: true yap.
 6. Bu skill veya alt ajanlar değişirse `main`'e de push et (yalnız `.claude/` ve `CLAUDE.md`).
