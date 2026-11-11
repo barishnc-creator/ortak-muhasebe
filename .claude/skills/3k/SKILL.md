@@ -9,7 +9,8 @@ Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu se
 
 - **Notların tek kayıt yeri:** `claude/lingerie-ecommerce-planning-sw8cx4` dalı → `docs/ic-camasiri-projesi-durum.md` (ana belge; "Şu an" tablosu güncel durumu verir). Diğer belgeler aynı klasörde.
 - **Araçlar:** bu skill ve `.claude/agents/rakip-avcisi.md`, `.claude/agents/urun-hazirlayici.md` — `main` dalında.
-- **Masaüstü paneli:** https://claude.ai/artifact/77euetsRAMfcKRiC715DXW — kullanıcı işi buradan izler ve yönetir. Verisi `ArtifactData` aracıyla (bu URL) okunup yazılır: `panel/durum`, `onaylar`, `komutlar`, `tablolar/*`, `belgeler/*`. Paneldeki "3K'ye devam et" düğmesi komutu kopyalar ve Claude Code'u açar; kullanıcı yeni oturuma yapıştırır. Panele yazılan notlar `komutlar` koleksiyonunda bekler.
+- **Masaüstü paneli:** https://claude.ai/artifact/77euetsRAMfcKRiC715DXW — kullanıcı işi buradan izler ve yönetir. Verisi `ArtifactData` aracıyla (bu URL) okunup yazılır: `panel/durum`, `onaylar`, `komutlar`, `tablolar/*`, `belgeler/*`. Kullanıcı HER ŞEYİ panelin içinden yürütür; dışarıda sekme açtırma, ona Claude Code'a gitmesini söyleme. Panel mesajları (devam, durum, onay, serbest yazı) "Send to Claude" yorumu olarak paneli izleyen oturuma gelir (`[Artifact comment sent to Claude]`) ve `sohbet` koleksiyonuna da yazılır.
+- **Panelden mesaj gelince:** işi yap; her anlamlı adımda ve sonunda `sohbet` koleksiyonuna {`kim`: "claude", `metin`: kısa sade Türkçe, `zaman`: ISO, `islendi`: true} ekle (panelde sohbet balonu olarak görünür); kullanıcının mesajını (`kim`: "sen") `islendi: true` yap; yorum dizisine de tek satırlık yanıt yaz (ArtifactComments). Uzun iş sürerken ara durumları `sohbet`e yaz ki kullanıcı ilerlemeyi panelde görsün.
 - **İzinler (kullanıcı, 11 Kas 2026):** kayıt dalına ve 3K araçları için `main`'e doğrudan push serbest. `main`'de yalnızca `.claude/` ve `CLAUDE.md` 3K için değişir; muhasebe uygulamasının koduna dokunma.
 
 ## 1. Her seferinde önce: güncel kaydı topla
@@ -27,6 +28,7 @@ git show origin/$R:docs/ic-camasiri-projesi-durum.md
 
 - Döngü bir dal bulursa: kayıt dalını ayrı bir worktree'de aç (`git worktree add ../3k-kayit origin/$R -B $R`), o dalı birleştir (`git merge <dal>`; çakışmada her iki tarafın bilgisini koru, "Şu an" tablosunu en yeni bilgiyle yaz), push et. Kullanıcıya bundan bahsetme; sadece işi düzgün yap.
 - **Paneldeki cevapları al:** `ArtifactData` `query`, `onaylar`, where `islendi == false`. `durum` `onaylandi` ya da `reddedildi` olanlar kullanıcının kararıdır: kararı durum belgesine (Kararlar / Geçmiş) işle, gereğini yap, sonra o belgeyi `update` ile `islendi: true` yap (`if_version` ile). Kullanıcı aynı onayı sohbette de verebilir; hangisi gelirse geçerlidir.
+- **Bekleyen panel mesajlarını al:** `sohbet` where `kim == "sen"` and `islendi == false` (Claude bağlı değilken yazılmış olabilir) — talimat olarak uygula, `islendi: true` yap.
 - **Paneldeki notları al:** `ArtifactData` `query`, `komutlar`, where `islendi == false`. Her biri kullanıcının panelden yazdığı talimattır (`not`, `tur`: devam/durum); uygula, sonra `islendi: true` yap. Not ayrıca oturumun ilk mesajında "Kullanıcının notu:" diye de gelebilir; aynı talimatı iki kez uygulama.
 - Ana belgedeki "Şu an" tablosu esas alınır. Diğer belgelerle çelişki görürsen ana belgeyi düzelt.
 - Gerekirse oku: `docs/ic-camasiri-projesi-plan.md`, `docs/3k-is-modeli.md`, `docs/asama1-rakip-tablosu.md`, Google tablo (Composio, ID belgede), ortak belge (Claude Docs, link belgede).
