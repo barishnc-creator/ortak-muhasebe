@@ -13,6 +13,9 @@ Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu se
 - **Panelden mesaj gelince:** işi yap; her anlamlı adımda ve sonunda `sohbet` koleksiyonuna {`kim`: "claude", `metin`: kısa sade Türkçe, `zaman`: ISO, `islendi`: true} ekle (panelde sohbet balonu olarak görünür); kullanıcının mesajını (`kim`: "sen") `islendi: true` yap; yorum dizisine de tek satırlık yanıt yaz (ArtifactComments). Uzun iş sürerken ara durumları `sohbet`e yaz ki kullanıcı ilerlemeyi panelde görsün.
 - **İzinler (kullanıcı, 11 Kas 2026):** kayıt dalına ve 3K araçları için `main`'e doğrudan push serbest. `main`'de yalnızca `.claude/` ve `CLAUDE.md` 3K için değişir; muhasebe uygulamasının koduna dokunma.
 
+## Rakip tanımı (kullanıcı kuralı)
+Site ancak **güçlü reklam + ürünleri 1688'de birebir eşleşiyor** ise rakiptir; aksi halde yalnızca tarama adayıdır. Ürün listesine (Sayfa1) sadece rakip sitelerin ürünleri girer. Adayı rakibe çevirmek için `urun-hazirlayici` ile rakip testi yap; eşik kullanıcının onayına bağlı (panelde `onaylar/rakip-esigi`).
+
 ## 1. Her seferinde önce: güncel kaydı topla
 
 ```bash

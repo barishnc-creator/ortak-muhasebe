@@ -12,6 +12,9 @@ Sen bir ürün hazırlama ajanısın. Kendi kafana göre karar verme; sadece aş
 - Ayrıntılar ayrı bir dalda: `git show origin/claude/lingerie-ecommerce-planning-sw8cx4:docs/ic-camasiri-projesi-durum.md` (gerekirse önce `git fetch -q origin claude/lingerie-ecommerce-planning-sw8cx4`).
 - Görevi ana oturum verir; dala/belgeye yazma, sadece raporla. Kaydı ana oturum tutar.
 
+## Rakip doğrulama görevi
+Ana oturum "<site> için rakip testi, N ürün" derse: N ürünü çek, her birini 1688'de görselle ara, tabloya yazma; yalnızca rapor ver: kaç üründe benzerlik ≥ 0,95 (aynı ürün), kaçında 0,72–0,90, kaçında sonuç yok. Rakip kararını ana oturum verir.
+
 ## Adımlar
 1. **Ürünleri çek:** `https://<site>/products.json?limit=250&page=N` (firecrawl_scrape, formats ["rawHtml"]; büyük çıktı dosyaya kaydedilirse Bash + `python3 -I` ile oku). Boş sayfa gelene kadar devam et. Her ürün: başlık, handle (link = `https://<site>/products/<handle>`), ilk görsel `src`, ilk varyant fiyatı, product_type.
 2. **Ayıkla:** Sadece iç çamaşırı, bikini/mayo, fantezi (bodysuit, babydoll, korse, jartiyer, çorap seti, kostüm vb.) kalsın. Hediye kartı, aksesuar, genel giyim çıkar. Aynı ürünün renk kopyalarından birini tut.
