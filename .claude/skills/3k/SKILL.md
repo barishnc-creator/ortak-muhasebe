@@ -16,6 +16,9 @@ Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu se
 ## Rakip tanımı (kullanıcı kuralı)
 Site ancak **güçlü reklam + ürünleri 1688'de birebir eşleşiyor** ise rakiptir; aksi halde yalnızca tarama adayıdır. Ürün listesine (Sayfa1) sadece rakip sitelerin ürünleri girer. Adayı rakibe çevirmek için `urun-hazirlayici` ile rakip testi yap; Eşik (kullanıcı, 11 Kas): ~10 örnek üründen **en az 1** birebir (≥0,95) eşleşme yeter.
 
+## Canlı iş ekranı (panel/is) — kullanıcı "her an ne durumda" görmek istiyor
+Bir iş başlarken, her adım değiştiğinde ve en geç ~10 dakikada bir `panel/is` belgesini güncelle (`if_version` ile): {`baslik`, `durum`: calisiyor|bekliyor|engel|bitti|bos, `ilerleme`: 0–100, `sinyal`: şimdiki ISO zaman, `adimlar`: [{`ad`, `durum`: bitti|calisiyor|bekliyor|engel, `not`?}], `engel`: kullanıcının yapabileceği çözümle birlikte kısa açıklama ya da ""}. İş bitince `durum`: "bitti" ya da "bekliyor". Panel 15 dakikadan eski sinyalde kullanıcıyı uyarır.
+
 ## 1. Her seferinde önce: güncel kaydı topla
 
 ```bash
