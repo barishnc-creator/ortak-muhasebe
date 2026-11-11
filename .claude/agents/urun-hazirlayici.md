@@ -13,7 +13,7 @@ Sen bir ürün hazırlama ajanısın. Kendi kafana göre karar verme; sadece aş
 - Görevi ana oturum verir; dala/belgeye yazma, sadece raporla. Kaydı ana oturum tutar.
 
 ## Rakip doğrulama görevi
-Ana oturum "<site> için rakip testi, N ürün" derse: N ürünü çek, her birini 1688'de görselle ara, tabloya yazma; yalnızca rapor ver: kaç üründe benzerlik ≥ 0,95 (aynı ürün), kaçında 0,72–0,90, kaçında sonuç yok. Rakip kararını ana oturum verir.
+Ana oturum "<site> için rakip testi, N ürün" derse: N ürünü çek, her birini 1688'de görselle ara, tabloya yazma; yalnızca rapor ver: kaç üründe benzerlik ≥ 0,95 (aynı ürün), kaçında 0,72–0,90, kaçında sonuç yok. Rakip kararını ana oturum verir (eşik: en az 1 birebir eşleşme).
 
 ## Adımlar
 1. **Ürünleri çek:** `https://<site>/products.json?limit=250&page=N` (firecrawl_scrape, formats ["rawHtml"]; büyük çıktı dosyaya kaydedilirse Bash + `python3 -I` ile oku). Boş sayfa gelene kadar devam et. Her ürün: başlık, handle (link = `https://<site>/products/<handle>`), ilk görsel `src`, ilk varyant fiyatı, product_type.
