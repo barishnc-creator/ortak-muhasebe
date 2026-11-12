@@ -14,7 +14,7 @@ Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu se
 - **İzinler (kullanıcı, 11 Kas 2026):** kayıt dalına ve 3K araçları için `main`'e doğrudan push serbest. `main`'de yalnızca `.claude/` ve `CLAUDE.md` 3K için değişir; muhasebe uygulamasının koduna dokunma.
 
 ## Kategori kuralı
-Yalnız kadın iç giyim / bikini / fantezi. **Erkek ürünleri eklenmez** (kullanıcı, 12 Kas). Seks oyuncakları kategori dışı. **Genel moda (bluz, etek, örgü) da eklenmez** (kullanıcı, 12 Kas).
+**Ana yön (12 Kas): ağırlık tatil bikinileri**; fantezi ikinci planda. Yalnız kadın iç giyim / bikini / fantezi. **Erkek ürünleri eklenmez** (kullanıcı, 12 Kas). Seks oyuncakları kategori dışı. **Genel moda (bluz, etek, örgü) da eklenmez** (kullanıcı, 12 Kas).
 
 ## Rakip tanımı (kullanıcı kuralı)
 Site ancak **güçlü reklam + ürünleri 1688'de birebir eşleşiyor** ise rakiptir; aksi halde yalnızca tarama adayıdır. Ürün listesine (Sayfa1) sadece rakip sitelerin ürünleri girer. Adayı rakibe çevirmek için `urun-hazirlayici` ile rakip testi yap; Eşik (kullanıcı, 11 Kas): ~10 örnek üründen **en az 1** birebir eşleşme yeter. **Birebir doğrulama iki aşamalı:** puan ≥0,95 ya da puan ≥0,80 + rakip görseli ile 1688 `image_url` görselini yan yana koyup gözle aynı ürün olduğunu teyit et (rakipler kendi fotoğrafını kullandığı için aynı ürün çoğu zaman 0,80–0,90 alır). Ayrıntı durum belgesinde "Eşleşme doğrulama".
@@ -70,6 +70,7 @@ Kısa Türkçe özet: hangi aşamadayız, en son ne yapıldı, senden ne bekleni
 2. Commit et ve `git push origin claude/lingerie-ecommerce-planning-sw8cx4`. Ağ hatasında 2/4/8/16 sn arayla tekrar dene.
 3. Kayıt dalına push reddedilirse oturumun kendi dalına push et; bir sonraki oturum 1. adımda bunu toplar.
 4. **Paneli güncelle** (her kayıtta, sorulmadan): `ArtifactData` `get` `panel/durum` → `set` (`if_version` ile) şu alanlarla: `asama` (sayı), `asamaAdi`, `sonYapilan`, `bekleyen`, `siradaki` (durum belgesinin "Şu an" tablosuyla aynı, kısa ve sade Türkçe), `guncelleme` (ISO zaman, `date -u +%FT%TZ`), `sayilar` {`rakip`, `taranan`, `eslesen`, `onaylanan`, `hedef`: 1000} (Google tablodan say), `gecmis` (en yeni başta, en fazla 8 öğe, {`tarih`: "11 Kas", `metin`}).
+4a. **Limit göstergesi:** `get_session` (claude-code-remote) → `external_metadata.rate_limit_info` (status, resetsAt) ve `context_usage` → `panel/limit` {durum, pencere, sifirlanma (ISO), hafiza (% doluluk), guncelleme}.
 4b. **Panel içi görünümleri güncelle** (panel dış sekme açmaz; her şeyi buradan gösterir). `ArtifactData` `set` (`file_path` ile JSON dosyası, var olana `if_version`):
    - `tablolar/rakip`: Google tablo `Rakip Siteler` sekmesi → {`baslik`: "Rakip Siteler", `sutunlar`: [başlık satırı], `satirlar`: [{`c`: [hücreler]}], `toplam`, `guncelleme`}.
    - `tablolar/urunler`: `Sayfa1` → aynı biçim, `baslik`: "Ürün listesi"; görsel sütununu çıkar (panel dış görsel gösteremez); en yeni 400 satır, `toplam` gerçek satır sayısı.
