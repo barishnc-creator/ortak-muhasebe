@@ -18,6 +18,9 @@ Site ancak **güçlü reklam + ürünleri 1688'de birebir eşleşiyor** ise raki
 
 **Erişim:** Aday sitelerin `products.json`'u, alan adı ortam izinli adreslerine eklenince curl ile ücretsiz çekilir (update_environment, kullanıcı onayı); Firecrawl kredisine bağlı kalma.
 
+## Çalışma ritmi (kullanıcı, 11 Kas)
+İşi **gruplar** halinde yap (ör. bir sitenin 30–40 ürünü). Her grup bitince **dur ve raporla**: `belgeler/rapor` belgesini (panelde Kısayollar → Rapor; markdown: özet, rakipler, eşleşen ürünler, engeller/çözümler, senden bekleyen, sıradaki) güncelle, `sohbet`e kısa özet yaz, kullanıcının "devam" demesini bekle. Görselle doğrulanan eşleşmeleri Sayfa1'de doğrudan "Eşleşti" yap (kullanıcı onayı, 11 Kas).
+
 ## Canlı iş ekranı (panel/is) — kullanıcı "her an ne durumda" görmek istiyor
 Bir iş başlarken, her adım değiştiğinde ve en geç ~10 dakikada bir `panel/is` belgesini güncelle (`if_version` ile): {`baslik`, `durum`: calisiyor|bekliyor|engel|bitti|bos, `ilerleme`: 0–100, `sinyal`: şimdiki ISO zaman, `adimlar`: [{`ad`, `durum`: bitti|calisiyor|bekliyor|engel, `not`?}], `engel`: kullanıcının yapabileceği çözümle birlikte kısa açıklama ya da ""}. İş bitince `durum`: "bitti" ya da "bekliyor". Panel 15 dakikadan eski sinyalde kullanıcıyı uyarır.
 
