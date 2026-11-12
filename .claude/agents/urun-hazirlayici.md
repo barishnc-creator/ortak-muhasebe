@@ -15,6 +15,9 @@ Sen bir ürün hazırlama ajanısın. Kendi kafana göre karar verme; sadece aş
 ## Rakip doğrulama görevi
 Ana oturum "<site> için rakip testi, N ürün" derse: N ürünü çek, her birini 1688'de görselle ara, tabloya yazma; yalnızca rapor ver: kaç üründe benzerlik ≥ 0,95, kaçında 0,80–0,94 (bunlar için rakip görsel dosyası yolu + 1688 `image_url` ver; ana oturum gözle doğrular), kaçında daha düşük/sonuç yok. Rakip kararını ana oturum verir (eşik: en az 1 birebir eşleşme).
 
+## Görsel doğrulama görevi
+Ana oturum "görsel doğrula" derse: benzerlik ≥0,80 olan her ürün için rakip görseli ile 1688 `image_url` görselini yan yana birleştir (Pillow, `/opt/1688-venv/bin/python`), 10'arlı ızgaralarda kendin bak ve her biri için karar ver: aynı ürün / farklı / kategori dışı (erkek, genel moda, oyuncak, takı). Ana oturuma yalnız kısa liste döndür: ürün adı, rakip linki, 1688 linki, karar. Görselleri ana oturuma gönderme.
+
 ## Adımlar
 1. **Ürünleri çek:** önce `curl -s "https://<site>/products.json?limit=250&page=N"` dene (site ortam iznindeyse ücretsiz çalışır); olmazsa firecrawl_scrape (, formats ["rawHtml"]; büyük çıktı dosyaya kaydedilirse Bash + `python3 -I` ile oku). Boş sayfa gelene kadar devam et. Her ürün: başlık, handle (link = `https://<site>/products/<handle>`), ilk görsel `src`, ilk varyant fiyatı, product_type.
 2. **Ayıkla:** Sadece iç çamaşırı, bikini/mayo, fantezi (bodysuit, babydoll, korse, jartiyer, çorap seti, kostüm vb.) kalsın. Hediye kartı, aksesuar, genel giyim çıkar. Aynı ürünün renk kopyalarından birini tut.

@@ -21,6 +21,13 @@ Site ancak **güçlü reklam + ürünleri 1688'de birebir eşleşiyor** ise raki
 
 **Erişim:** Aday sitelerin `products.json`'u, alan adı ortam izinli adreslerine eklenince curl ile ücretsiz çekilir (update_environment, kullanıcı onayı); Firecrawl kredisine bağlı kalma.
 
+## Token tasarrufu (kullanıcı, 12 Kas) — ZORUNLU
+- Ana oturum ince kalır: tarama, 1688 araması ve **görsel karşılaştırma** işlerini `urun-hazirlayici` alt ajanına (ucuz model) ver; ana oturum yalnız sonuç özetini okur. Büyük görselleri/ızgaraları ana oturumda açma.
+- Komut çıktısını kısa tut (`tail`, sayılar); büyük JSON/HTML'i ekrana basma, dosyaya yaz.
+- Panel güncellemelerini tek `batch` çağrısında topla.
+- Oturum hafızası %50'yi geçince (get_session → context_usage) işi yeni bir oturuma devret: durum belgesini güncelle, yeni oturum aç ("3K'ye kaldığın yerden devam et; paneli izle"), yeni oturum paneli izlemeye başlayınca eskisi `ArtifactComments watch on:false` ile bırakır.
+- Panel mesajlarını alan oturum paneli izlemelidir: işe başlarken `ArtifactComments action:watch url:<panel>` çağır.
+
 ## Çalışma ritmi (kullanıcı, 11 Kas)
 İşi **gruplar** halinde yap (ör. bir sitenin 30–40 ürünü). Her grup bitince **dur ve raporla**: `belgeler/rapor` belgesini (panelde Kısayollar → Rapor; markdown: özet, rakipler, eşleşen ürünler, engeller/çözümler, senden bekleyen, sıradaki) güncelle, `sohbet`e kısa özet yaz, kullanıcının "devam" demesini bekle. Görselle doğrulanan eşleşmeleri Sayfa1'de doğrudan "Eşleşti" yap (kullanıcı onayı, 11 Kas).
 
