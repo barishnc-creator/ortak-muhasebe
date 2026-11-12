@@ -14,7 +14,7 @@ Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu se
 - **İzinler (kullanıcı, 11 Kas 2026):** kayıt dalına ve 3K araçları için `main`'e doğrudan push serbest. `main`'de yalnızca `.claude/` ve `CLAUDE.md` 3K için değişir; muhasebe uygulamasının koduna dokunma.
 
 ## Kategori kuralı
-Yalnız kadın iç giyim / bikini / fantezi. **Erkek ürünleri eklenmez** (kullanıcı, 12 Kas). Seks oyuncakları kategori dışı. Genel moda (bluz, etek) için kullanıcı kararı bekleniyor — durum belgesine bak.
+Yalnız kadın iç giyim / bikini / fantezi. **Erkek ürünleri eklenmez** (kullanıcı, 12 Kas). Seks oyuncakları kategori dışı. **Genel moda (bluz, etek, örgü) da eklenmez** (kullanıcı, 12 Kas).
 
 ## Rakip tanımı (kullanıcı kuralı)
 Site ancak **güçlü reklam + ürünleri 1688'de birebir eşleşiyor** ise rakiptir; aksi halde yalnızca tarama adayıdır. Ürün listesine (Sayfa1) sadece rakip sitelerin ürünleri girer. Adayı rakibe çevirmek için `urun-hazirlayici` ile rakip testi yap; Eşik (kullanıcı, 11 Kas): ~10 örnek üründen **en az 1** birebir eşleşme yeter. **Birebir doğrulama iki aşamalı:** puan ≥0,95 ya da puan ≥0,80 + rakip görseli ile 1688 `image_url` görselini yan yana koyup gözle aynı ürün olduğunu teyit et (rakipler kendi fotoğrafını kullandığı için aynı ürün çoğu zaman 0,80–0,90 alır). Ayrıntı durum belgesinde "Eşleşme doğrulama".
