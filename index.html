@@ -637,13 +637,14 @@ async function joinWorkspace(code){
  const r=Array.isArray(data)?data[0]:data;if(r?.workspace_id)ls.set(WS_KEY,r.workspace_id);
  toast('Deftere katıldınız, açılıyor…');setTimeout(()=>location.reload(),700);return true;
 }
-function catalogLink(){const u=new URL(location.href);u.hash='';u.pathname=u.pathname.replace(/(index\.html?)?$/,'catalog.html');u.search='?w='+encodeURIComponent(workspaceId);return u.toString()}
+const MAIN_WS='a5af67d1-a235-421a-9996-5ed7bada68c3';// catalog.html parametresiz açılınca bu defteri gösterir
+function catalogLink(extra=''){const u=new URL(location.href);u.hash='';u.search='';u.pathname=u.pathname.replace(/(index\.html?)?$/,'catalog');const q=[workspaceId!==MAIN_WS&&'w='+encodeURIComponent(workspaceId),extra].filter(Boolean).join('&');return u.toString()+(q?'?'+q:'')}
 function copyLegacy(t){try{const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';document.body.appendChild(a);a.focus();a.select();a.setSelectionRange(0,t.length);const ok=document.execCommand('copy');a.remove();return ok}catch(e){return false}}
 async function copyText(t,msg){
  if(copyLegacy(t))return toast(msg); // dokunma anında, eşzamanlı: iPhone'da da güvenilir
  try{await navigator.clipboard.writeText(t);toast(msg)}catch(e){toast('Kopyalanamadı. Bağlantıya uzun basıp kopyalayabilirsiniz.')}
 }
-const vitrinLink=()=>catalogLink()+'&mod=vitrin';
+const vitrinLink=()=>catalogLink('mod=vitrin');
 const catShareInfo=k=>{const co=company();return k==='full'?{t:'Fiyatlı katalog',s:'Fiyatlarla birlikte. Müşteri sepete ekleyip sipariş verebilir.',url:catalogLink(),msg:co.name+' ürün kataloğu, buradan sipariş verebilirsiniz:'}:{t:'Fiyatsız katalog',s:'Yalnızca ürün fotoğrafları ve videoları. Fiyat görünmez, sipariş verilemez.',url:vitrinLink(),msg:co.name+' ürün kataloğu:'}};
 function shareCatalog(first){
  const ks=first==='full'?['full','vitrin']:['vitrin','full'];
@@ -951,7 +952,7 @@ tx(){
 prod(){
  const q=lower(UI.prodQ),list=S.prod.filter(p=>!q||lower(p.n+' '+(p.catalogCategory||'')).includes(q));
  return head('Ürünler',S.prod.length+' ürün, '+S.prod.filter(p=>p.catalogVisible!==false&&p.catalogActive!==false&&N(p.price)>0).length+' tanesi katalogda',btn('cats','Kategoriler')+btn('newProd','Ürün ekle',{cls:'p',icon:'plus'}))+
- `<div class="tools"><label class="search">${IC.search}<span class="sr">Ürün ara</span><input data-input="prodQ" value="${E(UI.prodQ)}" placeholder="Ürün ya da kategori ara"></label><div class="catbtns"><a class="btn s" href="${E(catalogLink())}" target="_blank" rel="noopener">Kataloğu aç</a><a class="btn s" href="${E(catalogLink()+'&mod=vitrin')}" target="_blank" rel="noopener" title="Fiyatsız, siparişsiz; yalnızca ürün fotoğrafları ve videoları">Fiyatsız katalog</a>${btn('shareCat','Paylaş',{cls:'p',icon:'share',id:'vitrin'})}</div></div>
+ `<div class="tools"><label class="search">${IC.search}<span class="sr">Ürün ara</span><input data-input="prodQ" value="${E(UI.prodQ)}" placeholder="Ürün ya da kategori ara"></label><div class="catbtns"><a class="btn s" href="${E(catalogLink())}" target="_blank" rel="noopener">Kataloğu aç</a><a class="btn s" href="${E(catalogLink('mod=vitrin'))}" target="_blank" rel="noopener" title="Fiyatsız, siparişsiz; yalnızca ürün fotoğrafları ve videoları">Fiyatsız katalog</a>${btn('shareCat','Paylaş',{cls:'p',icon:'share',id:'vitrin'})}</div></div>
  <div class="grid">${list.map(p=>{const c=pc(p),k=N(p.price)-c,mg=N(p.price)?k/N(p.price):0,live=p.catalogVisible!==false&&p.catalogActive!==false&&N(p.price)>0;
   return `<article class="pc"><div class="im">${p.catalogImage?`<img src="${E(p.catalogImage)}" alt="" loading="lazy">`:`<span class="ph0">${E(String(p.n||'?').charAt(0))}</span>`}<div class="tags">${live?'<span class="tag t">Katalogda</span>':'<span class="tag">Katalogda değil</span>'}${p.catalogBestSeller?'<span class="tag a">Çok satan</span>':''}${p.catalogVideo?'<span class="tag">Video</span>':''}${(()=>{const pr=promoFor(p.id);return pr?`<span class="tag" style="background:rgba(244,114,182,.9);color:#2b0718">Kampanya %${pct(pr.pct)}</span>`:''})()}</div></div>
   <div class="bd"><div class="nm">${E(p.n)}<small>${E(p.catalogCategory||'Kategorisiz')} · ${E(mat(p.mat)?.n||'Malzeme yok')} · ${fg(p.gram)} g · ${fg(pmin(p))} dk</small></div>
@@ -1193,7 +1194,7 @@ function saveOrd(f,o){
  const label=(kons?'konsinye ':'')+(its.length>1?its.length+' kalem, '+TL(total):its[0].qty+' × '+pname(its[0].prod));
  const firstNew=S.ord[S.ord.length-its.length];logAct(cust+' için sipariş ekledi: '+label);addNotification(kons?'Yeni konsinye':'Yeni sipariş',(meName()||'Ortağınız')+', '+cust+' için '+label+(its.length>1?'':'. '+ordDesc(firstNew)),null,{ord:firstNew?.id});
  tab='ord';if(location.hash!=='#ord')history.replaceState(null,'','#ord');upd();
- if(grp&&phone.replace(/\D/g,'').length>=10)toast('Sipariş eklendi ('+grp+').','Takip bağlantısını kopyala',()=>copyText(catalogLink()+'&takip='+grp,'Müşteri takip bağlantısı kopyalandı.'));else toast(kons?'Konsinye sipariş eklendi. Satış ve iadeleri "Konsinye hesap" ile işleyin.':'Sipariş eklendi.');
+ if(grp&&phone.replace(/\D/g,'').length>=10)toast('Sipariş eklendi ('+grp+').','Takip bağlantısını kopyala',()=>copyText(catalogLink('takip='+grp),'Müşteri takip bağlantısı kopyalandı.'));else toast(kons?'Konsinye sipariş eklendi. Satış ve iadeleri "Konsinye hesap" ile işleyin.':'Sipariş eklendi.');
 }
 /* Konsinye hesap: müşterinin bildirdiği satış ve iadeler işlenir. Yalnızca satılan adet borca yazılır. */
 function formKons(o){
@@ -1371,7 +1372,7 @@ const ppGet=(paId,pid)=>pprices().find(x=>x.partner===paId&&x.prod===pid);
 const hasV=v=>v!=null&&v!=='';
 const ppOf=paId=>pprices().filter(x=>x.partner===paId&&prod(x.prod)&&hasV(x.price)).sort((a,b)=>String(pname(a.prod)).localeCompare(pname(b.prod),'tr'));
 const ppFor=(name,pid)=>{const pa=partnerByName(name),r=pa&&pid?ppGet(pa.id,pid):undefined;return r&&hasV(r.price)?r:undefined};
-const partnerLink=pa=>pa?.catKey?catalogLink()+'&p='+encodeURIComponent(pa.catKey):'';
+const partnerLink=pa=>pa?.catKey?catalogLink('p='+encodeURIComponent(pa.catKey)):'';
 const newCatKey=()=>Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>b.toString(16).padStart(2,'0')).join('');
 // Partner fiyat listesinde fiyat varsa o kullanılır; yoksa bu müşteriye en son verilen fiyat.
 const custPrice=(name,pid)=>{const pp=ppFor(name,pid);if(pp)return N(pp.price);const m=(S.custPrices||{})[lower(name)];return m&&pid&&m[pid]!=null?N(m[pid]):null};
@@ -1500,7 +1501,7 @@ async function quoteToOrder(id){
  const grp='CAT-'+Array.from(crypto.getRandomValues(new Uint8Array(4)),b=>b.toString(16).padStart(2,'0')).join('').toUpperCase(),f=1-c.dp/100;
  items.forEach(i=>S.ord.push({id:uid(),cust:q.cust.name,prod:i.prod,qty:N(i.qty),price:r2(N(i.price)*(1-iDp(i)/100)*f),paid:0,st:ST[0],ded:false,date:td(),source:'quote',quoteNo:q.no,orderGroup:grp,phone:q.cust.phone||'',note:'Teklif '+q.no,by:myUid}));
  q.status='Siparişe dönüştü';q.orderGroup=grp;logAct('Teklifi siparişe dönüştürdü: '+q.no+', '+q.cust.name);upd();
- const link=catalogLink()+'&takip='+grp;
+ const link=catalogLink('takip='+grp);
  if(String(q.cust.phone||'').replace(/\D/g,'').length>=10)toast('Sipariş oluşturuldu ('+grp+').','Takip bağlantısını kopyala',()=>copyText(link,'Müşteri takip bağlantısı kopyalandı.'));else toast('Sipariş oluşturuldu ('+grp+'). Müşteri telefonu olmadığı için takip bağlantısı kullanılamaz.');
 }
 
