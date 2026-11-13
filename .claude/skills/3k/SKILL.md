@@ -19,6 +19,8 @@ Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu se
 ## Rakip tanımı (kullanıcı kuralı)
 Site ancak **güçlü reklam + ürünleri 1688'de birebir eşleşiyor** ise rakiptir; aksi halde yalnızca tarama adayıdır. Ürün listesine (Sayfa1) sadece rakip sitelerin ürünleri girer. Adayı rakibe çevirmek için `urun-hazirlayici` ile rakip testi yap; Eşik (kullanıcı, 11 Kas): ~10 örnek üründen **en az 1** birebir eşleşme yeter. **Birebir doğrulama iki aşamalı:** puan ≥0,95 ya da puan ≥0,80 + rakip görseli ile 1688 `image_url` görselini yan yana koyup gözle aynı ürün olduğunu teyit et (rakipler kendi fotoğrafını kullandığı için aynı ürün çoğu zaman 0,80–0,90 alır). Ayrıntı durum belgesinde "Eşleşme doğrulama".
 
+**Hızlı geçiş (kullanıcı, 13 Kas):** Küçük mağazalara takılma — `products.json`'da ~150'den az ürünü olan siteyi test etmeden atla. Önceliği büyük katalog + çok reklam veren bikini/mayo sitelerine ver. Aday siteye en fazla 10 ürün; ilk 10'da 0,80 üstü yoksa hemen sonrakine geç. **Reklam sayma (13 Kas, ücretsiz):** yalnız 1688'i geçen sitelerin Meta reklamı Firecrawl günlük ücretsiz kotasıyla (ana oturumda tek `firecrawl_scrape`, formats query; alt ajan tanımlarındaki Firecrawl araç adı bu ortamda eşleşmiyor); yetmezse panelde elle kontrol için Ad Library linki. Meta API/ücretli kredi yok.
+
 **Erişim:** Aday sitelerin `products.json`'u, alan adı ortam izinli adreslerine eklenince curl ile ücretsiz çekilir (update_environment, kullanıcı onayı); Firecrawl kredisine bağlı kalma.
 
 ## Token tasarrufu (kullanıcı, 12 Kas) — ZORUNLU
