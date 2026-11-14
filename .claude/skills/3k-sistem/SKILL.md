@@ -29,8 +29,9 @@ Kullanıcının **iş sektörünün kendisi**: yurt dışında kanıtlanmış ü
 4. **Her şey panelden:** kullanıcı yalnız proje panelini kullanır; dış sekme açtırma. Panel mesajları paneli izleyen oturuma gelir.
 5. **Tek kayıt yeri:** her projenin tek durum belgesi (kayıt dalında). Her ilerlemeden sonra sorulmadan güncelle + push; paneli de güncelle.
 6. **Token tasarrufu (zorunlu):** ağır iş (tarama, 1688, görsel kontrol) alt ajanda (ucuz model), ana oturum ince; büyük çıktı dosyaya; panel yazmaları tek batch; bağlam eşiğinde (çalışan 250–400 bin, Merkez 300 bin) `devir.md`'ye göre yeni oturuma devret; devri Merkez yönetir.
-7. **Yöntem ortak, veriler ayrı:** projelerin verileri birbirine karışmaz; yöntem ve dersler bu skill'de ortaktır.
-8. **Ders kaydı:** bir projede doğrulanan her yeni yöntem/kural `moduller.md`'ye (genel) ve projenin durum belgesine (özel) yazılır, `main`'e push edilir.
+7. **Kullanım koruma (kullanıcı kararı 14 Kas, kesin):** Kullanım sınırını boşa harcatan hiçbir şey yapılmaz ve önerilmez. Çalışan bir oturumda model değiştirilmez/değiştirilmesi istenmez (tüm bağlam yeniden okunur); model değişikliği yalnız devirde, yeni oturum açılırken yapılır. Oturumu yeniden başlatma, paneli süs için yeniden yayınlama, aynı belgeyi tekrar tekrar okuma, büyük çıktılı araç çağrısı yok. Maliyeti belirgin her adımdan önce kullanıcıya maliyetiyle birlikte sor.
+8. **Yöntem ortak, veriler ayrı:** projelerin verileri birbirine karışmaz; yöntem ve dersler bu skill'de ortaktır.
+9. **Ders kaydı:** bir projede doğrulanan her yeni yöntem/kural `moduller.md`'ye (genel) ve projenin durum belgesine (özel) yazılır, `main`'e push edilir.
 
 ## Kullanıcının kalıcı tercihleri (tüm projeler)
 - Türkçe, sade, kısa; ayrıntı panelde Rapor'da.
