@@ -1,6 +1,6 @@
 ---
 name: 3k-sistem
-description: 3K Sistemi — kullanıcının e-ticaret iş modelinin ana yöntemi (Kanıtla · Kur · Kazan). Kullanıcı "şu ürün için site yapacağız", "yeni proje", "X için mağaza kur", "şu siteye ürün ekleyeceğiz", "yeni iş" dediğinde ya da bir projenin hangi aşamada olduğunu, sıradaki aşamayı, genel yöntemi sorduğunda kullan. Mevcut projeler (3K iç çamaşırı/bikini, 3K Vael) kendi skill'lerini (3k, vael) bununla birlikte kullanır.
+description: 3K Sistemi — kullanıcının e-ticaret iş modelinin ana yöntemi (Kanıtla · Kur · Kazan). Kullanıcı "şu ürün için site yapacağız", "yeni proje", "X için mağaza kur", "şu siteye ürün ekleyeceğiz", "yeni iş" dediğinde ya da bir projenin hangi aşamada olduğunu, sıradaki aşamayı, genel yöntemi sorduğunda kullan. Mevcut projeler (3K Bikini, 3K Vael) kendi skill'lerini (3k = 3K Bikini, vael = 3K Vael) bununla birlikte kullanır.
 ---
 
 # 3K Sistemi — Kanıtla · Kur · Kazan

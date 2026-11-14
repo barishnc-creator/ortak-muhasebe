@@ -6,9 +6,9 @@ Bu depo ortak muhasebe uygulamasıdır.
 
 Kullanıcının e-ticaret iş modeli. "Şu ürün için site yapacağız", "yeni proje", "şu siteye ürün ekleyeceğiz" gibi isteklerde ve tüm 3K projelerinde `3k-sistem` skill'ini kullan (`.claude/skills/3k-sistem/`: aşamalar, modüller, proje kurulumu, proje listesi, panel şablonu).
 
-## 3K projesi
+## 3K Bikini
 
-Kullanıcı "3K" derse (ör. "3K ne durumda", "3K'ye kaldığın yerden devam et") `3k` skill'ini kullan (`.claude/skills/3k/SKILL.md`). 3K, muhasebe uygulamasından ayrı bir iç çamaşırı e-ticaret projesidir. Notları `claude/lingerie-ecommerce-planning-sw8cx4` dalındadır. Skill bu dalı kendisi bulur ve okur; kullanıcıdan dal ya da belge adı isteme.
+Kullanıcı "Bikini", "3K Bikini" ya da (eski adıyla) "3K" derse (ör. "Bikini ne durumda", "Bikini'ye kaldığın yerden devam et") `3k` skill'ini kullan (`.claude/skills/3k/SKILL.md`). 3K Bikini, muhasebe uygulamasından ayrı bikini/iç çamaşırı e-ticaret projesidir. Notları `claude/lingerie-ecommerce-planning-sw8cx4` dalındadır. Skill bu dalı kendisi bulur ve okur; kullanıcıdan dal ya da belge adı isteme.
 
 ## 3K Vael
 

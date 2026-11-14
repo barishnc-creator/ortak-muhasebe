@@ -1,9 +1,9 @@
 ---
 name: 3k
-description: 3K (Kanıtla · Kur · Kazan) iç çamaşırı e-ticaret projesi. Kullanıcı "3K" dediği her durumda kullan — "3K ne durumda", "3K'da durum ne", "3K durum", "3K'yı başlat", "3K'ye kaldığın yerden devam et", "3K devam" vb. Muhasebe uygulamasıyla ilgisi yok; notlar ayrı bir dalda.
+description: 3K Bikini — 3K Sistemi'nin bikini/iç çamaşırı projesi (eski adı "3K"). Kullanıcı "Bikini" ya da "3K Bikini" dediğinde (ve eski alışkanlıkla yalnız "3K" dediğinde) kullan — "Bikini ne durumda", "Bikini'ye kaldığın yerden devam et", "3K Bikini ne durumda", "3K ne durumda", "3K'da durum ne", "3K durum", "3K'yı başlat", "3K'ye kaldığın yerden devam et", "3K devam" vb. Muhasebe uygulamasıyla ilgisi yok; notlar ayrı bir dalda.
 ---
 
-# 3K
+# 3K Bikini
 
 > **Bu proje 3K Sistemi'nin bir uygulamasıdır.** Genel yöntem, aşamalar, doğrulanmış modüller ve proje listesi: `3k-sistem` skill'i (`.claude/skills/3k-sistem/`). Burada yalnız 3K'e özel bilgiler var. Yeni öğrenilen genel yöntemi `3k-sistem/moduller.md`'ye, proje aşamasını `3k-sistem/projeler.md`'ye işle.
 
