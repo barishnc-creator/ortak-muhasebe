@@ -1,0 +1,33 @@
+name: Gizlilik kontrolü
+
+# Bu depo herkese açık. 3K iş notları ve gizli anahtarlar buraya girmemeli;
+# onların yeri gizli barishnc-creator/3k-isler deposu. Bkz. CLAUDE.md.
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 3K dosyaları ve gizli bilgiler
+        run: |
+          hata=0
+          yasak=$(git ls-files | grep -E '^(docs/|\.claude/skills/|\.claude/agents/)' || true)
+          if [ -n "$yasak" ]; then
+            echo "::error::3K/iş notu dosyaları açık depoda. Bunlar gizli 3k-isler deposuna ait:"; echo "$yasak"; hata=1
+          fi
+          kelime=$(git grep -n -I -i -E '3k-sistem|3K Bikini|3K Vael|vaelmaison|detail\.1688\.com|ALI_1688|docs\.google\.com/spreadsheets/d/' -- . ':!CLAUDE.md' ':!.github/' ':!vendor/' || true)
+          if [ -n "$kelime" ]; then
+            echo "::error::3K iş içeriği açık depoda:"; echo "$kelime" | cut -c1-200; hata=1
+          fi
+          gizli=$(git grep -n -I -E 'sb_secret_|service_role.{0,5}["'"'"'][A-Za-z0-9._-]{30,}|eyJhbGciOi[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{40,}|sk-ant-|sk_live_|ghp_[A-Za-z0-9]{30,}|github_pat_|AIza[0-9A-Za-z_-]{35}|shpat_|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY' -- . ':!.github/' ':!vendor/' || true)
+          if [ -n "$gizli" ]; then
+            echo "::error::Gizli anahtar olabilecek değer bulundu (değer yazdırılmadı):"; echo "$gizli" | cut -d: -f1,2; hata=1
+          fi
+          [ $hata -eq 0 ] && echo "Temiz: açık depoda 3K içeriği ya da gizli anahtar yok."
+          exit $hata

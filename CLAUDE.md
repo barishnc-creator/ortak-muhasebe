@@ -1,15 +1,24 @@
 # Ortak Muhasebe
 
-Bu depo ortak muhasebe uygulamasıdır.
+Bu depo ortak muhasebe uygulamasıdır. **Depo herkese açıktır** ve uygulama GitHub Pages'te yayındadır (`barishnc-creator.github.io/ortak-muhasebe`).
 
-## 3K Sistemi (ana yöntem)
+## Gizlilik kuralı (kesin)
 
-Kullanıcının e-ticaret iş modeli. "Şu ürün için site yapacağız", "yeni proje", "şu siteye ürün ekleyeceğiz" gibi isteklerde ve tüm 3K projelerinde `3k-sistem` skill'ini kullan (`.claude/skills/3k-sistem/`: aşamalar, modüller, proje kurulumu, proje listesi, panel şablonu).
+Bu depoya yalnız muhasebe uygulamasının kodu girer. Şunlar **asla** bu depoya yazılmaz (ne main'e ne başka bir dala):
 
-## 3K Bikini
+- 3K Sistemi / 3K Bikini / 3K Vael ile ilgili her şey: skill'ler, ajanlar, durum ve devir notları, rakip/ürün/tedarikçi (1688) verisi, tablo linkleri, paneller.
+- Gizli anahtar, şifre, token, davet kodu, müşteri bilgisi.
 
-Kullanıcı "Bikini", "3K Bikini" ya da (eski adıyla) "3K" derse (ör. "Bikini ne durumda", "Bikini'ye kaldığın yerden devam et") `3k` skill'ini kullan (`.claude/skills/3k/SKILL.md`). 3K Bikini, muhasebe uygulamasından ayrı bikini/iç çamaşırı e-ticaret projesidir. Notları `claude/lingerie-ecommerce-planning-sw8cx4` dalındadır. Skill bu dalı kendisi bulur ve okur; kullanıcıdan dal ya da belge adı isteme.
+Supabase'in `sb_publishable_` anahtarı tasarım gereği açıktır; `service_role` ve diğer gizli anahtarlar yalnız Supabase Vault'ta durur.
 
-## 3K Vael
+`.github/workflows/gizlilik.yml` bu kuralı her push'ta kontrol eder.
 
-Kullanıcı "Vael" derse (ör. "Vael ne durumda", "Vael'e kaldığın yerden devam et") `vael` skill'ini kullan (`.claude/skills/vael/SKILL.md`). Vael Maison sitesini geliştirme işi; notları `claude/vael-kayit` dalında. 3K ile yöntem ortak, veriler ayrı.
+## 3K işleri → gizli depo
+
+Kullanıcı "Bikini", "3K", "Vael", "3K Merkez" derse ya da "şu ürün için site yapacağız", "yeni proje" gibi bir 3K işi isterse: bu işler gizli **`barishnc-creator/3k-isler`** deposundadır. Skill'ler (`3k`, `3k-sistem`, `vael`) ve notlar oradadır.
+
+1. `add_repo` (owner `barishnc-creator`, repo `3k-isler`, access `push`).
+2. `git clone --depth 1 https://github.com/barishnc-creator/3k-isler /home/user/3k-isler`, ardından `register_repo_root`.
+3. O deponun `CLAUDE.md`'sine ve skill'lerine göre işi **o depodan** yürüt; bu depoya hiçbir şey yazma.
+
+Yeni 3K oturumları doğrudan `source_url` https://github.com/barishnc-creator/3k-isler ile açılır.
