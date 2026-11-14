@@ -44,3 +44,10 @@ Ayrıca:
 - **Onay ve soru:** Kullanıcıdan karar gerekince proje panelinin `onaylar`'ına ek olarak Merkez'e bildir (`projeler/<ad>.onay` sayısı). Merkez bunu `onaylar`'a ekler, kararı sana iletir.
 - **Bağlam:** Her grup sonunda `get_session` ile kendi bağlamına bak. 250 binde yeni büyük iş başlatma, 400 binde hemen devret (`devir.md`). Devir notunu `anthropic-skills:devir-notu` ile yaz, Merkez'e `calisanlar/<ad>.durum:"devir-hazir"` yaz. Yeni oturumu Merkez açar.
 - Merkez'in oturum kimliği her zaman `calisanlar/merkez.oturum` alanındadır.
+
+## Uyandırma kuralı (14 Kas, token)
+Her `send_message` karşı oturumu uyandırır ve o oturumun tüm bağlamı yeniden okunur. Bu yüzden:
+- Çalışan olağan ilerlemeyi YALNIZ Merkez veritabanına yazar (yazmak kimseyi uyandırmaz). Merkez'e `send_message` yalnız `devir-hazir`, engel/hata ya da kullanıcı kararı gereken yeni bir soru için atılır.
+- Merkez, çalışandan gelen bilgi mesajına cevap yazmaz; yalnız kullanıcının talimatını ya da kararını iletir.
+- Projeye özel kararlar proje panelinden verilir (yalnız o çalışan uyanır). Merkez paneli genel işler ve projeler arası konular içindir.
+- Devredilen eski oturum hemen arşivlenir. Mesajlar `calisanlar/merkez.oturum` alanındaki güncel Merkez'e gider.
