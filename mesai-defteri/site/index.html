@@ -57,6 +57,8 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:5px 10px;border-radius:99px;background:var(--surface);border:1px solid var(--line)}
 .sync i{width:6px;height:6px;border-radius:50%;background:var(--faint)}
 .sync.cloud i{background:var(--live)}
+.sync.warn{color:var(--warn)}
+.sync.warn i{background:var(--warn)}
 .top-right{display:flex;align-items:center;gap:6px}
 
 .view{display:flex;flex-direction:column;gap:14px;padding-top:8px;animation:in .28s ease both}
@@ -315,6 +317,7 @@ const S = { mode: "loading", profile: null, sessions: [], view: "bugun", rangeTy
 let cloud = null; // {profileRef, sessCol}
 let profileTimer = null, profilePending = false, profileWriting = false;
 
+let storageOK = (() => { try { localStorage.setItem("__t", "1"); localStorage.removeItem("__t"); return true; } catch { return false; } })();
 const lsRead = () => { try { return JSON.parse(localStorage.getItem(LS) || "null"); } catch { return null; } };
 const lsWrite = () => { try { localStorage.setItem(LS, JSON.stringify({ profile: S.profile, sessions: S.sessions })); } catch {} };
 
@@ -432,7 +435,7 @@ function render() {
     <header class="top">
       <div class="brand"><span class="logo">${ICON.logo}</span>Mesai Defteri</div>
       <div class="top-right">
-        <span class="sync ${S.mode === "cloud" ? "cloud" : ""}" title="Kayıt yeri"><i></i>${S.mode === "cloud" ? "Hesapta" : "Bu cihazda"}</span>
+        <span class="sync ${S.mode === "cloud" || storageOK ? "cloud" : "warn"}" title="Kayıt durumu"><i></i>${S.mode === "cloud" ? "Hesapta kayıtlı" : storageOK ? "Cihazda kayıtlı" : "Kaydedilemiyor"}</span>
         <button class="icon-btn" id="btnSettings" aria-label="Ayarlar">${ICON.gear}</button>
       </div>
     </header>
@@ -762,9 +765,9 @@ function openSettings() {
   openSheet(`<h2 style="font-size:22px">Ayarlar</h2>
     <div class="field"><label for="sName">Adın</label><input type="text" id="sName" maxlength="40" value="${esc(S.profile.name)}"></div>
     <div class="field"><label for="sRate">Saatlik ücret (₺) <span style="font-weight:400">· isteğe bağlı</span></label><input type="number" id="sRate" min="0" step="1" inputmode="decimal" placeholder="Örn. 150" value="${S.profile.rate || ""}"><span class="hint">Girersen raporda tahmini kazancın da görünür.</span></div>
-    <div class="store-box">${cloudMode ? ICON.cloud : ICON.device}<div><b>${cloudMode ? "Kayıtların hesabında" : "Kayıtların bu cihazda"}</b>${cloudMode
+    <div class="store-box">${cloudMode ? ICON.cloud : ICON.device}<div><b>${cloudMode ? "Kayıtların hesabında" : storageOK ? "Kayıtların bu cihazda, otomatik kaydediliyor" : "Kayıt yapılamıyor"}</b>${!cloudMode && !storageOK ? "Tarayıcı gizli modda ya da site verileri engelli görünüyor. Uygulamayı normal sekmede aç; yoksa sayfa kapanınca kayıtlar silinir." : cloudMode
       ? "Bu bağlantıyı açan her kişi kendi ayrı defterini görür. Kayıtların yalnızca sana görünür, telefon ve bilgisayarda aynı kalır."
-      : "Kayıtlar bu tarayıcıda saklanır. Tarayıcı verilerini silersen kaybolabilir; ara sıra aşağıdan yedek almanı öneririz."}</div></div>
+      : "Her giriş, çıkış ve değişiklik anında bu telefona kaydedilir; internet gerekmez. Tarayıcı geçmişini ve site verilerini silersen kaybolabilir, ayda bir aşağıdan yedek almanı öneririz."}</div></div>
     <div class="actions"><button class="btn" id="bkCopy">${ICON.copy} Yedeği kopyala</button><button class="btn" id="bkLoad">Yedekten yükle</button></div>
     <div class="field" id="bkBox" hidden><label for="bkTxt">Yedek metnini yapıştır</label><textarea id="bkTxt" placeholder='{"profile":…}'></textarea><button class="btn" id="bkApply">Yedeği uygula</button><span class="err" id="bkErr"></span></div>
     <div class="divider"></div>
