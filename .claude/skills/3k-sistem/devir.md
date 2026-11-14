@@ -2,6 +2,9 @@
 
 Kullanıcı kararı (14 Kas 2026): devir sistemini Merkez yönetir; "hangisine ne gerekiyorsa ona göre devir yap, her zaman sorunsuz devam etsin." Devir için ayrıca onay istenmez. Para, yayın, hesap ve Shopify'a yazma kuralları devirde de aynen geçerli.
 
+## Model (kullanıcı kararı 14 Kas 2026)
+Yeni açılan tüm oturumlar (Merkez ve çalışanlar) Sonnet ile açılır: `create_session model:"claude-sonnet-5-5"`. Geçiş yalnız devirde olur; açık oturumda model değiştirilmez. Zor kararlarda gerekiyorsa tek seferlik Opus alt ajanı (`Agent model:"opus"`) kullanılır.
+
 ## Neden
 Oturumların penceresi 1M token, ama her mesajda tüm bağlam yeniden okunur. 300 bin tokenlık bir oturumda her adım, 50 bin tokenlık bir oturuma göre ~6 kat pahalıdır ve kullanım sınırını o kadar hızlı doldurur. Bu yüzden devir erken ve düzenli yapılır. Otomatik sıkıştırma (784 bin) beklenmez.
 
@@ -28,7 +31,7 @@ Not: Merkez'in araç listesi büyük olduğu için temel bağlamı ~150 bindir. 
    - Kendi zamanlanmış görevlerini kapatır (`update_trigger enabled:false`); bunlar nota yazılı olur.
    - Panel izlemesini bırakır (`ArtifactComments watch on:false`).
    - Merkez'e `calisanlar/<ad>` için tek batch yazar: `durum:"devir-hazir"`, `devirNotu:"<dal>:docs/<ad>-devir.md"`, `guncelleme`. Merkez'e send_message da atar (araç yoksa batch yeter).
-3. **Merkez:** `create_session` çağırır: `source_url` ortak-muhasebe, aynı ortam, `tags:[<ad>]`, `title:"3K <Ad> · <gün ay>"`, prompt aşağıdaki **Çalışan açılış metni**.
+3. **Merkez:** `create_session` çağırır: `source_url` ortak-muhasebe, aynı ortam, `model:"claude-sonnet-5-5"`, `tags:[<ad>]`, `title:"3K <Ad> · <gün ay>"`, prompt aşağıdaki **Çalışan açılış metni**.
 4. **Yeni oturum** "hazır" deyince Merkez şunları yapar:
    - `projeler/<ad>.oturum`, `calisanlar/<ad>.oturum` ve `durum` alanlarını günceller.
    - `devirler/<ISO>` kaydı ekler: {proje, eski, yeni, baglam, zaman}.
@@ -39,7 +42,7 @@ Not: Merkez'in araç listesi büyük olduğu için temel bağlamı ~150 bindir. 
 
 ## Akış — 3K Merkez
 1. Merkez `claude/merkez-kayit` dalına `docs/merkez-devir.md` yazar. Notta şunlar olur: çalışanların oturumları, bekleyen onaylar ve kime ait oldukları, iletilmemiş mesajlar, açık işler, zamanlanmış görev kimlikleri.
-2. `create_session` ile yeni Merkez açar: aynı ortam, `title:"3K Merkez · <gün ay>"`, prompt aşağıdaki **Merkez açılış metni**.
+2. `create_session` ile yeni Merkez açar: aynı ortam, `model:"claude-sonnet-5-5"`, `title:"3K Merkez · <gün ay>"`, prompt aşağıdaki **Merkez açılış metni**.
 3. Yeni Merkez "hazır" deyince eski Merkez şunları yapar:
    - Kendi zamanlanmış görevlerini siler: günlük özet, haftalık özet, devir kontrolü. Yeni Merkez bunları kendine yeniden kurar.
    - Panel izlemesini bırakır.
