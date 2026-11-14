@@ -5,6 +5,8 @@ description: 3K (Kanıtla · Kur · Kazan) iç çamaşırı e-ticaret projesi. K
 
 # 3K
 
+> **Bu proje 3K Sistemi'nin bir uygulamasıdır.** Genel yöntem, aşamalar, doğrulanmış modüller ve proje listesi: `3k-sistem` skill'i (`.claude/skills/3k-sistem/`). Burada yalnız 3K'e özel bilgiler var. Yeni öğrenilen genel yöntemi `3k-sistem/moduller.md`'ye, proje aşamasını `3k-sistem/projeler.md`'ye işle.
+
 Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu sen takip edersin.
 
 - **Notların tek kayıt yeri:** `claude/lingerie-ecommerce-planning-sw8cx4` dalı → `docs/ic-camasiri-projesi-durum.md` (ana belge; "Şu an" tablosu güncel durumu verir). Diğer belgeler aynı klasörde.

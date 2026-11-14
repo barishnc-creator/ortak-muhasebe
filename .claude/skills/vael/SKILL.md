@@ -5,6 +5,8 @@ description: 3K Vael — Vael Maison (vaelmaison.com, Shopify) sitesini gelişti
 
 # 3K Vael
 
+> **Bu proje 3K Sistemi'nin bir uygulamasıdır.** Genel yöntem, aşamalar, doğrulanmış modüller ve proje listesi: `3k-sistem` skill'i (`.claude/skills/3k-sistem/`). Burada yalnız 3K Vael'e özel bilgiler var. Yeni öğrenilen genel yöntemi `3k-sistem/moduller.md`'ye, proje aşamasını `3k-sistem/projeler.md`'ye işle.
+
 Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu sen takip edersin.
 
 - **Notların tek kayıt yeri:** `claude/vael-kayit` dalı → `docs/vael-durum.md` ("Şu an" tablosu güncel durumu verir).
