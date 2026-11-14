@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="Mesai">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="description" content="Giriş-çıkış takibi, haftalık program ve mesai raporu.">
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" href="/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Mesai Defteri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -859,5 +859,5 @@ window.addEventListener("hashchange", () => { const h = location.hash.slice(1); 
 })();
 </script>
 
-<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}))}</script>
+<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}</script>
 </body></html>
