@@ -62,6 +62,6 @@ Kaynak: 3K iç çamaşırı/bikini (11–13 Kas 2026) ve 3K Vael (13–14 Kas 20
 - Limit dolarsa bekle, sıfırlanınca devam; durumu `panel/is.engel`e yaz.
 
 ## 11. Oturum ve token düzeni
-- Bir oturum çok uzarsa (hafıza %50+) her panel mesajı pahalılaşır → durum belgesini güncelle, `create_session` ile yeni oturum ("<Proje>'ye kaldığın yerden devam et; paneli izle"), yeni oturum paneli izleyince eskisi `watch on:false`.
+- Bir oturum uzarsa her panel mesajı pahalılaşır → `devir.md` (eşikler 250/400 bin; Merkez yönetir).
 - Çalışma süreci yeniden başlayabilir; arka plan işleri ölür → log dosyalarından kalanı topla, yarım grubu tamamla.
 - Kayıt dalına push reddedilirse oturumun kendi dalına push; sonraki oturum toplar.

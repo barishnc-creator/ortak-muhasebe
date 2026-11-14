@@ -21,7 +21,7 @@ Kullanıcı hiçbir dal, belge veya araç adı söylemez. Nerede ne olduğunu se
 - Ana oturum ince kalır: tarama, 1688 araması ve **görsel karşılaştırma** işlerini alt ajanlara (ucuz model; ör. `urun-hazirlayici`, genel işler için general-purpose) ver; ana oturum yalnız sonuç özetini okur. Büyük görselleri/ızgaraları ana oturumda açma.
 - Komut çıktısını kısa tut (`tail`, sayılar); büyük JSON/HTML'i ekrana basma, dosyaya yaz.
 - Panel güncellemelerini tek `batch` çağrısında topla.
-- Oturum hafızası %50'yi geçince (get_session → context_usage) işi yeni bir oturuma devret: durum belgesini güncelle, yeni oturum aç ("Vael'e kaldığın yerden devam et; paneli izle"), yeni oturum paneli izlemeye başlayınca eskisi `ArtifactComments watch on:false` ile bırakır.
+- **Devir:** `3k-sistem/devir.md` geçerli: her grup sonunda bağlamına bak (get_session → context_usage). 250 binde yeni büyük iş başlatma, grup sonunda devir notu (`anthropic-skills:devir-notu`) + Merkez'e `devir-hazir`; 400 binde hemen. Yeni oturumu 3K Merkez açar.
 - Panel mesajlarını alan oturum paneli izlemelidir: işe başlarken `ArtifactComments action:watch url:<panel>` çağır.
 
 ## Çalışma ritmi (kullanıcı, 11 Kas)

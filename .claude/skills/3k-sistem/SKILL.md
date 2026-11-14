@@ -13,6 +13,8 @@ Kullanıcının **iş sektörünün kendisi**: yurt dışında kanıtlanmış ü
 - `proje-kurulum.md` — yeni proje açma adımları (panel, kayıt dalı, proje skill'i, yeni oturum).
 - `projeler.md` — tüm projelerin listesi (ad, komut, panel, kayıt dalı, aşama).
 - `panel-sablon.html` — yönetim paneli şablonu (yeni projede kopyalanır).
+- `devir.md` — oturum devri: eşikler, akış, açılış metinleri (tüm oturumlar uyar).
+- `merkez.md` — 3K Merkez yönetici oturumunun görevleri ve zamanlanmış görevleri.
 
 ## Kullanıcı yeni iş verdiğinde ("X için site yapacağız")
 1. `projeler.md`'yi oku; aynı iş varsa onun skill'iyle devam et.
@@ -26,7 +28,7 @@ Kullanıcının **iş sektörünün kendisi**: yurt dışında kanıtlanmış ü
 3. **Araçları sormadan kullan;** "olmuyor" demeden tüm alternatifleri tara (skill'ler, GitHub, ücretsiz yollar), en iyi çözümü kanıtıyla sun. **Ücretsiz yol önce.**
 4. **Her şey panelden:** kullanıcı yalnız proje panelini kullanır; dış sekme açtırma. Panel mesajları paneli izleyen oturuma gelir.
 5. **Tek kayıt yeri:** her projenin tek durum belgesi (kayıt dalında). Her ilerlemeden sonra sorulmadan güncelle + push; paneli de güncelle.
-6. **Token tasarrufu (zorunlu):** ağır iş (tarama, 1688, görsel kontrol) alt ajanda (ucuz model), ana oturum ince; büyük çıktı dosyaya; panel yazmaları tek batch; hafıza %50'yi geçince yeni oturuma devret.
+6. **Token tasarrufu (zorunlu):** ağır iş (tarama, 1688, görsel kontrol) alt ajanda (ucuz model), ana oturum ince; büyük çıktı dosyaya; panel yazmaları tek batch; bağlam eşiğinde (çalışan 250–400 bin, Merkez 300 bin) `devir.md`'ye göre yeni oturuma devret; devri Merkez yönetir.
 7. **Yöntem ortak, veriler ayrı:** projelerin verileri birbirine karışmaz; yöntem ve dersler bu skill'de ortaktır.
 8. **Ders kaydı:** bir projede doğrulanan her yeni yöntem/kural `moduller.md`'ye (genel) ve projenin durum belgesine (özel) yazılır, `main`'e push edilir.
 
@@ -36,3 +38,8 @@ Kullanıcının **iş sektörünün kendisi**: yurt dışında kanıtlanmış ü
 - Küçük mağazalara takılma; büyük/güçlü kaynaklara öncelik.
 - Satış fiyatlarını kullanıcı belirler; varsayılan kural projeye göre (bkz. moduller.md → Fiyatlama).
 - Shopify'a önce TASLAK; yayına alma her zaman kullanıcıda.
+
+Ayrıca:
+- **Onay ve soru:** Kullanıcıdan karar gerekince proje panelinin `onaylar`'ına ek olarak Merkez'e bildir (`projeler/<ad>.onay` sayısı). Merkez bunu `onaylar`'a ekler, kararı sana iletir.
+- **Bağlam:** Her grup sonunda `get_session` ile kendi bağlamına bak. 250 binde yeni büyük iş başlatma, 400 binde hemen devret (`devir.md`). Devir notunu `anthropic-skills:devir-notu` ile yaz, Merkez'e `calisanlar/<ad>.durum:"devir-hazir"` yaz. Yeni oturumu Merkez açar.
+- Merkez'in oturum kimliği her zaman `calisanlar/merkez.oturum` alanındadır.
