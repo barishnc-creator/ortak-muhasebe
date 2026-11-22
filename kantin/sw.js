@@ -1,4 +1,4 @@
-const CACHE = 'kantin-v2'
+const CACHE = 'kantin-v3'
 self.addEventListener('install', (e) => { self.skipWaiting() })
 self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()) })
 self.addEventListener('fetch', (e) => {
