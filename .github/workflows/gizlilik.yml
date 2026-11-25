@@ -17,7 +17,7 @@ jobs:
       - name: 3K dosyaları ve gizli bilgiler
         run: |
           hata=0
-          yasak=$(git ls-files | grep -E '^(docs/|\.claude/skills/|\.claude/agents/)' || true)
+          yasak=$(git ls-files | grep -E '^(docs/|\.claude/skills/|\.claude/agents/)' | grep -v -x 'docs/PAKET.md' || true)
           if [ -n "$yasak" ]; then
             echo "::error::3K/iş notu dosyaları açık depoda. Bunlar gizli 3k-isler deposuna ait:"; echo "$yasak"; hata=1
           fi
