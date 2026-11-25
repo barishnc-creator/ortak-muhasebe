@@ -1,6 +1,6 @@
 # PAKET — Tidex Muhasebe (Atölye Defteri)
 
-Son güncelleme: 25 Kas 2026. Bu işin güncellemeleri yalnız bu paketin tek oturumundan yürür ("Tidex Muhasebe" başlıklı, sol menüde sabitli). Bu depo AÇIKTIR: buraya yalnız Tidex uygulamasının bilgisi yazılır; başka işlere ait içerik, kişisel bilgi, gizli anahtar, davet kodu asla yazılmaz (bkz. `CLAUDE.md`, `.github/workflows/gizlilik.yml`).
+Son güncelleme: 25 Kas 2026 (akşam). Bu işin güncellemeleri yalnız bu paketin tek oturumundan yürür ("Tidex Muhasebe" başlıklı, sol menüde sabitli). Bu depo AÇIKTIR: buraya yalnız Tidex uygulamasının bilgisi yazılır; başka işlere ait içerik, kişisel bilgi, gizli anahtar, davet kodu asla yazılmaz (bkz. `CLAUDE.md`, `.github/workflows/gizlilik.yml`).
 
 ## Amaç
 Tidex Technology'nin ortaklı ortak muhasebe ve operasyon uygulaması + 3D baskı atölye defteri: siparişler, tahsilat, üretim/baskı sırası, kasa, partner fiyat listeleri, ürün kataloğu. İki ortak kullanır.
@@ -21,7 +21,7 @@ Tidex Technology'nin ortaklı ortak muhasebe ve operasyon uygulaması + 3D bask�
 1. Kantin/Tidex Supabase ayrımı: karar kullanıcıda; ayrı proje kurulacaksa Kantin tablolarını taşıma planı (Kantin kaynağı ayrı yerde, bu depoya not yazılmaz).
 2. Haftalık görevin önerdiği diğer iki geliştirme (23 Kas raporu oturum hafızasında): uygulanması kullanıcı onayına bağlı.
 3. Kontrol: `gizlilik.yml` `docs/` klasörünü yasaklar; yalnız `docs/PAKET.md` istisnadır (25 Kas'ta eklendi). Başka docs dosyası eklenmez.
-4. Küçük iş: gizlilik kontrolü, Supabase kütüphanesindeki sabit bir metni yanlış alarm olarak yakalayabiliyor (kontrol desenini daraltma onay bekliyor).
+4. Çözüldü (25 Kas, PR #15): gizlilik kontrolü, derlenmiş Supabase kütüphanesindeki sabit `sb_secret_` önekini yanlış alarm olarak yakalıyordu (22 Kas'tan beri kırmızı). Desen artık önek + en az 20 karakterlik gövde ister; diğer desenler aynı. Kontrol main'de yeşil.
 
 ## Kararlar ve tercihler (bu işe özel)
 - Para hesabında float yok; veri güvenliği ve kullanım kolaylığı öncelikli.
@@ -30,8 +30,8 @@ Tidex Technology'nin ortaklı ortak muhasebe ve operasyon uygulaması + 3D bask�
 
 ## Kimlikler
 - Depo (açık): github.com/barishnc-creator/ortak-muhasebe, dal main.
-- Zamanlanmış görev: trig_016rJE2xzGqMRmmjvqda3sgy "Haftalık Tidex geliştirme önerileri" — Pzt 09:00 (İstanbul), oturum `session_01Ry9EY9fpN7jsYRGEUxBkk6`'ya bağlı (Claude Hearth kanalı). Görevin model alanı boş (hesap varsayılanı); bağlı oturum Opus, orta çaba. 25 Kas'ta DOKUNULMADI (model ucuz değil: raporlandı; ucuza çekmek kullanıcı kararı).
-- Tek oturum: `session_01Ry9EY9fpN7jsYRGEUxBkk6` (~192 bin bağlam, 200 bine yaklaşıyor → yeni oturuma devir gerekecek; haftalık görev o zaman yeni oturuma taşınır).
+- Zamanlanmış görev: trig_01C68hsYfxhZQe7TLHfbfnwm "Haftalık Tidex geliştirme önerileri" — Pzt 09:00 (İstanbul), bu oturuma bağlı, model sonnet (25 Kas'ta eskisinden taşındı; aynı istem). Eski trig_016rJE2xzGqMRmmjvqda3sgy API'den kapatılamadı ("kaynak bulunamadı"): kullanıcının panelden kapatması gerekir; kapatılmazsa öneri iki kez gelir.
+- Tek oturum: `session_01Ry9EYAiNwNNTwmhpQ3qM57` (25 Kas'ta devralındı; eski `session_01Ry9EY9fpN7jsYRGEUxBkk6` doluydu).
 
 ## Skill ve araçlar
 Depoda `.claude/skills` yok (açık depo). Hesap skill'leri: `anthropic-skills:yazilim-test-ve-hata-ayiklama`, `guvenlik-denetimi`, `xlsx` (rapor/aktarım), `3d-model-paketi` / `hunyuan-figur-uretimi` / `openscad` (atölye modelleri), `tasarim-paketi`. Araçlar: Supabase MCP (ortak-muhasebe hesabı), Playwright, Node testleri.
@@ -41,4 +41,4 @@ Depoda `.claude/skills` yok (açık depo). Hesap skill'leri: `anthropic-skills:y
 - Eski dal `arsiv/ortak-muhasebe-main-2026-11-14` arşivdir, dokunma.
 
 ## Eski oturumlar
-Haftalık öneri oturumu (yukarıdaki, aktif tek oturum) · Çalışan saat takip uygulaması (14 Kas, Mesai Defteri; arşivli). Not: 3D baskı plaket/trend araştırması ayrı bir iştir (kendi paketi), bu pakete dahil değil.
+Haftalık öneri oturumu (yukarıdaki, aktif tek oturum; öncesi `session_01Ry9EY9fpN7jsYRGEUxBkk6`) · Çalışan saat takip uygulaması (14 Kas, Mesai Defteri; arşivli). Not: 3D baskı plaket/trend araştırması ayrı bir iştir (kendi paketi), bu pakete dahil değil.
